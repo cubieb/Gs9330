@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{87e2fc5c-641e-4568-a668-07bb54bed678}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Functions">
+      <UniqueIdentifier>{ed01281b-1ab8-4ad3-9c44-6753ff78c6dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Functions">
+      <UniqueIdentifier>{383708fd-1089-4407-ba35-e16320d334e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Public">
+      <UniqueIdentifier>{bafe29fa-fd56-4729-86f1-38f661efb515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Public">
+      <UniqueIdentifier>{4f631711-3452-46d2-892b-af07f893a9ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Codes\Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Common.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\RouterError.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Codes\Main.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Common.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Debug.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\RouterError.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\ReadMe.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
