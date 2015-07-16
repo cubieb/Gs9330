@@ -32,7 +32,7 @@ void DebugFlag::SetState(string const& funcName, bool isDebug)
     iter->second = isDebug;
 }
 
-ostream& DgbClearStream(char const* funcName, uint32_t line)
+ostream& DbgClearStream(char const* funcName, uint32_t line)
 {
     static ostream nullStream(0);
     static bool first = true;
@@ -48,9 +48,9 @@ ostream& DgbClearStream(char const* funcName, uint32_t line)
     return os;
 }
 
-ostream& DgbOStream(char const* funcName, uint32_t line)
+ostream& DbgOStream(char const* funcName, uint32_t line)
 {
-    ostream& os = DgbClearStream(funcName, line);
+    ostream& os = DbgClearStream(funcName, line);
 
     os << funcName << ", " << line << "> ";
     return os;

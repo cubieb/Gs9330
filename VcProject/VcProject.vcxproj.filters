@@ -39,7 +39,7 @@
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
       <Filter>源文件\Public</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\RouterError.cpp">
+    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
       <Filter>源文件\Public</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +53,10 @@
     <ClInclude Include="..\Codes\Include\Public\Debug.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\RouterError.h">
+    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
+    <ClInclude Include="..\Codes\Include\Public\SystemError.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>
   </ItemGroup>

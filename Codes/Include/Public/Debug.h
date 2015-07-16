@@ -5,12 +5,12 @@
 #   define __func__ __FUNCTION__
 #endif
 
-std::ostream& DgbClearStream(char const*, uint32_t);
-std::ostream& DgbOStream(char const*, uint32_t);
+std::ostream& DbgClearStream(char const*, uint32_t);
+std::ostream& DbgOStream(char const*, uint32_t);
 std::ostream& ErrOStream(char const*, uint32_t);
 
-#define dbgcstrm DgbClearStream(__func__, __LINE__)
-#define dbgstrm DgbOStream(__func__, __LINE__)
+#define dbgcstrm DbgClearStream(__func__, __LINE__)
+#define dbgstrm DbgOStream(__func__, __LINE__)
 #define errstrm ErrOStream(__func__, __LINE__)
 
 #define DbgExpandVar(v, type) #v << " = " << (type)v
