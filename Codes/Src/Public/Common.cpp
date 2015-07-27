@@ -28,6 +28,11 @@ bool Mac::IsZero() const
     return (memcmp(MacZero, mac.get(), 6) == 0);    
 }
 
+uchar_t* Mac::GetPtr() const
+{
+    return mac.get();
+}
+
 int Mac::Compare(Mac const& right) const
 {
     return memcmp(mac.get(), right.mac.get(), 6);

@@ -12,6 +12,24 @@
     <Filter Include="CodesUnderTest">
       <UniqueIdentifier>{ffdd75c0-f6f4-4a7b-999e-52f17e5daf60}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CodesUnderTest\源文件">
+      <UniqueIdentifier>{233e80da-0d7e-4c12-9667-cdb222d5c0c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\源文件\Functions">
+      <UniqueIdentifier>{d1380ab2-1f09-4629-8af3-7c2dd10794ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\源文件\Public">
+      <UniqueIdentifier>{4723cd32-0b80-4844-9557-a0614083b695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件">
+      <UniqueIdentifier>{348ec577-dae4-4d59-bb1b-755065681b69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件\Functions">
+      <UniqueIdentifier>{e7c83dc8-bdb5-4b63-bdec-607e94a38f6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件\Public">
+      <UniqueIdentifier>{7cb0081d-ad27-4913-9151-4564e7fc8ab2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\UnitTestCodes\Main.cpp">
@@ -20,6 +38,15 @@
     <ClCompile Include="..\UnitTestCodes\UnitTest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Common.cpp">
+      <Filter>CodesUnderTest\源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
+      <Filter>CodesUnderTest\源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
+      <Filter>CodesUnderTest\源文件\Public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">
@@ -27,6 +54,18 @@
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\UnitTest.h">
       <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Common.h">
+      <Filter>CodesUnderTest\头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Debug.h">
+      <Filter>CodesUnderTest\头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\SystemError.h">
+      <Filter>CodesUnderTest\头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
+      <Filter>CodesUnderTest\头文件\Public</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

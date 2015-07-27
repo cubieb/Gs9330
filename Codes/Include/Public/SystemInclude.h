@@ -16,6 +16,13 @@
 #   define  __BIG_ENDIAN    4321
 #   define  __PDP_ENDIAN    3412
 #   define  __BYTE_ORDER    __LITTLE_ENDIAN
+    /* Debug memory leack. */
+#   include "crtdbg.h"
+#   ifdef _DEBUG
+#       define DEBUG_CLIENTBLOCK   new( _CLIENT_BLOCK, __FILE__, __LINE__)
+#   else
+#       define DEBUG_CLIENTBLOCK
+#endif // _DEBUG
 #endif
 
 #ifdef __linux
@@ -57,6 +64,7 @@
 #   include <memory>
 #   include <climits>
 #   include <cerrno>
+#   include <utility>
 #   ifdef _WIN32
 #       include <cstdint>
 #       include <system_error>

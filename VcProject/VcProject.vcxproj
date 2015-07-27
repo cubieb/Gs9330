@@ -41,7 +41,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\Codes\Include\Public;$(SolutionDir)\Codes\Include\Functions;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Tools\zlib-1.2.5\include;$(SolutionDir)\Tools\iconv-1.9.2.win32\include;$(SolutionDir)\Tools\libxml2-2.7.8.win32\include;$(SolutionDir)\Codes\Include\Public;$(SolutionDir)\Codes\Include\Functions;$(IncludePath)</IncludePath>
+    <ReferencePath>$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib</ReferencePath>
+    <LibraryPath>$(SolutionDir)\Tools\zlib-1.2.5\lib;$(SolutionDir)\Tools\iconv-1.9.2.win32\lib;$(SolutionDir)\Tools\libxml2-2.7.8.win32\lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -57,6 +59,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);iconv.lib;libxml2.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

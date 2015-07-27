@@ -1,6 +1,12 @@
 #ifndef _Common_h_
 #define _Common_h_
 
+/*
+Example:
+    uchar_t* mem;
+    cout << MemStream(mem) << endl;
+*/
+
 template<class T>
 class MemStream
 {
@@ -56,13 +62,15 @@ public:
     Mac const& operator =(Mac const&);
     bool IsBroadcast() const;
     bool IsZero() const;
+    uchar_t* GetPtr() const;
 
     int Compare(Mac const&) const;
     int Compare(const uchar_t*) const;
+    
     void Put(std::ostream&) const;
 
 private:
-    Mac();
+    Mac() {}
     std::shared_ptr<uchar_t> mac;
 };
 std::ostream& operator << (std::ostream& os, Mac const& mac);
