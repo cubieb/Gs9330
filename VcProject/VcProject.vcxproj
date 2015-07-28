@@ -20,7 +20,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -86,6 +86,7 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />
     <ClInclude Include="..\Codes\Include\Public\Debug.h" />
     <ClInclude Include="..\Codes\Include\Public\SystemError.h" />

@@ -47,6 +47,9 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">
@@ -67,5 +70,13 @@
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
       <Filter>CodesUnderTest\头文件\Public</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\XmlFiles\C++SdkIncludeDir.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\XmlFiles\AddressListXml.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

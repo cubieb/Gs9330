@@ -59,6 +59,9 @@
     <ClInclude Include="..\Codes\Include\Public\SystemError.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt">

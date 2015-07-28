@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp" />
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
@@ -92,6 +93,10 @@
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h" />
     <ClInclude Include="..\UnitTestCodes\Main.h" />
     <ClInclude Include="..\UnitTestCodes\UnitTest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\XmlFiles\C++SdkIncludeDir.xml" />
+    <Xml Include="..\XmlFiles\AddressListXml.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

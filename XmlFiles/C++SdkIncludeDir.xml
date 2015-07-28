@@ -1,14 +1,14 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<cdtprojectproperties>
-<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
-    <language name="C Source File">
-        <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/include</includepath>
-        <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/systems/bde/linux/include</includepath>
-    </language>
+<?xml version = "1.0" encoding="gb2312" standalone = "yes"?>
+<root>
+    <section name="section 1">
+        <language name="C Source File">
+            <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/include</includepath>
+            <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/systems/bde/linux/include</includepath>
+        </language>
 
-    <language name="C++ Source File">
-        <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/include</includepath>
-        <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/systems/bde/linux/include</includepath>
-    </language>
-</section>
-</cdtprojectproperties>
+        <language name="C++ Source File">
+            <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/include</includepath>
+            <includepath>${WorkspaceDirPath}/Sdk/sdk-all-6.2.2/systems/bde/linux/include</includepath>
+        </language>
+    </section>
+</root>
