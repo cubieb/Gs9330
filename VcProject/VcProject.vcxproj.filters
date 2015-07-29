@@ -64,8 +64,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\ReadMe.txt">
+    <Text Include="..\ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\XmlFiles\AddressListXml.xml">
       <Filter>资源文件</Filter>
-    </Text>
+    </Xml>
+    <Xml Include="..\XmlFiles\C++SdkIncludeDir.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

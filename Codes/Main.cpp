@@ -16,34 +16,39 @@
 
 using namespace std;
 
-struct Pserson
-{
-    uint_t id;
-    string name;
-    string email;
-    string phone;
-};
-
 void PrintXpathNode(xmlNodeSetPtr nodes)
 {
     size_t i, size;
     size = (nodes) ? nodes->nodeNr : 0;     
 
-    Pserson person;
+    string del(10, '-');
+    del = del + "  ";
+    cout.setf(ios::left);
+    cout << setw(12) << "ID" << setw(12) << "Name" << setw(20) << "Email" << setw(12) << "Company" << endl;
+    cout << del << del << setw(20) << del << del << endl;
+
     for (i = 0; i < size; ++i)
     {        
         if(nodes->nodeTab[i]->type != XML_ELEMENT_NODE)
             continue;
 
-        xmlNodePtr cur = nodes->nodeTab[i];   
-        if (xmlStrcmp(cur->name, (xmlChar*)"Name") == 0)
-            person.name = (char*)xmlNodeGetContent(cur);
+        xmlNodePtr cur = nodes->nodeTab[i];           
+        for (cur = xmlFirstElementChild(cur); cur != nullptr; cur = xmlNextElementSibling(cur))
+        {
+            if (xmlStrcmp(cur->name, (xmlChar*)"ID") == 0)
+                cout << setw(12) << (char*)xmlNodeGetContent(cur);
 
-        if (xmlStrcmp(cur->name, (xmlChar*)"Email") == 0)
-            person.email = (char*)xmlNodeGetContent(cur);
-        
+            if (xmlStrcmp(cur->name, (xmlChar*)"Name") == 0)
+                cout << setw(12) << (char*)xmlNodeGetContent(cur);
+
+            if (xmlStrcmp(cur->name, (xmlChar*)"Email") == 0)
+                cout << setw(20) << (char*)xmlNodeGetContent(cur);
+
+            if (xmlStrcmp(cur->name, (xmlChar*)"Company") == 0)
+                cout << setw(12) << (char*)xmlNodeGetContent(cur);
+        }
+        cout << endl;
     }    
-    cout << person.name << ", " << person.email << endl;
 }
 
 int main(int argc, char **argv) 
@@ -55,7 +60,7 @@ int main(int argc, char **argv)
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile), XmlDocDeleter());
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     
-    xmlChar *xpathExpr = (xmlChar*)"//Contact[*]";
+    xmlChar *xpathExpr = (xmlChar*)"/AddressList/Contact[*]";
     shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
 
     PrintXpathNode(xpathObj->nodesetval);
