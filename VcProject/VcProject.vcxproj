@@ -87,6 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
+    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h" />
+    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />
     <ClInclude Include="..\Codes\Include\Public\Debug.h" />
     <ClInclude Include="..\Codes\Include\Public\SystemError.h" />

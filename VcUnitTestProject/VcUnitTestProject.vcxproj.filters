@@ -50,6 +50,9 @@
     <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">

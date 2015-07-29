@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp" />
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
