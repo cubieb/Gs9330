@@ -45,7 +45,7 @@ void TraverseXpath()
 {
     const char* xmlFile = "../XmlFiles/AddressListXml.xml";
 
-    xmlInitParser();
+    xmlInitParser();  
 
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile), XmlDocDeleter());
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());

@@ -42,6 +42,12 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
       <Filter>源文件\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">

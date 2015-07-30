@@ -18,6 +18,6 @@ using namespace std;
 
 int main(int argc, char **argv) 
 {
-
+    TraverseXpath();
     return(0);
 }
