@@ -7,8 +7,16 @@ using namespace std;
 
 CxxBeginNameSpace(UnitTest)
 
-void Crack()
-{
+CPPUNIT_TEST_SUITE_REGISTRATION( XmlDataWrapperTestCase );
 
+void XmlDataWrapperTestCase::setUp()
+{
 }
+
+void XmlDataWrapperTestCase::TestReadXmlTalbe()
+{
+    CPPUNIT_ASSERT( 1 == 1 );
+} 
+
+
 CxxEndNameSpace

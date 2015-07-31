@@ -82,8 +82,5 @@
     <Xml Include="..\XmlFiles\AddressListXml.xml">
       <Filter>资源文件</Filter>
     </Xml>
-    <Xml Include="..\XmlFiles\C++SdkIncludeDir.xml">
-      <Filter>资源文件</Filter>
-    </Xml>
   </ItemGroup>
 </Project>
