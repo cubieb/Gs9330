@@ -56,8 +56,8 @@
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Crc.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
+      <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,8 +88,8 @@
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
       <Filter>CodesUnderTest\Functions</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Crc.h">
-      <Filter>CodesUnderTest\Functions</Filter>
+    <ClInclude Include="..\Codes\Include\Public\Crc32.h">
+      <Filter>CodesUnderTest\头文件\Public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

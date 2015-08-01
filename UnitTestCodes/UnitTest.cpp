@@ -1,6 +1,6 @@
 #include "SystemInclude.h"
 #include "Common.h"
-#include "Crc.h"
+#include "Crc32.h"
 
 #include "UnitTest.h"
 
@@ -11,7 +11,7 @@ CxxBeginNameSpace(UnitTest)
 CPPUNIT_TEST_SUITE_REGISTRATION( XmlDataWrapperTestCase );
 void XmlDataWrapperTestCase::setUp()
 {
-}
+} 
 
 void XmlDataWrapperTestCase::TestReadXmlTalbe()
 {
@@ -23,23 +23,18 @@ void CrcTestCase::setUp()
 {
 }
 
-#include <nmmintrin.h>
-
 void CrcTestCase::TestCrc32()
 {
-    char buf[128];
-    fstream txtFile("D:/Temp/tmp.txt", ios_base::in  | ios::binary);
+    char* txt = "abcdefghijklmnopqrstuvwxyz";
+    size_t size = strlen(txt);
 
-    streampos start = txtFile.tellg();
-    txtFile.seekg(0, ios::end);      
-    streampos end = txtFile.tellg();
-    size_t fileSize = static_cast<size_t>(end - start); 
-    txtFile.seekp(0);
-    txtFile.read(buf, fileSize);
+    Crc32 crc32;
+    uint32_t crc = crc32.FullCrc((uchar_t *)txt, size); 
+    CPPUNIT_ASSERT(crc == 0x4c2750bd);
 
-    uint32_t crc32 = CalculateCrc32((uchar_t*)buf, fileSize);
-
-    CPPUNIT_ASSERT(crc32 == 1);
+    crc = crc32.FileCrc("D:/Temp/tmp.txt");
+    CPPUNIT_ASSERT(crc == 0x4c2750bd);
 } 
 
 CxxEndNameSpace
+//EOF
