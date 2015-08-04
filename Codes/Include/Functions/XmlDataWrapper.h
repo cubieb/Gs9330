@@ -77,7 +77,7 @@ public:
         error_code err;
         return err;
     }
-    
+
 private:
     std::string xmlFileName;
 };

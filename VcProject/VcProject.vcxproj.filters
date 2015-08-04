@@ -57,6 +57,9 @@
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">

@@ -5,12 +5,12 @@ class Discriptor;
 class NitTransportStream
 {
 public:
-    void AddDescriptor();
+    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
 
 private:
     uint16_t transportStreamId;
     uint16_t originalNetworkId;
-    std::list<Discriptor*> discripters;
+    std::list<std::shared_ptr<Discriptor>> discripters;
 };
 
 class Nit
@@ -18,16 +18,16 @@ class Nit
 public:
     typedef NitTransportStream TransportStream;
     
-    void SetTableId(uchar_t value);
-    void SetNetworkId(uint16_t value);
-    void SetVersionNumber(uchar_t value);
-    void AddDescriptor(uchar_t value);
+    void SetTableId(uchar_t data);
+    void SetNetworkId(uint16_t data);
+    void SetVersionNumber(uchar_t data);
+    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
     TransportStream AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
 
-    void MakeSection();
+    void MakeCodes();
 
 private:
-    std::list<Discriptor*> discripters;
+    std::list<std::shared_ptr<Discriptor>> discripters;
 };
 
 #endif

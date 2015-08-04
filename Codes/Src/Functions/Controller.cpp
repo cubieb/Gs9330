@@ -1,4 +1,5 @@
 #include "SystemInclude.h"
+#include "Common.h"
 
 #include "Descriptor.h"
 #include "XmlDataWrapper.h"
