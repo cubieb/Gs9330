@@ -1,0 +1,19 @@
+<?xml version = "1.0" encoding="gb2312"?>
+
+<Root TableType ="BAT" TableID="74" >
+	<Bouquet BouquetID="1" Name="连续剧"  Version="2">
+		<Descriptors Sum="1">
+			<Item1 Tag="0x5F" Value="5468"/>
+		</Descriptors>
+		<Transportstream TSID="1" ONID="1">
+			<ServiceList>
+				<Service ID="1"  Type="0x01"/>
+				<Service ID="2"  Type="0x03"/>
+			</ServiceList>
+			<Descriptors Sum="1">
+				<Item1 Tag="0x92" Value="000101"/>
+			</Descriptors>
+		</Transportstream>
+	</Bouquet>
+</Root>
+

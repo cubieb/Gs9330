@@ -101,4 +101,29 @@ size_t Read32(uchar_t* buf, uint32_t&);
 size_t Write16(uchar_t* buf, uint16_t);
 size_t Write32(uchar_t* buf, uint32_t);
 
+/******************Read from / Write to packet buffer******************/
+class CharDeleter
+{
+public:
+    CharDeleter()
+    {}
+
+    void operator()(char *ptr) const
+    {
+        delete[] ptr;
+    }
+};
+
+class UcharDeleter
+{
+public:
+    UcharDeleter()
+    {}
+
+    void operator()(uchar_t *ptr) const
+    {
+        delete[] ptr;
+    }
+};
+
 #endif

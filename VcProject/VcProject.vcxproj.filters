@@ -51,6 +51,12 @@
     <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
       <Filter>源文件\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">
@@ -80,6 +86,18 @@
     <ClInclude Include="..\Codes\Include\Public\Crc32.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Ts.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Controller.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Nit.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />
@@ -88,5 +106,19 @@
     <Xml Include="..\XmlFiles\AddressListXml.xml">
       <Filter>资源文件</Filter>
     </Xml>
+    <Xml Include="..\XmlFiles\BAT.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\XmlFiles\NIT.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\XmlFiles\SDT.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\XmlFiles\SI各个表对应的XML格式.doc">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

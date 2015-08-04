@@ -1,0 +1,18 @@
+<?xml version = "1.0" encoding="gb2312"?>
+
+<Root TableType ="NIT"  TableID="64" >
+	<Network ID="1"  Name ="成都广电网络"  Version="1" >
+		<Descriptors Sum="1">
+			<Item1  Tag="0x5F" Value="000021"/>
+		</Descriptors>
+        <!-- cable_delivery_system_descriptor {Frequency, Fec_Outer ...} -->
+		<Transportstream  TSID="1" ONID="1" Frequency = "56.23" Fec_Outer = "0x0010"  
+		    Modulation ="0x02" Symbol_Rate = "6.9" Fec_Inner = "0x0010" >
+			<Descriptors Sum="2">
+				<Item1 Tag="0x62" Value="FD00000000"/>
+				<Item2 Tag="0x83" Value="00000016"/>
+			</Descriptors>
+		</Transportstream>
+	</Network>
+</Root>
+

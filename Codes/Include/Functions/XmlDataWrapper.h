@@ -1,5 +1,8 @@
 #ifndef _XmlDataWrapper_h_
 #define _XmlDataWrapper_h_
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
 
 #include "DataWrapper.h"
 /*
@@ -57,7 +60,26 @@ public:
     }
 };
 
-void PrintXpathNode(xmlNodeSetPtr nodes);
-void TraverseXpath();
+template<typename Nit, typename DescriporFactory>
+class NitXmlWrapper: public NitWrapper<Nit, DescriporFactory>
+{
+public:
+    typedef NitWrapper<Nit, DescriporFactory> MyBase;
+    typedef NitXmlWrapper<Nit, DescriporFactory> MyType;    
+
+    NitXmlWrapper(const std::string thXmlFileName, DescriporFactory& theFactory, Trigger& theTrigger)
+        : MyBase(theFactory, theTrigger), xmlFileName(thXmlFileName)
+    {
+    }
+
+    std::error_code FillNit(Nit& nit) const
+    {
+        error_code err;
+        return err;
+    }
+    
+private:
+    std::string xmlFileName;
+};
 
 #endif
