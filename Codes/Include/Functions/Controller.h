@@ -9,4 +9,6 @@ class Controller
 {
 };
 
+void TestXmlDataRrapper();
+
 #endif

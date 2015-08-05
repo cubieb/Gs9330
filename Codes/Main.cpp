@@ -8,14 +8,14 @@
 #include "Debug.h"
 #include "SystemError.h" 
 
+#include "Controller.h"
 #include "Main.h"
 
 using namespace std;
 
-
 int main(int argc, char **argv) 
 {
 
-
+    TestXmlDataRrapper();
     return(0);
 }

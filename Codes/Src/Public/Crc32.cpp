@@ -172,11 +172,11 @@ void Crc32::PartialCrc(uint32_t *crc, const uchar_t*buffer, size_t bufferSize)
 	Returns the calculated CRC32 (through crc) for the given string.
 */
 
-void Crc32::FullCrc(const uchar_t*buffer, size_t iDataLength, uint32_t *crc)
+void Crc32::FullCrc(const uchar_t*buffer, size_t bufferSize, uint32_t *crc)
 {
     ((uint32_t)*crc) = 0xffffffff; //Initilaize the CRC.
 
-	this->PartialCrc(crc, buffer, iDataLength);
+	this->PartialCrc(crc, buffer, bufferSize);
 
 	((uint32_t)*crc) ^= 0xffffffff; //Finalize the CRC.
 }
@@ -186,11 +186,11 @@ void Crc32::FullCrc(const uchar_t*buffer, size_t iDataLength, uint32_t *crc)
 	Returns the calculated CRC23 for the given string.
 */
 
-uint32_t Crc32::FullCrc(const uchar_t*buffer, size_t iDataLength)
+uint32_t Crc32::FullCrc(const uchar_t*buffer, size_t bufferSize)
 {
     uint32_t crc = 0xffffffff; //Initilaize the CRC.
 
-	this->PartialCrc(&crc, buffer, iDataLength);
+	this->PartialCrc(&crc, buffer, bufferSize);
 
 	return(crc ^ 0xffffffff); //Finalize the CRC and return.
 }

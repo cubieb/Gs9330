@@ -2,14 +2,25 @@
 #include "Common.h"
 
 #include "Descriptor.h"
+#include "Nit.h"
 #include "XmlDataWrapper.h"
 #include "Controller.h"
 
-//void Func(const NitWrapper<int, DescriporFactory>&)
-//{
-//}
-//
-//DescriporFactory factory;
-//NitWrapper<Nit, DescriporFactory> *nitWrapper; 
-//nitWrapper = new NitXmlWrapper<Nit, DescriporFactory>("abc", factory, 
-//function<void(const NitWrapper<Nit, DescriporFactory>&)>(Func));
+using namespace std;
+
+void Func(const NitWrapper<Nit>& wrapper)
+{
+    Nit nit;
+    wrapper.FillNit(nit);
+
+    uchar_t buffer[1024];
+    nit.MakeCodes(buffer, 1024);
+}
+
+void TestXmlDataRrapper()
+{
+    NitWrapper<Nit> *nitWrapper; 
+    nitWrapper = new NitXmlWrapper<Nit>("../XmlFiles/Nit.xml", function<void(const NitWrapper<Nit>&)>(Func));
+
+    Func(*nitWrapper);
+}
