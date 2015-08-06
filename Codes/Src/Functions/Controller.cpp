@@ -13,6 +13,8 @@ void Func(const NitWrapper<Nit>& wrapper)
     Nit nit;
     wrapper.FillNit(nit);
 
+    cout << nit << endl;
+
     uchar_t buffer[1024];
     nit.MakeCodes(buffer, 1024);
 }

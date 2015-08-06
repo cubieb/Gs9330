@@ -155,3 +155,11 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write32(ptr, crc32.FullCrc(buffer, ptr - buffer));
     return (ptr - buffer);
 }
+
+void Nit::Put(std::ostream& os) const
+{
+    os << "tableId = " << (uint_t)tableId
+        << ", networkId = " << (uint_t)networkId
+        << ", versionNumber = " << (uint_t)versionNumber
+        << ", sectionNumber = " << (uint_t)sectionNumber;
+}

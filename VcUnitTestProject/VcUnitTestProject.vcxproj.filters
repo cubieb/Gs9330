@@ -15,23 +15,20 @@
     <Filter Include="CodesUnderTest\源文件">
       <UniqueIdentifier>{233e80da-0d7e-4c12-9667-cdb222d5c0c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CodesUnderTest\源文件\Public">
-      <UniqueIdentifier>{4723cd32-0b80-4844-9557-a0614083b695}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CodesUnderTest\头文件">
       <UniqueIdentifier>{348ec577-dae4-4d59-bb1b-755065681b69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\头文件\Functions">
-      <UniqueIdentifier>{e7c83dc8-bdb5-4b63-bdec-607e94a38f6e}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodesUnderTest\头文件\Public">
       <UniqueIdentifier>{7cb0081d-ad27-4913-9151-4564e7fc8ab2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CodesUnderTest\Functions">
-      <UniqueIdentifier>{63dbf97e-5ac8-464e-adca-1fc1e899d7ed}</UniqueIdentifier>
+    <Filter Include="CodesUnderTest\头文件\Functions">
+      <UniqueIdentifier>{85adda5d-ecad-4532-b26e-558fed4a5ec7}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodesUnderTest\源文件\Functions">
-      <UniqueIdentifier>{35bf037a-1847-4e8a-895d-bd1f9861c282}</UniqueIdentifier>
+      <UniqueIdentifier>{23e39fec-75a6-496e-86c9-491e11ecf768}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\源文件\Public">
+      <UniqueIdentifier>{12260efd-291f-41a5-a437-ba3d6bb790f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,22 +38,31 @@
     <ClCompile Include="..\UnitTestCodes\UnitTest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
     <ClCompile Include="..\Codes\Src\Public\Common.cpp">
+      <Filter>CodesUnderTest\源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
-      <Filter>CodesUnderTest\源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\DataWrapper.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
   </ItemGroup>
@@ -79,17 +85,32 @@
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
       <Filter>CodesUnderTest\头文件\Public</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
-      <Filter>CodesUnderTest\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h">
-      <Filter>CodesUnderTest\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
-      <Filter>CodesUnderTest\Functions</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\Public\Crc32.h">
       <Filter>CodesUnderTest\头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Controller.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Nit.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Ts.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -35,6 +35,9 @@ public:
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
+    /* the following function is provided just for debug */
+    void Put(std::ostream& os) const;
+
 private:
     uchar_t  tableId;
     uint16_t networkId;
@@ -43,5 +46,11 @@ private:
     std::list<std::shared_ptr<TransportStream>> transportStreams;
     std::list<std::shared_ptr<Discriptor>> discripters;
 };
+
+inline std::ostream& operator << (std::ostream& os, const class Nit& nit)
+{
+    nit.Put(os);
+    return os;
+}
 
 #endif

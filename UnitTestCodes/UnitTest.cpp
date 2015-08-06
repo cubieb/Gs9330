@@ -8,16 +8,23 @@ using namespace std;
 
 CxxBeginNameSpace(UnitTest)
 
+/**********************class XmlDataWrapperTestCase**********************/
 CPPUNIT_TEST_SUITE_REGISTRATION( XmlDataWrapperTestCase );
 void XmlDataWrapperTestCase::setUp()
 {
 } 
 
-void XmlDataWrapperTestCase::TestReadXmlTalbe()
+void XmlDataWrapperTestCase::TestTrigger()
 {
-    CPPUNIT_ASSERT(1 == 1);
+    CPPUNIT_ASSERT(true);
 } 
 
+void XmlDataWrapperTestCase::TestFillNit()
+{
+    CPPUNIT_ASSERT(true);
+} 
+
+/**********************class CrcTestCase**********************/
 CPPUNIT_TEST_SUITE_REGISTRATION(CrcTestCase);
 void CrcTestCase::setUp()
 {
@@ -34,6 +41,17 @@ void CrcTestCase::TestCrc32()
 
     //crc = crc32.FileCrc("D:/Temp/tmp.txt");
     //CPPUNIT_ASSERT(crc == 0x4c2750bd);
+} 
+
+/**********************class NitCase**********************/
+CPPUNIT_TEST_SUITE_REGISTRATION(NitCase);
+void NitCase::setUp()
+{
+}
+
+void NitCase::TestMakeCodes()
+{
+    CPPUNIT_ASSERT(true);
 } 
 
 CxxEndNameSpace

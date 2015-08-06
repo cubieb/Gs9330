@@ -22,6 +22,9 @@ public:
         memcpy(data.get(), theData, theDataSize);
     }
 
+    virtual ~UcharDescriptor()
+    {}
+
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const
     {
         assert(dataSize <= bufferSize);
