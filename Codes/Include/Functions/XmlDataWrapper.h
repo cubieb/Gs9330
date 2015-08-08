@@ -60,6 +60,8 @@ public:
     }
 };
 
+typedef std::shared_ptr<xmlChar> SharedXmlChar;
+
 /**********************class NitXmlWrapper**********************/
 template<typename Nit>
 class NitXmlWrapper: public NitWrapper<Nit>
@@ -75,11 +77,11 @@ public:
 
     template<typename RetType>
     RetType  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName) const;
-  
+
     template<>
     uchar_t GetXmlAttrValue<uchar_t>(xmlNodePtr node, const xmlChar *attrName) const
     {
-        std::shared_ptr<xmlChar> attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         char *ptr = (char *)attrValue.get();
         return (uchar_t)strtol(ptr, nullptr, 16);
     }
@@ -87,15 +89,15 @@ public:
     template<>
     uint16_t GetXmlAttrValue<uint16_t>(xmlNodePtr node, const xmlChar *attrName) const
     {
-        std::shared_ptr<xmlChar> attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         char *ptr = (char *)attrValue.get();
         return (uint16_t)strtol(ptr, nullptr, 10);
     }
 
     template<>
-    std::shared_ptr<xmlChar> GetXmlAttrValue<std::shared_ptr<xmlChar>>(xmlNodePtr node, const xmlChar *attrName) const
+    SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName) const
     {
-        std::shared_ptr<xmlChar> attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         return attrValue;
     }
 
@@ -109,7 +111,7 @@ public:
                 cur = xmlNextElementSibling(cur))
             {
                 uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-                std::shared_ptr<xmlChar> data = GetXmlAttrValue<std::shared_ptr<xmlChar>>(cur, (const xmlChar*)"Data");
+                SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
                 owner.AddDescriptor(tag, data.get(), strlen((const char*)data.get()));
             }
         }

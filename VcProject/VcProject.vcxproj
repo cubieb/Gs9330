@@ -114,7 +114,9 @@
     <Xml Include="..\XmlFiles\AddressListXml.xml" />
     <Xml Include="..\XmlFiles\BAT.xml" />
     <Xml Include="..\XmlFiles\NIT.xml" />
-    <Xml Include="..\XmlFiles\SDT.xml" />
+    <Xml Include="..\XmlFiles\SDT.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\XmlFiles\SI各个表对应的XML格式.doc" />

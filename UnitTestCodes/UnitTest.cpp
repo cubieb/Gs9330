@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Crc32.h"
 
+#include "Nit.h"
 #include "UnitTest.h"
 
 using namespace std;
@@ -51,6 +52,7 @@ void NitCase::setUp()
 
 void NitCase::TestMakeCodes()
 {
+    Nit nit;
     CPPUNIT_ASSERT(true);
 } 
 

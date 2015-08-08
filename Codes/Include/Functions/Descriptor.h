@@ -10,32 +10,39 @@ public:
 
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
     virtual size_t GetCodesSize() const = 0;
+
+    /* the following function is provided just for debug */
+    virtual void Put(std::ostream& os) const = 0;
 };
+
+inline std::ostream& operator << (std::ostream& os, const Discriptor& descriptor)
+{
+    descriptor.Put(os);
+    return os;
+}
 
 /**********************class UcharDescriptor**********************/
 class UcharDescriptor: public Discriptor
 {
 public: 
     UcharDescriptor(uchar_t *theData, size_t theDataSize)
-        : data(new uchar_t[theDataSize], UcharDeleter()), dataSize(theDataSize)
+        : data(new uchar_t[theDataSize+1], UcharDeleter()), dataSize(theDataSize)
     {
+        /* we allocate 1 more bytes to store '0', just for debug function Put() to
+           show the value correctly.
+         */
+        data.get()[theDataSize] = '0';
         memcpy(data.get(), theData, theDataSize);
     }
 
     virtual ~UcharDescriptor()
     {}
 
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const
-    {
-        assert(dataSize <= bufferSize);
-        memcpy(buffer, data.get(), dataSize);
-        return dataSize;
-    }
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+    size_t GetCodesSize() const;
 
-    size_t GetCodesSize() const
-    {
-        return dataSize;
-    }
+    /* the following function is provided just for debug */
+    void Put(std::ostream& os) const;
 
 private:
     std::shared_ptr<uchar_t> data;

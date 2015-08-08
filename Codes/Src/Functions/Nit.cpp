@@ -48,15 +48,26 @@ size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 size_t NitTransportStream::GetCodesSize() const
 {
     size_t size = 0;
-    for (auto iter = discripters.begin(); iter != discripters.end(); ++iter)
+    for (const auto iter: discripters)
     {
-        size = size + (*iter)->GetCodesSize();
+        size = size + iter->GetCodesSize();
     }
     return (size + 6);
 }
 
+void NitTransportStream::Put(std::ostream& os) const
+{
+    os << "transportStreamId = " << (uint_t)transportStreamId
+        << ", originalNetworkId = " << (uint_t)originalNetworkId << endl;
+    uint_t i = 0;
+    for(auto iter: discripters)
+    {
+        os << "Destripter " << i++ << ": " << *iter << endl;
+    }
+}
+
 /**********************class Nit**********************/
-Nit::Nit(): tableId(0), networkId(0), versionNumber(0), sectionNumber(0)
+Nit::Nit(): tableId(0), networkId(0), versionNumber(0)
 {}
 
 void Nit::SetTableId(uchar_t data)
@@ -96,14 +107,14 @@ Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16
 size_t Nit::GetCodesSize() const
 {
     size_t descriptorSize = 0, transportStreamSize = 0;
-    for (auto iter = discripters.begin(); iter != discripters.end(); ++iter)
+    for (const auto iter: discripters)
     {
-        descriptorSize = descriptorSize + (*iter)->GetCodesSize();
+        descriptorSize = descriptorSize + iter->GetCodesSize();
     }
 
-    for (auto iter = transportStreams.begin(); iter != transportStreams.end(); ++iter)
+    for (const auto iter: transportStreams)
     {
-        transportStreamSize = transportStreamSize + (*iter)->GetCodesSize();
+        transportStreamSize = transportStreamSize + iter->GetCodesSize();
     }
 
     return (sizeof(network_information_section) + descriptorSize + transportStreamSize);
@@ -123,19 +134,23 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write16(ptr, ui16Value);
     ptr = ptr + Write16(ptr, networkId);
     
-    //version_number, current_next_indicator, section_number, last_section_number  ????
-    uchar_t currentNextIndicator = 0;
+    /* when section size greater than 1021, we should seperate the section into more htan one section.
+       now we just consider the simplest case: only one section.
+     */
+    uchar_t currentNextIndicator = 1;
+    uchar_t sectionNumber = 0;
+    uchar_t lastSectionNumber = 0;
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);
     ptr = ptr + Write8(ptr, sectionNumber);
-    ptr = ptr + Write8(ptr, sectionNumber);  //last_section_number
+    ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
 
     uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);
     size = 0;
-    for (auto iter = discripters.begin(); iter != discripters.end(); ++iter)
+    for (const auto iter: discripters)
     {
-        ptr = ptr + (*iter)->MakeCodes(ptr, bufferSize - (ptr - buffer));
-        size = size + (*iter)->GetCodesSize();
+        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
+        size = size + iter->GetCodesSize();
     }
     ui16Value = (Reserved4Bit << 12) | size;
     Write16(pos, ui16Value);
@@ -143,10 +158,10 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     pos = ptr;
     ptr = ptr + Write16(ptr, 0);
     size = 0;
-    for (auto iter = transportStreams.begin(); iter != transportStreams.end(); ++iter)
+    for (const auto iter: transportStreams)
     {
-        ptr = ptr + (*iter)->MakeCodes(ptr, bufferSize - (ptr - buffer));
-        size = size + (*iter)->GetCodesSize();
+        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
+        size = size + iter->GetCodesSize();
     }
     ui16Value = (Reserved4Bit << 12) | size;
     Write16(pos, ui16Value);
@@ -160,6 +175,14 @@ void Nit::Put(std::ostream& os) const
 {
     os << "tableId = " << (uint_t)tableId
         << ", networkId = " << (uint_t)networkId
-        << ", versionNumber = " << (uint_t)versionNumber
-        << ", sectionNumber = " << (uint_t)sectionNumber;
+        << ", versionNumber = " << (uint_t)versionNumber << endl;
+    uint_t i = 0;
+    for(auto iter: discripters)
+    {
+        os << "Destripter " << i++ << ": " << *iter << endl;
+    }
+    for (const auto iter: transportStreams)
+    {
+        os << *iter << endl;
+    }
 }
