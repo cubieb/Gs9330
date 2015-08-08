@@ -23,8 +23,8 @@ struct network_information_section
     uint32_t current_next_indicator:1;          // 1 bslbf   -  
     uint32_t section_number:8;                  // 8 uimsbf  - 
     uint32_t last_section_number:8;             // 8 uimsbf  -
-    uint32_t reserved_future_use2:4;            // 4 bslbf   
-    uint32_t network_descriptors_length:12;     // 12 uimsbf  --
+    //uint32_t reserved_future_use2:4;            // 4 bslbf   
+    //uint32_t network_descriptors_length:12;     // 12 uimsbf  --
     //for(i=0;i<N;i++)
     //{
     //    descriptor()

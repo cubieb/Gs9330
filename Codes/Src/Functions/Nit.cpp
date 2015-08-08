@@ -8,13 +8,8 @@
 #include "Nit.h"
 
 using namespace std;
-
-/**********************class NitTransportStream**********************/
-NitTransportStream::NitTransportStream(uint16_t theTransportStreamId, uint16_t theOriginalNetworkId)
-    : transportStreamId(theTransportStreamId), originalNetworkId(theOriginalNetworkId)
-{}
-
-void NitTransportStream::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+/**********************class SectionBase**********************/
+void SectionBase::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 {
     DescriporFactory factory;
     shared_ptr<Discriptor> discripter(factory.Create(tag, data, dataSize));
@@ -26,14 +21,22 @@ void NitTransportStream::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSi
         errstrm << "cant create descriptor, tag = " << (uint_t)tag << endl;
 }
 
-size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
+size_t SectionBase::GetCodesSize() const
+{
+    size_t size = 0;
+    for (const auto iter: discripters)
+    {
+        size = size + iter->GetCodesSize();
+    }
+
+    /* 2 bytes for reserved_future_use and transport_descriptors_length */
+    return (size + 2); 
+}
+
+size_t SectionBase::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
 
-    ptr = ptr + Write16(ptr, transportStreamId);
-    ptr = ptr + Write16(ptr, originalNetworkId);
-
-    uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);
     size_t size = 0;
     for (auto iter = discripters.begin(); iter != discripters.end(); ++iter)
@@ -42,17 +45,31 @@ size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
         size = size + (*iter)->GetCodesSize();
     }
     uint16_t ui16Value = (Reserved4Bit << 12) | size;
+    Write16(buffer, ui16Value);
+
+    return (ptr - buffer);
+}
+
+/**********************class NitTransportStream**********************/
+NitTransportStream::NitTransportStream(uint16_t theTransportStreamId, uint16_t theOriginalNetworkId)
+    : transportStreamId(theTransportStreamId), originalNetworkId(theOriginalNetworkId)
+{}
+
+size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
+{
+    uchar_t *ptr = buffer;
+
+    ptr = ptr + Write16(ptr, transportStreamId);
+    ptr = ptr + Write16(ptr, originalNetworkId);
+
+    ptr = ptr + SectionBase::MakeCodes(buffer, bufferSize);
+
     return (ptr - buffer);
 }
 
 size_t NitTransportStream::GetCodesSize() const
 {
-    size_t size = 0;
-    for (const auto iter: discripters)
-    {
-        size = size + iter->GetCodesSize();
-    }
-    return (size + 6);
+    return (SectionBase::GetCodesSize() + 4);
 }
 
 void NitTransportStream::Put(std::ostream& os) const
@@ -85,18 +102,6 @@ void Nit::SetVersionNumber(uchar_t data)
     versionNumber = data;
 }
 
-void Nit::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
-{
-    DescriporFactory factory;
-    shared_ptr<Discriptor> discripter(factory.Create(tag, data, dataSize));
-    if (discripter != nullptr)
-    {
-        discripters.push_back(discripter);
-    }
-    else
-        errstrm << "cant create descriptor, tag = " << (uint_t)tag << endl;
-}
-
 Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId)
 {
     shared_ptr<TransportStream> transportStream(new TransportStream(transportStreamId, transportStreamId));
@@ -106,11 +111,8 @@ Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16
 
 size_t Nit::GetCodesSize() const
 {
-    size_t descriptorSize = 0, transportStreamSize = 0;
-    for (const auto iter: discripters)
-    {
-        descriptorSize = descriptorSize + iter->GetCodesSize();
-    }
+    size_t descriptorSize = SectionBase::GetCodesSize();
+    size_t transportStreamSize = 0;
 
     for (const auto iter: transportStreams)
     {
@@ -144,18 +146,9 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write8(ptr, sectionNumber);
     ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
 
-    uchar_t *pos = ptr;
-    ptr = ptr + Write16(ptr, 0);
-    size = 0;
-    for (const auto iter: discripters)
-    {
-        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
-        size = size + iter->GetCodesSize();
-    }
-    ui16Value = (Reserved4Bit << 12) | size;
-    Write16(pos, ui16Value);
+    ptr = ptr + SectionBase::MakeCodes(buffer, bufferSize);
 
-    pos = ptr;
+    uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);
     size = 0;
     for (const auto iter: transportStreams)
