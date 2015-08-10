@@ -16,8 +16,8 @@ using namespace std;
 
 int main(int argc, char **argv) 
 {
-    NetworkNameDescriptor descriptor(nullptr, 0);
+    Controller& controller = Controller::GetInstance();
 
-    TestXmlDataRrapper();
+    controller.Start();
     return(0);
 }

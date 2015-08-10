@@ -6,6 +6,7 @@ class Discriptor;
 class SectionBase
 {
 public:
+    virtual uint16_t GetPid()  const; 
     virtual void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
 
     virtual size_t GetCodesSize() const;
@@ -45,6 +46,8 @@ public:
     typedef NitTransportStream TransportStream;
     Nit();
     ~Nit() {}
+    
+    uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
     void SetNetworkId(uint16_t data);

@@ -8,7 +8,7 @@ bslbf :  bit string, left bit first
 #pragma pack(push, 1)
 
 /*
-    define struct network_information_section just for calculating fixed fieds size.
+    define struct network_information_section just for calculating fixed fields size.
 */
 struct network_information_section
 {
@@ -60,13 +60,13 @@ class NitWrapper
 public:
     typedef NitWrapper<Nit> MyType;
     typedef std::function<void(const MyType&)> Trigger;
+
     NitWrapper(Trigger& theTrigger)
         : trigger(theTrigger)
     {}
     
     virtual ~NitWrapper() 
     {}
-
     virtual std::error_code FillNit(Nit& nit) const = 0;
 
 private:

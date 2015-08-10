@@ -9,6 +9,11 @@
 
 using namespace std;
 /**********************class SectionBase**********************/
+uint16_t SectionBase::GetPid() const
+{
+    return 0;
+}
+
 void SectionBase::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 {
     DescriporFactory factory;
@@ -35,7 +40,8 @@ size_t SectionBase::GetCodesSize() const
 
 size_t SectionBase::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
-    uchar_t *ptr = buffer;
+    uchar_t *ptr = buffer;    
+    assert(SectionBase::GetCodesSize() <= bufferSize);
 
     ptr = ptr + Write16(ptr, 0);
     size_t size = 0;
@@ -55,9 +61,15 @@ NitTransportStream::NitTransportStream(uint16_t theTransportStreamId, uint16_t t
     : transportStreamId(theTransportStreamId), originalNetworkId(theOriginalNetworkId)
 {}
 
+size_t NitTransportStream::GetCodesSize() const
+{
+    return (SectionBase::GetCodesSize() + 4);
+}
+
 size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
+    assert(NitTransportStream::GetCodesSize() <= bufferSize);
 
     ptr = ptr + Write16(ptr, transportStreamId);
     ptr = ptr + Write16(ptr, originalNetworkId);
@@ -65,11 +77,6 @@ size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + SectionBase::MakeCodes(buffer, bufferSize);
 
     return (ptr - buffer);
-}
-
-size_t NitTransportStream::GetCodesSize() const
-{
-    return (SectionBase::GetCodesSize() + 4);
 }
 
 void NitTransportStream::Put(std::ostream& os) const
@@ -86,6 +93,11 @@ void NitTransportStream::Put(std::ostream& os) const
 /**********************class Nit**********************/
 Nit::Nit(): tableId(0), networkId(0), versionNumber(0)
 {}
+
+uint16_t Nit::GetPid() const
+{
+    return 0x0010;
+}
 
 void Nit::SetTableId(uchar_t data)
 {
@@ -126,7 +138,7 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
     uint16_t ui16Value;
-    size_t  size = GetCodesSize();
+    size_t  size = Nit::GetCodesSize();
     
     assert(size <= bufferSize && size <= (MaxNitSectionLength - 3));
 

@@ -57,6 +57,9 @@
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">

@@ -84,6 +84,7 @@
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Crc32.cpp" />

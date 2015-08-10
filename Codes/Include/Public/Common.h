@@ -107,7 +107,8 @@ size_t MemCopy(void *dest, size_t destSize, const void *src, size_t count);
 
 /******************shared_ptr<...> deleter******************/
 /*
-CharDeleter, auxiliary class used by shared_ptr<char>.  Example:
+CharDeleter, auxiliary class used by shared_ptr<char>.  
+Example:
 {
     shared_ptr<char> buffer(new char[128], CharDeleter());
 }

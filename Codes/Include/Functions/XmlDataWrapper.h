@@ -70,7 +70,7 @@ public:
     typedef NitWrapper<Nit> MyBase;
     typedef NitXmlWrapper<Nit> MyType;    
 
-    NitXmlWrapper(const std::string thXmlFileName, Trigger& theTrigger)
+    NitXmlWrapper(Trigger& theTrigger, const std::string thXmlFileName)
         : MyBase(theTrigger), xmlFileName(thXmlFileName)
     {
     }
