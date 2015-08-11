@@ -12,9 +12,39 @@ public:
     virtual size_t GetCodesSize() const;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
+    /* the following function is provided just for debug */
+    virtual int Compare(const SectionBase& right) const;
+    virtual void Put(std::ostream& os) const;
+
 protected:
-    std::list<std::shared_ptr<Discriptor>> discripters;
+    std::list<std::shared_ptr<Discriptor>> descriptors;
 };
+
+inline bool operator==(const SectionBase& left, const SectionBase& right)
+{
+    return (left.Compare(right) == 0);
+}
+
+inline bool operator!=(const SectionBase& left, const SectionBase& right)
+{
+    return (left.Compare(right) != 0);
+}
+
+inline bool operator>(const SectionBase& left, const SectionBase& right)
+{
+    return (left.Compare(right) > 0);
+}
+
+inline bool operator<(const SectionBase& left, const SectionBase& right)
+{
+    return (left.Compare(right) < 0);
+}
+
+inline std::ostream& operator << (std::ostream& os, const SectionBase& nit)
+{
+    nit.Put(os);
+    return os;
+}
 
 /**********************class NitTransportStream**********************/
 class NitTransportStream: public SectionBase
@@ -32,12 +62,6 @@ private:
     uint16_t transportStreamId;
     uint16_t originalNetworkId;
 };
-
-inline std::ostream& operator << (std::ostream& os, const NitTransportStream& nitTs)
-{
-    nitTs.Put(os);
-    return os;
-}
 
 /**********************class Nit**********************/
 class Nit: public SectionBase
@@ -66,11 +90,5 @@ private:
     uchar_t  versionNumber;
     std::list<std::shared_ptr<TransportStream>> transportStreams;
 };
-
-inline std::ostream& operator << (std::ostream& os, const Nit& nit)
-{
-    nit.Put(os);
-    return os;
-}
 
 #endif

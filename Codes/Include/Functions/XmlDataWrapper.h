@@ -91,7 +91,7 @@ public:
     {
         SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         char *ptr = (char *)attrValue.get();
-        return (uint16_t)strtol(ptr, nullptr, 10);
+        return (uint16_t)strtol(ptr, nullptr, 16);
     }
 
     template<>
@@ -117,8 +117,9 @@ public:
         }
     }
 
+    void Start() const;
     std::error_code FillNit(Nit& nit) const;
-
+    
 private:
     std::string xmlFileName;
 };

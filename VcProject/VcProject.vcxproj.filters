@@ -83,9 +83,6 @@
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
       <Filter>头文件\Functions</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\Public\Crc32.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>

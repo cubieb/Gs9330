@@ -12,25 +12,25 @@ bslbf :  bit string, left bit first
 */
 struct network_information_section
 {
-    uint32_t table_id:8;                        // 8 uimsbf  -
-    uint32_t section_syntax_indicator:1;        // 1 bslbf    
-    uint32_t reserved_future_use1:1;            // 1 bslbf    
-    uint32_t reserved1:2;                       // 2 bslbf    
-    uint32_t section_length:12;                 // 12 uimsbf -- 
-    uint32_t network_id:16;                     // 16 uimsbf -- 
-    uint32_t reserved2:2;                       // 2 bslbf     
-    uint32_t version_number:5;                  // 5 uimsbf    
-    uint32_t current_next_indicator:1;          // 1 bslbf   -  
-    uint32_t section_number:8;                  // 8 uimsbf  - 
-    uint32_t last_section_number:8;             // 8 uimsbf  -
+    uchar_t  table_id:8;                        // 8 uimsbf  -
+    uint16_t section_syntax_indicator:1;        // 1 bslbf    
+    uint16_t reserved_future_use1:1;            // 1 bslbf    
+    uint16_t reserved1:2;                       // 2 bslbf    
+    uint16_t section_length:12;                 // 12 uimsbf -- 
+    uint16_t network_id:16;                     // 16 uimsbf -- 
+    uchar_t  reserved2:2;                       // 2 bslbf     
+    uchar_t  version_number:5;                  // 5 uimsbf    
+    uchar_t  current_next_indicator:1;          // 1 bslbf   -  
+    uchar_t  section_number:8;                  // 8 uimsbf  - 
+    uchar_t  last_section_number:8;             // 8 uimsbf  -
     //uint32_t reserved_future_use2:4;            // 4 bslbf   
-    //uint32_t network_descriptors_length:12;     // 12 uimsbf  --
+    //uint32_t network_descriptors_length:12;     // 12 uimsbf --
     //for(i=0;i<N;i++)
     //{
     //    descriptor()
     //}
-    uint32_t reserved_future_use3:4;              // 4 bslbf   
-    uint32_t transport_stream_loop_length:12;     // 12 uimsbf --
+    uint16_t reserved_future_use3:4;              // 4 bslbf   
+    uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
     //for(i=0;i<N;i++)
     //{
     //    transport_stream_id          16 uimsbf
@@ -43,7 +43,7 @@ struct network_information_section
     //        descriptor()  
     //    }
     //}
-    uint32_t CRC_32;                           //32 rpchof
+    uint32_t CRC_32;                           //32 rpchof  ----
 };
 #pragma pack(pop)
 
@@ -64,9 +64,10 @@ public:
     NitWrapper(Trigger& theTrigger)
         : trigger(theTrigger)
     {}
-    
+
     virtual ~NitWrapper() 
     {}
+    virtual void Start() const = 0;
     virtual std::error_code FillNit(Nit& nit) const = 0;
 
 private:

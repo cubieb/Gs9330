@@ -12,8 +12,29 @@ public:
     virtual size_t GetCodesSize() const = 0;
 
     /* the following function is provided just for debug */
+    virtual int Compare(const Discriptor& right) const;
     virtual void Put(std::ostream& os) const = 0;
 };
+
+inline bool operator==(const Discriptor& left, const Discriptor& right)
+{
+    return (left.Compare(right) == 0);
+}
+
+inline bool operator!=(const Discriptor& left, const Discriptor& right)
+{
+    return (left.Compare(right) != 0);
+}
+
+inline bool operator>(const Discriptor& left, const Discriptor& right)
+{
+    return (left.Compare(right) > 0);
+}
+
+inline bool operator<(const Discriptor& left, const Discriptor& right)
+{
+    return (left.Compare(right) < 0);
+}
 
 inline std::ostream& operator << (std::ostream& os, const Discriptor& descriptor)
 {
@@ -31,7 +52,7 @@ public:
         /* we allocate 1 more bytes to store '0', just for debug function Put() to
            show the value correctly.
          */
-        data.get()[theDataSize] = '0';
+        data.get()[theDataSize] = '\0';
         memcpy(data.get(), theData, theDataSize);
     }
 
@@ -50,6 +71,7 @@ private:
 };
 
 /**********************class NetworkNameDescriptor**********************/
+/* network_name_descriptor */
 class NetworkNameDescriptor: public UcharDescriptor
 {
 public:
@@ -60,6 +82,7 @@ public:
 };
 
 /**********************class ServiceListDescriptor**********************/
+/* service_list_descriptor */
 class ServiceListDescriptor: public UcharDescriptor
 {
 public: 
@@ -70,6 +93,7 @@ public:
 };
 
 /**********************class StuffingDescriptor**********************/
+/* stuffing_descriptor */
 class StuffingDescriptor: public UcharDescriptor
 {
 public: 
@@ -80,6 +104,7 @@ public:
 };
 
 /**********************class SatelliteDeliverySystemDescriptor**********************/
+/* satellite_delivery_system_descriptor */
 class SatelliteDeliverySystemDescriptor: public UcharDescriptor
 {
 public: 

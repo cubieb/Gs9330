@@ -96,7 +96,6 @@
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />
     <ClInclude Include="..\Codes\Include\Functions\Nit.h" />
-    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Ts.h" />
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />

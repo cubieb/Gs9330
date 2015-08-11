@@ -21,23 +21,21 @@ Controller::Controller()
     nitWrapper.reset(new NitXmlWrapper<Nit>(trigger, name));
 }
 
-void Controller::Start()
+void Controller::Start() const
 {
-    Trigger(*nitWrapper);
+    nitWrapper->Start();
 }
 
-void Controller::Trigger(const NitWrapper<Nit>& wrapper)
+void Controller::Trigger(const NitWrapper<Nit>& wrapper) const
 {
     Nit nit;
     wrapper.FillNit(nit);
 
-    cout << nit << endl;
     Ts ts;
     size_t size = ts.GetCodesSize(nit);
     shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
 
     size_t ret = ts.MakeCodes(nit, buffer.get(), size);
-    //fstream file("D:/Temp/Temp.ts", ios_base::out  | ios::binary);
-    //file.write((char*)buffer, bufferSize);
     assert(ret == size);
 }
+

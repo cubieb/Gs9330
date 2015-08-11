@@ -49,5 +49,21 @@ protected:
     void TestMakeCodes();
 };
 
+/**********************class TsCase**********************/
+class TsCase : public CPPUNIT_NS::TestFixture
+{
+    CPPUNIT_TEST_SUITE(TsCase);
+    CPPUNIT_TEST(TestMakeCodes);
+    CPPUNIT_TEST_SUITE_END();
+
+public:
+    void setUp();
+
+protected:
+    void Trigger(const NitWrapper<Nit>& wrapper) const;
+    void TestMakeCodes();
+};
+
+
 CxxEndNameSpace
 #endif

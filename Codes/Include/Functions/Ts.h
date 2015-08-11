@@ -10,14 +10,14 @@
 */
 struct transport_packet
 {
-    uint32_t sync_byte:8;                       // 8 uimsbf  -
-    uint32_t transport_error_indicator:1;       // 1 bslbf    
-    uint32_t payload_unit_start_indicator:1;    // 1 bslbf    
-    uint32_t transport_priority:1;              // 1 bslbf
-    uint32_t PID:13;                            // 13 bslbf  --
-    uint32_t transport_scrambling_control:2;    // 2 bslbf
-    uint32_t adaptation_field_control:2;        // 2 bslbf
-    uint32_t continuity_counter:4;              // 4 bslbf   -
+    uchar_t  sync_byte:8;                       // 8 uimsbf  -
+    uint16_t transport_error_indicator:1;       // 1 bslbf    
+    uint16_t payload_unit_start_indicator:1;    // 1 bslbf    
+    uint16_t transport_priority:1;              // 1 bslbf
+    uint16_t PID:13;                            // 13 bslbf  --
+    uchar_t  transport_scrambling_control:2;    // 2 bslbf
+    uchar_t  adaptation_field_control:2;        // 2 bslbf
+    uchar_t  continuity_counter:4;              // 4 bslbf   -
 };
 #pragma pack(pop)
 
@@ -43,8 +43,13 @@ private:
 class Ts
 {
 public:
+    Ts();
     size_t GetCodesSize(const SectionBase& section) const;
-    size_t MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize) const;
+    size_t MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize);
+
+private:
+    uchar_t adaptationFieldControl;
+    uchar_t continuityCounter;
 };
 
 #endif

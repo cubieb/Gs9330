@@ -11,20 +11,22 @@ Segment::Segment(const SectionBase& section, size_t segmentSize)
 {
     /* refer to <ISO/IEC 13818-1> "pointer_field" */    
     size_t size = section.GetCodesSize() + 1;           /* 1 bytes for pointer_field and */
-    size = size + (segmentSize - (size % segmentSize)); /* size must be times of segmentSize */
+    size_t tail = segmentSize - (size % segmentSize);
+    size = size + tail; /* size must be times of segmentSize */
     buffer.reset(new uchar_t[size], UcharDeleter());
 
-    buffer.get()[0] = 0x0; //pointer_field
-    section.MakeCodes(buffer.get() + 1, size - 1);
+    uchar_t *ptr = buffer.get();
+    ptr[0] = 0x0; //pointer_field    
+    section.MakeCodes(ptr + 1, section.GetCodesSize());
 
-    for (uchar_t *ptr = buffer.get(); ptr < buffer.get() + size; ptr = ptr + segmentSize)
+    for (ptr = buffer.get(); ptr < buffer.get() + size; ptr = ptr + segmentSize)
     {
         segments.push_back(ptr);
     }
-    size_t tail = size % segmentSize;
+    
     if ((tail) != 0)
     {
-        uchar_t* ptr = segments.back();
+        ptr = segments.back();
         memset(ptr + segmentSize - tail, 0xff, tail);
     }
 }
@@ -40,11 +42,14 @@ Segment::iterator Segment::end()
 }
 
 /**********************class Ts**********************/
+Ts::Ts(): adaptationFieldControl(1), continuityCounter(0)
+{}
+
 size_t Ts::GetCodesSize(const SectionBase& section) const
 {
     size_t sectionSize = section.GetCodesSize() + 1;
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
-    size_t segmentNumber = (sectionSize + 1) / segmentSize;
+    size_t segmentNumber = sectionSize / segmentSize;
 
     if ((sectionSize % segmentSize) != 0)
     {
@@ -54,7 +59,7 @@ size_t Ts::GetCodesSize(const SectionBase& section) const
     return (segmentNumber * TsPacketSize);
 }
 
-size_t Ts::MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize) const
+size_t Ts::MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize)
 {
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
     Segment segment(section, segmentSize);
@@ -75,7 +80,10 @@ size_t Ts::MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferS
 		   adaptation_field_control[2]='01';
 		   continuity_counter[4] = '0000';
 		*/
-        ptr = ptr + Write8(ptr, 1 << 4);
+        ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | continuityCounter++);
+        if (continuityCounter == 0x10)
+            continuityCounter = 0;
+
         ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);
     }
 

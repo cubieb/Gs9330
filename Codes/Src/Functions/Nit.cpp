@@ -20,7 +20,7 @@ void SectionBase::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
     shared_ptr<Discriptor> discripter(factory.Create(tag, data, dataSize));
     if (discripter != nullptr)
     {
-        discripters.push_back(discripter);
+        descriptors.push_back(discripter);
     }
     else
         errstrm << "cant create descriptor, tag = " << (uint_t)tag << endl;
@@ -29,7 +29,7 @@ void SectionBase::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 size_t SectionBase::GetCodesSize() const
 {
     size_t size = 0;
-    for (const auto iter: discripters)
+    for (const auto iter: descriptors)
     {
         size = size + iter->GetCodesSize();
     }
@@ -45,7 +45,7 @@ size_t SectionBase::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
     ptr = ptr + Write16(ptr, 0);
     size_t size = 0;
-    for (auto iter = discripters.begin(); iter != discripters.end(); ++iter)
+    for (auto iter = descriptors.begin(); iter != descriptors.end(); ++iter)
     {
         ptr = ptr + (*iter)->MakeCodes(ptr, bufferSize - (ptr - buffer));
         size = size + (*iter)->GetCodesSize();
@@ -54,6 +54,36 @@ size_t SectionBase::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     Write16(buffer, ui16Value);
 
     return (ptr - buffer);
+}
+
+int SectionBase::Compare(const SectionBase& right) const
+{
+    size_t leftSize = GetCodesSize();
+    size_t rightSize = right.GetCodesSize();
+
+    shared_ptr<uchar_t> leftBuf(new uchar_t[leftSize], UcharDeleter());
+    shared_ptr<uchar_t> rightBuf(new uchar_t[rightSize], UcharDeleter());
+    MakeCodes(leftBuf.get(), leftSize);
+    right.MakeCodes(rightBuf.get(), rightSize);
+
+    int ret = memcmp(leftBuf.get(), rightBuf.get(), min(leftSize, rightSize));
+    if (ret == 0)
+        return ret;
+
+    return (leftSize >  rightSize ? 1 : -1);
+}
+
+void SectionBase::Put(std::ostream& os) const
+{
+    uint_t i = 0;
+    for(auto iter: descriptors)
+    {
+        if (i != 0)
+        {
+            os << endl;
+        }
+        os << "Destripter " << i++ << ": " << *iter;
+    }
 }
 
 /**********************class NitTransportStream**********************/
@@ -69,12 +99,12 @@ size_t NitTransportStream::GetCodesSize() const
 size_t NitTransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
-    assert(NitTransportStream::GetCodesSize() <= bufferSize);
+    assert(GetCodesSize() <= bufferSize);
 
     ptr = ptr + Write16(ptr, transportStreamId);
     ptr = ptr + Write16(ptr, originalNetworkId);
 
-    ptr = ptr + SectionBase::MakeCodes(buffer, bufferSize);
+    ptr = ptr + SectionBase::MakeCodes(ptr, bufferSize);
 
     return (ptr - buffer);
 }
@@ -83,11 +113,9 @@ void NitTransportStream::Put(std::ostream& os) const
 {
     os << "transportStreamId = " << (uint_t)transportStreamId
         << ", originalNetworkId = " << (uint_t)originalNetworkId << endl;
-    uint_t i = 0;
-    for(auto iter: discripters)
-    {
-        os << "Destripter " << i++ << ": " << *iter << endl;
-    }
+
+    SectionBase::Put(os);
+    os << endl;
 }
 
 /**********************class Nit**********************/
@@ -137,16 +165,16 @@ size_t Nit::GetCodesSize() const
 size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
-    uint16_t ui16Value;
-    size_t  size = Nit::GetCodesSize();
+    uint16_t ui16Value; 
+    size_t  size = GetCodesSize();
     
     assert(size <= bufferSize && size <= (MaxNitSectionLength - 3));
 
     ptr = ptr + Write8(ptr, tableId);
     ui16Value = (SectionSyntaxIndicator << 15) | (Reserved1Bit < 14) | (Reserved2Bit << 12);
     ui16Value = ui16Value | size;
-    ptr = ptr + Write16(ptr, ui16Value);
-    ptr = ptr + Write16(ptr, networkId);
+    ptr = ptr + Write16(ptr, ui16Value);  //section_length
+    ptr = ptr + Write16(ptr, networkId);  //network_id
     
     /* when section size greater than 1021, we should seperate the section into more htan one section.
        now we just consider the simplest case: only one section.
@@ -154,11 +182,12 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     uchar_t currentNextIndicator = 1;
     uchar_t sectionNumber = 0;
     uchar_t lastSectionNumber = 0;
+    //current_next_indicator
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);
-    ptr = ptr + Write8(ptr, sectionNumber);
+    ptr = ptr + Write8(ptr, sectionNumber); //section_number
     ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
 
-    ptr = ptr + SectionBase::MakeCodes(buffer, bufferSize);
+    ptr = ptr + SectionBase::MakeCodes(ptr, bufferSize);
 
     uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);
@@ -173,6 +202,7 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.FullCrc(buffer, ptr - buffer));
+    assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);
 }
 
@@ -181,11 +211,10 @@ void Nit::Put(std::ostream& os) const
     os << "tableId = " << (uint_t)tableId
         << ", networkId = " << (uint_t)networkId
         << ", versionNumber = " << (uint_t)versionNumber << endl;
-    uint_t i = 0;
-    for(auto iter: discripters)
-    {
-        os << "Destripter " << i++ << ": " << *iter << endl;
-    }
+
+    SectionBase::Put(os);
+    os << endl;
+
     for (const auto iter: transportStreams)
     {
         os << *iter << endl;
