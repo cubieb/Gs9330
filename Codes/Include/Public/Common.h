@@ -57,6 +57,7 @@ inline std::ostream& operator << (std::ostream& os, MemStream<uchar_t> const& me
 class Mac
 {
 public:    
+    Mac();
     Mac(const uchar_t*);
     Mac(Mac const&);
     Mac const& operator =(Mac const&);
@@ -69,8 +70,7 @@ public:
     
     void Put(std::ostream&) const;
 
-private:
-    Mac() {}
+private:    
     std::shared_ptr<uchar_t> mac;
 };
 std::ostream& operator << (std::ostream& os, Mac const& mac);

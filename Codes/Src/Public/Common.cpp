@@ -4,6 +4,11 @@
 
 using namespace std;
 
+Mac::Mac(): mac(new uchar_t[6])
+{
+    memcpy(this->mac.get(), MacZero, 6);
+}
+
 Mac::Mac(const uchar_t* mac): mac(new uchar_t[6])
 {
     memcpy(this->mac.get(), mac, 6);
@@ -111,7 +116,6 @@ size_t Write32(uchar_t* buf, uint32_t value)
     }
     return size;
 }
-
 
 size_t MemCopy(void *dest, size_t destSize, const void *src, size_t count)
 {

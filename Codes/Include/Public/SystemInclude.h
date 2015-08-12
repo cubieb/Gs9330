@@ -62,6 +62,7 @@
 #   include <map>
 #   include <vector>
 #   include <set>
+#   include <bitset>
 #   include <typeinfo>
 #   include <functional>
 #   include <algorithm>
