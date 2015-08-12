@@ -112,21 +112,16 @@ void TsCase::Trigger(const NitWrapper<Nit>& wrapper) const
 void TsCase::TestMakeCodes()
 {
     Nit nit;
-#if 0
-    function<void(const NitWrapper<Nit>&)> trigger(bind(&TsCase::Trigger, this, _1));
-    NitXmlWrapper<Nit> nitWrapper(trigger, "../XmlFiles/Nit.xml"); 
-    nitWrapper.FillNit(nit);
-#else    
+    //function<void(const NitWrapper<Nit>&)> trigger(bind(&TsCase::Trigger, this, _1));
+    //NitXmlWrapper<Nit> nitWrapper(trigger, "../XmlFiles/Nit.xml"); 
+    //nitWrapper.FillNit(nit);
     nit.SetTableId(0x40);
     nit.SetNetworkId(1);
     nit.SetVersionNumber(1);
     char *name = "Chengdu Broadcast Television Network";
     nit.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
     nit.AddTransportStream(5, 5);
-#endif
-
-    cout << endl << nit << endl;
-
+ 
     Ts ts;
     size_t size = ts.GetCodesSize(nit);
     shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());

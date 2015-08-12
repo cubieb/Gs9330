@@ -74,7 +74,7 @@ size_t Ts::MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferS
            transport_error_indicator = 0;
            transport_priority = 0;
          */
-        uint16_t startIndicator = iter == segment.begin() ? 1 : 0;
+        uint16_t startIndicator = (iter == segment.begin() ? 1 : 0);
         ptr = ptr + Write16(ptr, (startIndicator << 14) | section.GetPid());
         /* transport_scrambling_control[2]='00';
 		   adaptation_field_control[2]='01';

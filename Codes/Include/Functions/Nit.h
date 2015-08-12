@@ -1,73 +1,62 @@
 #ifndef _Nit_h_
 #define _Nit_h_
 
+#include "SectionBase.h"
+
+/*
+uimsbf:  unsigned integer most significant bit first
+bslbf :  bit string, left bit first
+*/
+#pragma pack(push, 1)
+
+/*
+    define struct network_information_section just for calculating fixed fields size.
+*/
+struct network_information_section
+{
+    uchar_t  table_id:8;                        // 8 uimsbf  -
+    uint16_t section_syntax_indicator:1;        // 1 bslbf    
+    uint16_t reserved_future_use1:1;            // 1 bslbf    
+    uint16_t reserved1:2;                       // 2 bslbf    
+    uint16_t section_length:12;                 // 12 uimsbf -- 
+    uint16_t network_id:16;                     // 16 uimsbf -- 
+    uchar_t  reserved2:2;                       // 2 bslbf     
+    uchar_t  version_number:5;                  // 5 uimsbf    
+    uchar_t  current_next_indicator:1;          // 1 bslbf   -  
+    uchar_t  section_number:8;                  // 8 uimsbf  - 
+    uchar_t  last_section_number:8;             // 8 uimsbf  -
+    //uint32_t reserved_future_use2:4;            // 4 bslbf   
+    //uint32_t network_descriptors_length:12;     // 12 uimsbf --
+    //for(i=0;i<N;i++)
+    //{
+    //    descriptor()
+    //}
+    uint16_t reserved_future_use3:4;              // 4 bslbf   
+    uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
+    //for(i=0;i<N;i++)
+    //{
+    //    transport_stream_id          16 uimsbf
+    //    original_network_id          16 uimsbf
+    //    reserved_future_use          4 bslbf
+    //    transport_descriptors_length 12 uimsbf
+    //    for(j=0;j<N;j++)
+    //    {
+    //        //cable_delivery_system_descriptor() must be included.
+    //        descriptor()  
+    //    }
+    //}
+    uint32_t CRC_32;                           //32 rpchof  ----
+};
+#pragma pack(pop)
+
 class Discriptor;
-/**********************class SectionBase**********************/
-class SectionBase
-{
-public:
-    virtual uint16_t GetPid()  const; 
-    virtual void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-
-    virtual size_t GetCodesSize() const;
-    virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
-
-    /* the following function is provided just for debug */
-    virtual int Compare(const SectionBase& right) const;
-    virtual void Put(std::ostream& os) const;
-
-protected:
-    std::list<std::shared_ptr<Discriptor>> descriptors;
-};
-
-inline bool operator==(const SectionBase& left, const SectionBase& right)
-{
-    return (left.Compare(right) == 0);
-}
-
-inline bool operator!=(const SectionBase& left, const SectionBase& right)
-{
-    return (left.Compare(right) != 0);
-}
-
-inline bool operator>(const SectionBase& left, const SectionBase& right)
-{
-    return (left.Compare(right) > 0);
-}
-
-inline bool operator<(const SectionBase& left, const SectionBase& right)
-{
-    return (left.Compare(right) < 0);
-}
-
-inline std::ostream& operator << (std::ostream& os, const SectionBase& nit)
-{
-    nit.Put(os);
-    return os;
-}
-
-/**********************class NitTransportStream**********************/
-class NitTransportStream: public SectionBase
-{
-public:
-    NitTransportStream(uint16_t theTransportStreamId, uint16_t theOriginalNetworkId);
-
-    size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;    
-    
-    /* the following function is provided just for debug */
-    void Put(std::ostream& os) const;
-
-private:
-    uint16_t transportStreamId;
-    uint16_t originalNetworkId;
-};
-
 /**********************class Nit**********************/
+/* 5.2.1 Network Information Table */
 class Nit: public SectionBase
 {
 public:
-    typedef NitTransportStream TransportStream;
+    enum: uint16_t {Pid = 0x0010};
+    typedef TransportStream TransportStream;
     Nit();
     ~Nit() {}
     

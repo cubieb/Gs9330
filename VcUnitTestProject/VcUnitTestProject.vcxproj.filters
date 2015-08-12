@@ -65,6 +65,12 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\SectionBase.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">
@@ -83,9 +89,6 @@
       <Filter>CodesUnderTest\头文件\Functions</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Nit.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h">
       <Filter>CodesUnderTest\头文件\Functions</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Ts.h">
@@ -111,6 +114,12 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\SectionBase.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -114,6 +114,11 @@ public:
     {}
 };
 
+/**********************class SatelliteDeliverySystemDescriptor**********************/
+class Descriptors
+{
+};
+
 /**********************class DescriporFactory**********************/
 class DescriporFactory
 {

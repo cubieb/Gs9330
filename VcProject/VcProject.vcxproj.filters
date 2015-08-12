@@ -60,6 +60,12 @@
     <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\SectionBase.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">
@@ -100,6 +106,12 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
       <Filter>源文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\SectionBase.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
+      <Filter>头文件\Functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

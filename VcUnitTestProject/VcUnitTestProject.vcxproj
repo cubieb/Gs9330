@@ -83,6 +83,8 @@
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\SectionBase.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Ts.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
@@ -97,7 +99,8 @@
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />
     <ClInclude Include="..\Codes\Include\Functions\Nit.h" />
-    <ClInclude Include="..\Codes\Include\Functions\SqlDataWrapper.h" />
+    <ClInclude Include="..\Codes\Include\Functions\Sdt.h" />
+    <ClInclude Include="..\Codes\Include\Functions\SectionBase.h" />
     <ClInclude Include="..\Codes\Include\Functions\Ts.h" />
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />
