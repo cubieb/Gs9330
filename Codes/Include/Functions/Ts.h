@@ -1,6 +1,5 @@
 #ifndef _Ts_h_
 #define _Ts_h_
-#include "SystemInclude.h"
 
 #define TsPacketSize 188
 
@@ -21,14 +20,13 @@ struct transport_packet
 };
 #pragma pack(pop)
 
-class SectionBase;
-class Segment;
+class Section;
 /**********************class Segment**********************/
 class Segment
 {
 public:
     typedef std::list<uchar_t*>::iterator iterator;
-    Segment(const SectionBase& section, size_t segmentSize);
+    Segment(const Section& section, size_t segmentSize);
 
     iterator begin();
     iterator end();
@@ -44,8 +42,8 @@ class Ts
 {
 public:
     Ts();
-    size_t GetCodesSize(const SectionBase& section) const;
-    size_t MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize);
+    size_t GetCodesSize(const Section& section) const;
+    size_t MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize);
 
 private:
     uchar_t adaptationFieldControl;

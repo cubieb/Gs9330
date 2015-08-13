@@ -1,23 +1,7 @@
 #ifndef _Descriptor_h_
 #define _Descriptor_h_
 
-#include "Types.h"
-/**********************class Descriptor**********************/
-class Descriptor
-{
-public:
-    Descriptor() {}
-    virtual ~Descriptor() {}
-
-    virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
-    virtual size_t GetCodesSize() const = 0;
-
-    /* the following function is provided just for debug */
-    virtual int Compare(const Descriptor& right) const;
-    virtual void Put(std::ostream& os) const = 0;
-};
-GenerateInlineCodes(Descriptor);
-
+#include "Component.h"
 /**********************class UcharDescriptor**********************/
 class UcharDescriptor: public Descriptor
 {
@@ -91,7 +75,7 @@ public:
 };
 
 /**********************class Descriptors**********************/
-class Descriptors
+class Descriptors: public Component
 {
 public:
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
@@ -99,13 +83,11 @@ public:
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */
-    int Compare(const Descriptors& right) const;
     void Put(std::ostream& os) const;
 
 private:
     std::list<std::shared_ptr<Descriptor>> descriptors;
 };
-GenerateInlineCodes(Descriptors);
 
 /**********************class DescriporFactory**********************/
 class DescriporFactory

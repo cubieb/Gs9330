@@ -2,28 +2,9 @@
 #include "Common.h"
 #include "Debug.h"
 
-#include "Types.h"
 #include "Descriptor.h"
 
 using namespace std;
-/**********************class Descriptor**********************/
-int Descriptor::Compare(const Descriptor& right) const
-{
-    size_t leftSize = GetCodesSize();
-    size_t rightSize = right.GetCodesSize();
-
-    shared_ptr<uchar_t> leftBuf(new uchar_t[leftSize], UcharDeleter());
-    shared_ptr<uchar_t> rightBuf(new uchar_t[rightSize], UcharDeleter());
-    MakeCodes(leftBuf.get(), leftSize);
-    right.MakeCodes(rightBuf.get(), rightSize);
-
-    int ret = memcmp(leftBuf.get(), rightBuf.get(), min(leftSize, rightSize));
-    if (ret == 0)
-        return ret;
-
-    return (leftSize >  rightSize ? 1 : -1);
-}
-
 /**********************class UcharDescriptor**********************/
 size_t UcharDescriptor::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
@@ -83,23 +64,6 @@ size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     Write16(buffer, ui16Value);
 
     return (ptr - buffer);
-}
-
-int Descriptors::Compare(const Descriptors& right) const
-{
-    size_t leftSize = GetCodesSize();
-    size_t rightSize = right.GetCodesSize();
-
-    shared_ptr<uchar_t> leftBuf(new uchar_t[leftSize], UcharDeleter());
-    shared_ptr<uchar_t> rightBuf(new uchar_t[rightSize], UcharDeleter());
-    MakeCodes(leftBuf.get(), leftSize);
-    right.MakeCodes(rightBuf.get(), rightSize);
-
-    int ret = memcmp(leftBuf.get(), rightBuf.get(), min(leftSize, rightSize));
-    if (ret == 0)
-        return ret;
-
-    return (leftSize >  rightSize ? 1 : -1);
 }
 
 void Descriptors::Put(std::ostream& os) const

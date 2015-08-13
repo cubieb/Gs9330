@@ -7,7 +7,7 @@
 using namespace std;
 
 /**********************class Segment**********************/
-Segment::Segment(const SectionBase& section, size_t segmentSize)
+Segment::Segment(const Section& section, size_t segmentSize)
 {
     /* refer to <ISO/IEC 13818-1> "pointer_field" */    
     size_t size = section.GetCodesSize() + 1;           /* 1 bytes for pointer_field and */
@@ -45,7 +45,7 @@ Segment::iterator Segment::end()
 Ts::Ts(): adaptationFieldControl(1), continuityCounter(0)
 {}
 
-size_t Ts::GetCodesSize(const SectionBase& section) const
+size_t Ts::GetCodesSize(const Section& section) const
 {
     size_t sectionSize = section.GetCodesSize() + 1;
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
@@ -59,7 +59,7 @@ size_t Ts::GetCodesSize(const SectionBase& section) const
     return (segmentNumber * TsPacketSize);
 }
 
-size_t Ts::MakeCodes(const SectionBase& section, uchar_t *buffer, size_t bufferSize)
+size_t Ts::MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize)
 {
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
     Segment segment(section, segmentSize);

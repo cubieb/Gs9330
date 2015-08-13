@@ -1,7 +1,7 @@
 #ifndef _Sdt_h_
 #define _Sdt_h_
 
-#include "SectionBase.h"
+#include "Component.h"
 
 /*
 uimsbf:  unsigned integer most significant bit first
@@ -47,7 +47,7 @@ struct service_description_section
 
 /**********************class Sdt**********************/
 /* 5.2.3 Service Description Table */
-class Sdt: public SectionBase
+class Sdt: public Section
 {
 public:
     enum: uint16_t {Pid = 0x0011};

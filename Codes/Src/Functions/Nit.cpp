@@ -5,13 +5,14 @@
 #include "Types.h"
 #include "Crc32.h"
 #include "Descriptor.h"
-#include "XmlDataWrapper.h"
 #include "Nit.h"
 
 using namespace std;
 /**********************class Nit**********************/
 Nit::Nit(): tableId(0), networkId(0), versionNumber(0)
-{}
+{
+    descriptors.reset(new Descriptors);
+}
 
 uint16_t Nit::GetPid() const
 {
@@ -35,7 +36,7 @@ void Nit::SetVersionNumber(uchar_t data)
 
 void Nit::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 {
-    descriptors.AddDescriptor(tag, data, dataSize);
+    descriptors->AddDescriptor(tag, data, dataSize);
 }
 
 Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId)
@@ -47,7 +48,7 @@ Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16
 
 size_t Nit::GetCodesSize() const
 {
-    size_t descriptorSize = descriptors.GetCodesSize();
+    size_t descriptorSize = descriptors->GetCodesSize();
     size_t transportStreamSize = 0;
 
     for (const auto iter: transportStreams)
@@ -83,7 +84,7 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write8(ptr, sectionNumber); //section_number
     ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
 
-    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);
+    ptr = ptr + descriptors->MakeCodes(ptr, bufferSize);
 
     uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);

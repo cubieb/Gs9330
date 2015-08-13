@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     char *name = "Chengdu Broadcast Television Network";
     nit.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
     nit.AddTransportStream(5, 5);
- 
+
     cout << nit;
 
     Ts ts;
@@ -36,6 +36,6 @@ int main(int argc, char **argv)
     fstream file("D:/Temp/Temp.ts", ios_base::out  | ios::binary);
     size_t ret = ts.MakeCodes(nit, buffer.get(), size);
     file.write((char*)buffer.get(), size); 
-    
+   
     return 0;
 }
