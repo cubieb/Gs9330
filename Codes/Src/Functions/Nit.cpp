@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Debug.h"
 
+#include "Types.h"
 #include "Crc32.h"
 #include "Descriptor.h"
 #include "XmlDataWrapper.h"
@@ -32,6 +33,11 @@ void Nit::SetVersionNumber(uchar_t data)
     versionNumber = data;
 }
 
+void Nit::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+{
+    descriptors.AddDescriptor(tag, data, dataSize);
+}
+
 Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId)
 {
     shared_ptr<TransportStream> transportStream(new TransportStream(transportStreamId, transportStreamId));
@@ -41,7 +47,7 @@ Nit::TransportStream& Nit::AddTransportStream(uint16_t transportStreamId, uint16
 
 size_t Nit::GetCodesSize() const
 {
-    size_t descriptorSize = SectionBase::GetCodesSize();
+    size_t descriptorSize = descriptors.GetCodesSize();
     size_t transportStreamSize = 0;
 
     for (const auto iter: transportStreams)
@@ -77,7 +83,7 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write8(ptr, sectionNumber); //section_number
     ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
 
-    ptr = ptr + SectionBase::MakeCodes(ptr, bufferSize);
+    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);
 
     uchar_t *pos = ptr;
     ptr = ptr + Write16(ptr, 0);
@@ -102,7 +108,8 @@ void Nit::Put(std::ostream& os) const
         << ", networkId = " << (uint_t)networkId
         << ", versionNumber = " << (uint_t)versionNumber << endl ;
 
-    SectionBase::Put(os);
+    os << descriptors;
+
     for (const auto iter: transportStreams)
     {
         os << *iter;

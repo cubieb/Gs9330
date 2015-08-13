@@ -101,6 +101,7 @@
     <ClInclude Include="..\Codes\Include\Functions\Sdt.h" />
     <ClInclude Include="..\Codes\Include\Functions\SectionBase.h" />
     <ClInclude Include="..\Codes\Include\Functions\Ts.h" />
+    <ClInclude Include="..\Codes\Include\Functions\Types.h" />
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />
     <ClInclude Include="..\Codes\Include\Public\Crc32.h" />

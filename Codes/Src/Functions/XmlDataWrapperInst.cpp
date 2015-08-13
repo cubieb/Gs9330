@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "SystemError.h" 
 
+#include "Types.h"
 #include "Descriptor.h"
 #include "Nit.h"
 #include "XmlDataWrapperDef.h"

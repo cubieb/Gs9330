@@ -1,6 +1,8 @@
 #ifndef _Nit_h_
 #define _Nit_h_
 
+#include "Types.h"
+#include "Descriptor.h"
 #include "SectionBase.h"
 
 /*
@@ -49,7 +51,8 @@ struct network_information_section
 };
 #pragma pack(pop)
 
-class Discriptor;
+class Descriptor;
+class Descriptors;
 /**********************class Nit**********************/
 /* 5.2.1 Network Information Table */
 class Nit: public SectionBase
@@ -65,6 +68,8 @@ public:
     void SetTableId(uchar_t data);
     void SetNetworkId(uint16_t data);
     void SetVersionNumber(uchar_t data);
+
+    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
     TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
 
     size_t GetCodesSize() const;
@@ -77,6 +82,7 @@ private:
     uchar_t  tableId;
     uint16_t networkId;
     uchar_t  versionNumber;
+    Descriptors descriptors;
     std::list<std::shared_ptr<TransportStream>> transportStreams;
 };
 

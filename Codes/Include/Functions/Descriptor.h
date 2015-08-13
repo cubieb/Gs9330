@@ -1,49 +1,25 @@
 #ifndef _Descriptor_h_
 #define _Descriptor_h_
 
-/**********************class Discriptor**********************/
-class Discriptor
+#include "Types.h"
+/**********************class Descriptor**********************/
+class Descriptor
 {
 public:
-    Discriptor() {}
-    virtual ~Discriptor() {}
+    Descriptor() {}
+    virtual ~Descriptor() {}
 
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
     virtual size_t GetCodesSize() const = 0;
 
     /* the following function is provided just for debug */
-    virtual int Compare(const Discriptor& right) const;
+    virtual int Compare(const Descriptor& right) const;
     virtual void Put(std::ostream& os) const = 0;
 };
-
-inline bool operator==(const Discriptor& left, const Discriptor& right)
-{
-    return (left.Compare(right) == 0);
-}
-
-inline bool operator!=(const Discriptor& left, const Discriptor& right)
-{
-    return (left.Compare(right) != 0);
-}
-
-inline bool operator>(const Discriptor& left, const Discriptor& right)
-{
-    return (left.Compare(right) > 0);
-}
-
-inline bool operator<(const Discriptor& left, const Discriptor& right)
-{
-    return (left.Compare(right) < 0);
-}
-
-inline std::ostream& operator << (std::ostream& os, const Discriptor& descriptor)
-{
-    descriptor.Put(os);
-    return os;
-}
+GenerateInlineCodes(Descriptor);
 
 /**********************class UcharDescriptor**********************/
-class UcharDescriptor: public Discriptor
+class UcharDescriptor: public Descriptor
 {
 public: 
     UcharDescriptor(uchar_t *theData, size_t theDataSize)
@@ -114,25 +90,37 @@ public:
     {}
 };
 
-/**********************class SatelliteDeliverySystemDescriptor**********************/
+/**********************class Descriptors**********************/
 class Descriptors
 {
+public:
+    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
+    size_t GetCodesSize() const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+
+    /* the following function is provided just for debug */
+    int Compare(const Descriptors& right) const;
+    void Put(std::ostream& os) const;
+
+private:
+    std::list<std::shared_ptr<Descriptor>> descriptors;
 };
+GenerateInlineCodes(Descriptors);
 
 /**********************class DescriporFactory**********************/
 class DescriporFactory
 {
 public:
-    Discriptor* Create(uchar_t tag, uchar_t *data, size_t dataSize) const
+    Descriptor* Create(uchar_t tag, uchar_t *data, size_t dataSize) const
     {
         return CreateA<0x0>(data, dataSize);
     }
 
 private:
     template<uchar_t Tag>
-    Discriptor* CreateA(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateA(uchar_t *data, size_t dataSize) const
     {
-        Discriptor* descriptor = CreateB<Tag>(data, dataSize);
+        Descriptor* descriptor = CreateB<Tag>(data, dataSize);
         if (descriptor != nullptr)
             return descriptor;
 
@@ -140,37 +128,37 @@ private:
     }
 
     template<>
-    Discriptor* CreateA<0xFF>(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateA<0xFF>(uchar_t *data, size_t dataSize) const
     {
         return nullptr;       
     }
 
     template<uchar_t Tag>
-    Discriptor* CreateB(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateB(uchar_t *data, size_t dataSize) const
     {
         return nullptr;
     }
 
     template<>
-    Discriptor* CreateB<NetworkNameDescriptor::Tag>(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateB<NetworkNameDescriptor::Tag>(uchar_t *data, size_t dataSize) const
     {
         return new NetworkNameDescriptor(data, dataSize);
     }
 
     template<>
-    Discriptor* CreateB<ServiceListDescriptor::Tag>(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateB<ServiceListDescriptor::Tag>(uchar_t *data, size_t dataSize) const
     {
         return new ServiceListDescriptor(data, dataSize);
     }
     
     template<>
-    Discriptor* CreateB<StuffingDescriptor::Tag>(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateB<StuffingDescriptor::Tag>(uchar_t *data, size_t dataSize) const
     {
         return new StuffingDescriptor(data, dataSize);
     }
     
     template<>
-    Discriptor* CreateB<SatelliteDeliverySystemDescriptor::Tag>(uchar_t *data, size_t dataSize) const
+    Descriptor* CreateB<SatelliteDeliverySystemDescriptor::Tag>(uchar_t *data, size_t dataSize) const
     {
         return new SatelliteDeliverySystemDescriptor(data, dataSize);
     }
