@@ -101,24 +101,11 @@ public:
         return attrValue;
     }
 
-    template<typename Owner>
-    void AddDescriptor(Owner& owner, xmlNodePtr& node, xmlChar* child) const
-    {
-        if (xmlStrcmp(node->name, child) == 0)
-        {
-            for (xmlNodePtr cur = xmlFirstElementChild(node); 
-                cur != nullptr; 
-                cur = xmlNextElementSibling(cur))
-            {
-                uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-                SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-                owner.AddDescriptor(tag, data.get(), strlen((const char*)data.get()));
-            }
-        }
-    }
-
     void Start() const;
-    std::error_code FillNit(Nit& nit) const;
+
+    void AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Nit& nit, uint16_t tsId, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
+    std::error_code FillNit(Nit& nit) const;    
     
 private:
     std::string xmlFileName;

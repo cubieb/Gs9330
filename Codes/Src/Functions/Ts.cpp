@@ -42,8 +42,22 @@ Segment::iterator Segment::end()
 }
 
 /**********************class Ts**********************/
-Ts::Ts(): adaptationFieldControl(1), continuityCounter(0)
-{}
+Ts::Ts()
+{
+    transporPacket.transportPriority = 0;
+    transporPacket.adaptationFieldControl = 1;
+    transporPacket.continuityCounter = 0;
+}
+
+void Ts::SetTransportPriority(uint16_t theTransportPriority)
+{
+    transporPacket.transportPriority = theTransportPriority;
+}
+
+void Ts::SetContinuityCounter(uchar_t theContinuityCounter)
+{
+    transporPacket.continuityCounter = theContinuityCounter;
+}
 
 size_t Ts::GetCodesSize(const Section& section) const
 {
@@ -75,15 +89,12 @@ size_t Ts::MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize)
            transport_priority = 0;
          */
         uint16_t startIndicator = (iter == segment.begin() ? 1 : 0);
-        ptr = ptr + Write16(ptr, (startIndicator << 14) | section.GetPid());
-        /* transport_scrambling_control[2]='00';
-		   adaptation_field_control[2]='01';
-		   continuity_counter[4] = '0000';
+        ptr = ptr + Write16(ptr, (startIndicator << 14) | (transporPacket.transportPriority << 13) | section.GetPid());
+        /* transport_scrambling_control[2] = '00';
+		   adaptation_field_control[2] = '01';
+		   continuity_counter[4] = 'xxxx';
 		*/
-        ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | continuityCounter++);
-        if (continuityCounter == 0x10)
-            continuityCounter = 0;
-
+        ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
         ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);
     }
 

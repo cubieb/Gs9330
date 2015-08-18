@@ -3,33 +3,12 @@
 
 #define MaxNitSectionLength     1024
 
-#define SectionSyntaxIndicator  0x1
-#define Reserved1Bit            0x1
-#define Reserved2Bit            0x3
-#define Reserved4Bit            0xF
+#define NitSectionSyntaxIndicator  0x1
 
-#define GenerateInlineCodes(Type) \
-inline bool operator==(const Type& left, const Type& right) \
-{ \
-    return (left.Compare(right) == 0); \
-} \
-inline bool operator!=(const Type& left, const Type& right) \
-{ \
-    return (left.Compare(right) != 0); \
-} \
-inline bool operator>(const Type& left, const Type& right) \
-{ \
-    return (left.Compare(right) > 0); \
-} \
-inline bool operator<(const Type& left, const Type& right) \
-{ \
-    return (left.Compare(right) < 0); \
-} \
-inline std::ostream& operator << (std::ostream& os, const Type& value) \
-{ \
-    value.Put(os); \
-    return os; \
-}
+#define Reserved1Bit               0x1
+#define Reserved2Bit               0x3
+#define Reserved4Bit               0xF
+#define Reserved12Bit              0xFFF
 
 /*
  * From boost documentation:

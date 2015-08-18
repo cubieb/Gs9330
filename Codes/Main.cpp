@@ -18,23 +18,24 @@ using namespace std;
 int main(int argc, char **argv) 
 {
     Nit nit;
-    //function<void(const NitWrapper<Nit>&)> trigger(bind(&TsCase::Trigger, this, _1));
-    //NitXmlWrapper<Nit> nitWrapper(trigger, "../XmlFiles/Nit.xml"); 
-    //nitWrapper.FillNit(nit);
+    
     nit.SetTableId(0x40);
     nit.SetNetworkId(1);
-    nit.SetVersionNumber(1);
-    char *name = "Chengdu Broadcast Television Network";
+    nit.SetVersionNumber(0xc);
+    char *name = "Royal cable";
     nit.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
-    nit.AddTransportStream(5, 5);
 
-    cout << nit;
+    shared_ptr<uchar_t> buffer;
+
+    std::cout << nit;
 
     Ts ts;
+
     size_t size = ts.GetCodesSize(nit);
-    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-    fstream file("D:/Temp/Temp.ts", ios_base::out  | ios::binary);
+    buffer.reset(new uchar_t[size], UcharDeleter());
     size_t ret = ts.MakeCodes(nit, buffer.get(), size);
+
+    fstream file("D:/Temp/Temp.ts", ios_base::out  | ios::binary);
     file.write((char*)buffer.get(), size); 
    
     return 0;

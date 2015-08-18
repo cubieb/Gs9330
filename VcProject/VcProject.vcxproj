@@ -117,8 +117,8 @@
     <Text Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\XmlFiles\AddressListXml.xml" />
     <Xml Include="..\XmlFiles\BAT.xml" />
+    <Xml Include="..\XmlFiles\Nit.UnitTest1.xml" />
     <Xml Include="..\XmlFiles\NIT.xml" />
     <Xml Include="..\XmlFiles\SDT.xml">
       <SubType>Designer</SubType>

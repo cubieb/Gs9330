@@ -27,7 +27,7 @@ size_t Sdt::GetCodesSize() const
     return 0;
 }
 
-size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize) const
+size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize)
 {
     return 0;
 }

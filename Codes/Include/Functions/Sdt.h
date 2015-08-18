@@ -59,7 +59,7 @@ public:
     void SetTableId(uchar_t data);
 
     size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize);
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;

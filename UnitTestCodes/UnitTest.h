@@ -19,6 +19,9 @@ public:
 protected:    
     void TestTrigger();
     void TestFillNit();
+
+private:
+    void Trigger(const NitWrapper<Nit>& wrapper) const;
 };
 
 /**********************class CrcTestCase**********************/
@@ -60,8 +63,10 @@ public:
     void setUp();
 
 protected:
-    void Trigger(const NitWrapper<Nit>& wrapper) const;
     void TestMakeCodes();
+
+private:
+    void Trigger(const NitWrapper<Nit>& wrapper) const;
 };
 
 

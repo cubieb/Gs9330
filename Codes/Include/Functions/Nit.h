@@ -2,7 +2,6 @@
 #define _Nit_h_
 
 #include "Component.h"
-#include "TransportStream.h"
 
 /*
     uimsbf:  unsigned integer most significant bit first
@@ -11,7 +10,12 @@
 #pragma pack(push, 1)
 
 /*
-    define struct network_information_section just for calculating fixed fields size.
+define struct network_information_section just for calculating fixed fields size.
+sub_table: collection of sections with the same value of table_id and:
+    for a NIT: the same table_id_extension (network_id) and version_number;
+    for a BAT: the same table_id_extension (bouquet_id) and version_number;
+    for a SDT: the same table_id_extension (transport_stream_id), the same original_network_id and version_number;
+    for a EIT: the same table_id_extension (service_id), the same transport_stream_id, the same original_network_id and version_number.
 */
 struct network_information_section
 {
@@ -32,8 +36,8 @@ struct network_information_section
     //{
     //    descriptor()
     //}
-    uint16_t reserved_future_use3:4;              // 4 bslbf   
-    uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
+    //uint16_t reserved_future_use3:4;              // 4 bslbf   
+    //uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
     //for(i=0;i<N;i++)
     //{
     //    transport_stream_id          16 uimsbf
@@ -51,13 +55,15 @@ struct network_information_section
 #pragma pack(pop)
 
 class Descriptors;
+class TransportStreams;
+
+#include "TransportStream.h"
 /**********************class Nit**********************/
 /* 5.2.1 Network Information Table */
 class Nit: public Section
 {
 public:
     enum: uint16_t {Pid = 0x0010};
-    typedef TransportStream TransportStream;
     Nit();
     ~Nit() {}
     
@@ -66,10 +72,14 @@ public:
     void SetTableId(uchar_t data);
     void SetNetworkId(uint16_t data);
     void SetVersionNumber(uchar_t data);
+    void SetSectionNumber(uchar_t data);
+    void SetLastSectionNumber(uchar_t data);
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-    TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
-
+    //TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
+    void AddTs(uint16_t tsId, uint16_t onId);
+    void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);
+    
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
@@ -80,9 +90,10 @@ private:
     uchar_t  tableId;
     uint16_t networkId;
     uchar_t  versionNumber;
+    uchar_t  sectionNumber;
+    uchar_t  lastSectionNumber;
     std::shared_ptr<Descriptors> descriptors;
-    //std::shared_ptr<TransportStreams> transportStreams;
-    std::list<std::shared_ptr<TransportStream>> transportStreams;
+    std::shared_ptr<TransportStreams> transportStreams;
 };
 
 #endif

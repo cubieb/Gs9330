@@ -42,12 +42,20 @@ class Ts
 {
 public:
     Ts();
+
+    void SetTransportPriority(uint16_t theTransportPriority);
+    void SetContinuityCounter(uchar_t theContinuityCounter);
+
     size_t GetCodesSize(const Section& section) const;
     size_t MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize);
 
 private:
-    uchar_t adaptationFieldControl;
-    uchar_t continuityCounter;
+    struct transporPacket
+    {
+        uint16_t transportPriority:1;
+        uchar_t  adaptationFieldControl:2;
+        uchar_t  continuityCounter:4; 
+    }transporPacket;
 };
 
 #endif

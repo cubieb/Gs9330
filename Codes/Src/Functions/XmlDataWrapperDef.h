@@ -11,6 +11,39 @@ void NitXmlWrapper<Nit>::Start() const
 }
 
 template<typename Nit>
+void NitXmlWrapper<Nit>::AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* child) const
+{
+    if (xmlStrcmp(node->name, child) == 0)
+    {
+        for (xmlNodePtr cur = xmlFirstElementChild(node); 
+            cur != nullptr; 
+            cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            nit.AddDescriptor(tag, data.get(), strlen((const char*)data.get()));
+        }
+    }
+}
+
+template<typename Nit>
+void NitXmlWrapper<Nit>::AddTsDescriptor(Nit& nit, uint16_t tsId, uint16_t onId, 
+                                         xmlNodePtr& node, xmlChar* child) const
+{
+    if (xmlStrcmp(node->name, child) == 0)
+    {
+        for (xmlNodePtr cur = xmlFirstElementChild(node); 
+            cur != nullptr; 
+            cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            nit.AddTsDescriptor(tsId, onId, tag, data.get(), strlen((const char*)data.get()));
+        }
+    }
+}
+
+template<typename Nit>
 error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
 {
     error_code err;
@@ -49,9 +82,10 @@ error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
             tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
             onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
 
-            Nit::TransportStream& transportStream = nit.AddTransportStream(tsId, onId);
+            nit.AddTs(tsId, onId);
+            
             xmlNodePtr child = xmlFirstElementChild(node);
-            AddDescriptor(transportStream, child, (xmlChar*)"Descriptors");
+            AddTsDescriptor(nit, tsId, onId, child, (xmlChar*)"Descriptors");
         }
     }
 

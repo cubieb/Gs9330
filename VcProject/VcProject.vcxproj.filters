@@ -127,9 +127,6 @@
     <Text Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\XmlFiles\AddressListXml.xml">
-      <Filter>资源文件</Filter>
-    </Xml>
     <Xml Include="..\XmlFiles\BAT.xml">
       <Filter>资源文件</Filter>
     </Xml>
@@ -137,6 +134,9 @@
       <Filter>资源文件</Filter>
     </Xml>
     <Xml Include="..\XmlFiles\SDT.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\XmlFiles\Nit.UnitTest1.xml">
       <Filter>资源文件</Filter>
     </Xml>
   </ItemGroup>

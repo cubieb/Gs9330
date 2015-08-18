@@ -5,30 +5,26 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="CodesUnderTest">
       <UniqueIdentifier>{ffdd75c0-f6f4-4a7b-999e-52f17e5daf60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CodesUnderTest\头文件">
-      <UniqueIdentifier>{81c0a342-771b-429a-87a0-40d2ada1d086}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\头文件\Functions">
-      <UniqueIdentifier>{7e2ad1c6-47ff-4b7a-b8d3-22decc2401ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\头文件\Public">
-      <UniqueIdentifier>{98fc48ce-f622-4c45-add2-a0fbb0d9b2a1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CodesUnderTest\源文件">
-      <UniqueIdentifier>{f37db3ca-61db-40ee-8949-757c90f91338}</UniqueIdentifier>
+      <UniqueIdentifier>{ae68b15f-6f11-4afc-9d17-4e41b5e9ce28}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodesUnderTest\源文件\Functions">
-      <UniqueIdentifier>{899e9124-4456-44b7-9e85-61319850a5b4}</UniqueIdentifier>
+      <UniqueIdentifier>{1f69fe1f-6ba9-43ae-835d-dce136f2ca99}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodesUnderTest\源文件\Public">
-      <UniqueIdentifier>{ffdea008-2439-4db8-b35f-96aa8a203779}</UniqueIdentifier>
+      <UniqueIdentifier>{83d42c64-3666-4691-9b41-ed974ed29cbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件">
+      <UniqueIdentifier>{f95d4b1c-533d-4761-a75a-cf68e544c4ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件\Functions">
+      <UniqueIdentifier>{08044782-e2a2-4fc1-804b-bccec27a7842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodesUnderTest\头文件\Public">
+      <UniqueIdentifier>{d1fe0213-49eb-41d9-a5e2-38d5c4862a8b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -47,10 +43,19 @@
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
+    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Component.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\TransportStream.cpp">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
       <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Public\Common.cpp">
@@ -65,12 +70,6 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
       <Filter>CodesUnderTest\源文件\Public</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\SectionBase.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">
@@ -78,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\UnitTest.h">
       <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
+      <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Controller.h">
       <Filter>CodesUnderTest\头文件\Functions</Filter>
@@ -91,7 +93,19 @@
     <ClInclude Include="..\Codes\Include\Functions\Nit.h">
       <Filter>CodesUnderTest\头文件\Functions</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Component.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\TransportStream.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Ts.h">
+      <Filter>CodesUnderTest\头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Types.h">
       <Filter>CodesUnderTest\头文件\Functions</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
@@ -112,19 +126,5 @@
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
       <Filter>CodesUnderTest\头文件\Public</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\SectionBase.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\XmlFiles\AddressListXml.xml">
-      <Filter>资源文件</Filter>
-    </Xml>
   </ItemGroup>
 </Project>
