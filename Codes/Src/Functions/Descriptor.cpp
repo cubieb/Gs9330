@@ -43,6 +43,34 @@ void Descriptors::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
         errstrm << "cant create descriptor, tag = " << (uint_t)tag << endl;
 }
 
+void Descriptors::AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+{
+    Descriptor* ptr = new ServiceListDescriptor(serviceList);
+    shared_ptr<Descriptor> discripter(ptr);
+    if (discripter != nullptr)
+    {
+        AddComponent(discripter);
+    }
+    else
+        errstrm << "cant create descriptor, tag = " << (uint_t)0x41 << endl;
+}
+
+void Descriptors::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, 
+                                    uchar_t modulation, uint32_t symbolRate, 
+                                    uint32_t fecInner)
+{
+    Descriptor* ptr = new CableDeliverySystemDescriptor(frequency, fecOuter, 
+        modulation, symbolRate, fecInner);
+
+    shared_ptr<Descriptor> discripter(ptr);
+    if (discripter != nullptr)
+    {
+        AddComponent(discripter);
+    }
+    else
+        errstrm << "cant create descriptor, tag = " << (uint_t)0x41 << endl;
+}
+
 size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     return MyBase::MakeCodes(buffer, bufferSize);
@@ -59,10 +87,12 @@ void Descriptors::Put(std::ostream& os) const
 
 /**********************class DescriptorFactory**********************/
 DescriptorCreatorRgistration(NetworkNameDescriptor::Tag, NetworkNameDescriptor::CreateInstance);
-DescriptorCreatorRgistration(ServiceListDescriptor::Tag, ServiceListDescriptor::CreateInstance);
+DescriptorCreatorRgistration(ServiceListDescriptor::Tag, 
+                             (ServiceListDescriptor::Constructor1)ServiceListDescriptor::CreateInstance);
 DescriptorCreatorRgistration(StuffingDescriptor::Tag, StuffingDescriptor::CreateInstance);
 DescriptorCreatorRgistration(SatelliteDeliverySystemDescriptor::Tag, SatelliteDeliverySystemDescriptor::CreateInstance);
-DescriptorCreatorRgistration(CableDeliverySystemDescriptor::Tag, CableDeliverySystemDescriptor::CreateInstance);
+DescriptorCreatorRgistration(CableDeliverySystemDescriptor::Tag, 
+                             (CableDeliverySystemDescriptor::Constructor1)CableDeliverySystemDescriptor::CreateInstance);
 DescriptorCreatorRgistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83::CreateInstance);
 
 void DescriptorFactory::Register(uchar_t type, DescriptorCreator creator)

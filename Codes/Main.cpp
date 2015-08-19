@@ -15,28 +15,49 @@
 
 using namespace std;
 
+struct TsIdPara
+{
+    uint16_t tsId;
+    uint32_t freq;
+
+};
+
 int main(int argc, char **argv) 
 {
+    TsIdPara tsid[] = 
+    { 
+        {1,  0x03790000}, {51, 0x04190000}, {52, 0x04270000}, {53, 0x04350000}, {54, 0x04430000}, 
+        {55, 0x04510000}, {56, 0x04590000}, {57, 0x04740000}, {58, 0x04820000}, {59, 0x04980000}, 
+        {60, 0x05060000}, {61, 0x05140000}, {62, 0x02270000}
+    };
+    
+    Ts ts;
+    fstream file("D:/Temp/ActualAndOther.ts", ios_base::out  | ios::binary);
+
     Nit nit;
     
     nit.SetTableId(0x40);
     nit.SetNetworkId(1);
     nit.SetVersionNumber(0xc);
-    char *name = "Royal cable";
-    nit.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
+    char *netName = "辽宁北方广电网络";
+    nit.AddDescriptor(0x40, (uchar_t*)netName, strlen(netName)); 
 
-    shared_ptr<uchar_t> buffer;
-
-    std::cout << nit;
-
-    Ts ts;
-
+    for (auto iter: tsid)
+    {
+        nit.AddTs(iter.tsId, 0x1000);
+        nit.AddTsDescriptor0x44(iter.tsId, 0x1000, iter.freq, 2, 3, 0x68750, 0);
+    }
+    
     size_t size = ts.GetCodesSize(nit);
-    buffer.reset(new uchar_t[size], UcharDeleter());
-    size_t ret = ts.MakeCodes(nit, buffer.get(), size);
+    shared_ptr<uchar_t> bufferActual(new uchar_t[size], UcharDeleter());
+    ts.MakeCodes(nit, bufferActual.get(), size);
+    file.write((char*)bufferActual.get(), size); 
+    
+    nit.SetTableId(0x41);
+    size = ts.GetCodesSize(nit);
+    shared_ptr<uchar_t> bufferOther(new uchar_t[size], UcharDeleter());
+    ts.MakeCodes(nit, bufferOther.get(), size);
+    file.write((char*)bufferOther.get(), size); 
 
-    fstream file("D:/Temp/Temp.ts", ios_base::out  | ios::binary);
-    file.write((char*)buffer.get(), size); 
-   
     return 0;
 }

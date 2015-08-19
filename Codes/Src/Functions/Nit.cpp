@@ -52,6 +52,17 @@ void Nit::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
     descriptors->AddDescriptor(tag, data, dataSize);
 }
 
+void Nit::AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+{
+    descriptors->AddDescriptor0x41(serviceList);
+}
+
+void Nit::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                            uint32_t symbolRate, uint32_t fecInner)
+{
+    descriptors->AddDescriptor0x44(frequency, fecOuter, modulation, symbolRate, fecInner);
+}
+
 void Nit::AddTs(uint16_t tsId, uint16_t onId)
 {
     transportStreams->AddTransportStream(tsId, onId);
@@ -60,6 +71,19 @@ void Nit::AddTs(uint16_t tsId, uint16_t onId)
 void Nit::AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
     transportStreams->AddTsDescriptor(tsId, onId, tag, data, dataSize);
+}
+
+void Nit::AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+                              const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+{
+    transportStreams->AddTsDescriptor0x41(tsId, onId, serviceList);
+}
+
+void Nit::AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+                              uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                              uint32_t symbolRate, uint32_t fecInner)
+{
+    transportStreams->AddTsDescriptor0x44(tsId, onId, frequency, fecOuter, modulation, symbolRate, fecInner);
 }
 
 size_t Nit::GetCodesSize() const
@@ -99,7 +123,6 @@ size_t Nit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
-    assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);
 }
 

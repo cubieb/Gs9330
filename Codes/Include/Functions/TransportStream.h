@@ -13,8 +13,12 @@ public:
     TransportStream(uint16_t theTransportStreamId, uint16_t theOriginalNetworkId);
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-    uint16_t GetTsId() { return transportStreamId; }
-    uint16_t GetOnId() { return originalNetworkId; }
+    void AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
+    void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                           uint32_t symbolRate, uint32_t fecInner);
+
+    uint16_t GetTsId() const { return transportStreamId; }
+    uint16_t GetOnId() const { return originalNetworkId; }
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;    
@@ -28,6 +32,25 @@ private:
     std::shared_ptr<Descriptors> descriptors;
 };
 
+class EqualTs: std::unary_function<const std::shared_ptr<Component>&, bool>
+{
+public:
+    EqualTs(uint16_t tsId, uint16_t onId)
+        : transportStreamId(tsId), originalNetworkId(onId)
+    {}
+
+    result_type operator()(argument_type component)
+    {
+        TransportStream& ts = dynamic_cast<TransportStream&>(*component);
+        return (result_type)(ts.GetTsId() == transportStreamId && ts.GetOnId() == originalNetworkId);
+    }
+
+private:
+    uint16_t transportStreamId;
+    uint16_t originalNetworkId;
+};
+
+
 /**********************class TransportStreams**********************/
 class TransportStreams: public Components
 {    
@@ -38,6 +61,11 @@ public:
 
     void AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
     void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+                             const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
+    void AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+                             uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                             uint32_t symbolRate, uint32_t fecInner);
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;

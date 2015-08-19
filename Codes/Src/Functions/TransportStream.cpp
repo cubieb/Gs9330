@@ -24,6 +24,17 @@ size_t TransportStream::GetCodesSize() const
     return (descriptors->GetCodesSize() + 4);
 }
 
+void TransportStream::AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+{
+    descriptors->AddDescriptor0x41(serviceList);
+}
+
+void TransportStream::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                                        uint32_t symbolRate, uint32_t fecInner)
+{
+    descriptors->AddDescriptor0x44(frequency, fecOuter, modulation, symbolRate, fecInner);
+}
+
 size_t TransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
@@ -65,15 +76,26 @@ size_t TransportStreams::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
 void TransportStreams::AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
-    for (auto iter: components)
-    {        
-        TransportStream& ts = dynamic_cast<TransportStream&>(*iter);
-        if (ts.GetTsId() == tsId && ts.GetOnId() == onId)
-        {
-            ts.AddDescriptor(tag, data, dataSize);
-            break;
-        }
-    }
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
+    ts.AddDescriptor(tag, data, dataSize);
+}
+
+void TransportStreams::AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+                                           const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+{
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
+    ts.AddDescriptor0x41(serviceList);
+}
+
+void TransportStreams::AddTsDescriptor0x44(uint16_t tsId, uint16_t onId, 
+                                           uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                                           uint32_t symbolRate, uint32_t fecInner)
+{
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
+    ts.AddDescriptor0x44(frequency, fecOuter, modulation, symbolRate, fecInner);
 }
 
 void TransportStreams::Put(std::ostream& os) const

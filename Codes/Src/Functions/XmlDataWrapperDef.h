@@ -70,7 +70,7 @@ error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
     nit.SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
     nit.SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    nit.AddDescriptor(NetworkNameDescriptor::Tag, name.get(), strlen((const char*)name.get()) + 1);
+    nit.AddDescriptor(NetworkNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {

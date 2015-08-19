@@ -76,9 +76,18 @@ public:
     void SetLastSectionNumber(uchar_t data);
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
+    void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                           uint32_t symbolRate, uint32_t fecInner);
+
     //TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
     void AddTs(uint16_t tsId, uint16_t onId);
-    void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);    
+    void AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+                             const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
+    void AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+                             uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                             uint32_t symbolRate, uint32_t fecInner);
     
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;

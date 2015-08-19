@@ -6,8 +6,10 @@
 class UcharDescriptor: public Descriptor
 {
 public: 
-    UcharDescriptor(): data(nullptr), dataSize(0)
-    {}
+    UcharDescriptor(size_t theDataSize)
+        : data(new uchar_t[theDataSize+1], UcharDeleter()), dataSize(theDataSize)
+    {
+    }
 
     UcharDescriptor(uchar_t *theData, size_t theDataSize)
         : data(new uchar_t[theDataSize+1], UcharDeleter()), dataSize(theDataSize)
@@ -28,13 +30,8 @@ public:
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
-    void Reset(uchar_t *theData, size_t theDataSizeaSize)
-    {
-        data.reset(theData);
-        dataSize = theDataSizeaSize;
-    }
 
-private:
+protected:
     std::shared_ptr<uchar_t> data;
     size_t dataSize;
 };
@@ -62,25 +59,27 @@ class ServiceListDescriptor: public UcharDescriptor
 {
 public: 
     enum: uchar_t {Tag  = 0x41};
-    ServiceListDescriptor()
-    {};
+    typedef Descriptor*(*Constructor1)(uchar_t *, size_t);
+    typedef Descriptor*(*Constructor2)(const std::list<std::pair<uint16_t, uchar_t>>&);
 
     ServiceListDescriptor(uchar_t *theData, size_t theDataSize)
         : UcharDescriptor(theData, theDataSize)
     {}
 
-    void SetData(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+    ServiceListDescriptor(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+        : UcharDescriptor(3 * serviceList.size())
     {
-        size_t size = 3 * serviceList.size();
-        uchar_t *buffer = new uchar_t[size];
-
-        uchar_t *ptr = buffer;
+        uchar_t *ptr = data.get();
         for (auto iter: serviceList)
         {
             ptr = ptr + Write16(ptr, iter.first);
             ptr = ptr + Write8(ptr, iter.second);
         }
-        Reset(buffer, size);
+    }
+
+    static Descriptor* CreateInstance(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
+    {
+        return new ServiceListDescriptor(serviceList);
     }
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -130,25 +129,28 @@ class CableDeliverySystemDescriptor: public UcharDescriptor
 {
 public: 
     enum: uchar_t {Tag  = 0x44};
-    CableDeliverySystemDescriptor()
-    {}
+    typedef Descriptor*(*Constructor1)(uchar_t *, size_t);
+    typedef Descriptor*(*Constructor2)(uint32_t, uint16_t, uchar_t, uint32_t, uint32_t);
 
     CableDeliverySystemDescriptor(uchar_t *theData, size_t theDataSize)
         : UcharDescriptor(theData, theDataSize)
     {}
-
-    void SetData(uint32_t frequency, uint16_t fecOunter, uchar_t modulation,
+    
+    CableDeliverySystemDescriptor(uint32_t frequency, uint16_t fecOunter, uchar_t modulation,
                                   uint32_t symbolRate, uint32_t fecInner)
+        : UcharDescriptor(11)
     {
-        size_t size = 11;
-        uchar_t *buffer = new uchar_t[size];
-        uchar_t *ptr = buffer;
+        uchar_t *ptr = data.get();
         ptr = ptr + Write32(ptr, frequency);
         ptr = ptr + Write16(ptr, (Reserved12Bit << 4) | (fecOunter & 0xf));
         ptr = ptr + Write8(ptr, modulation);
         ptr = ptr + Write32(ptr, (symbolRate << 4) | fecInner);
+    }
 
-        Reset(buffer, size);
+    static Descriptor* CreateInstance(uint32_t frequency, uint16_t fecOunter, uchar_t modulation,
+                                      uint32_t symbolRate, uint32_t fecInner)
+    {
+        return new CableDeliverySystemDescriptor(frequency, fecOunter, modulation, symbolRate, fecInner);
     }
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -182,6 +184,10 @@ public:
     typedef Components MyBase;
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
+    void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
+                           uint32_t symbolRate, uint32_t fecInner);
+
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */
@@ -217,7 +223,6 @@ public:
         factory.Register(type, creator);
     }
 };
-
 
 #define DescriptorCreatorRgistration(type, creator)      \
     static AutoRegisterSuite  JoinName(descriptorCreator, __LINE__)(type, creator)
