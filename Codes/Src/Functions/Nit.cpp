@@ -68,22 +68,22 @@ void Nit::AddTs(uint16_t tsId, uint16_t onId)
     transportStreams->AddTransportStream(tsId, onId);
 }
 
-void Nit::AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize)
+void Nit::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
-    transportStreams->AddTsDescriptor(tsId, onId, tag, data, dataSize);
+    transportStreams->AddTsDescriptor(tsId, tag, data, dataSize);
 }
 
-void Nit::AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+void Nit::AddTsDescriptor0x41(uint16_t tsId,
                               const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
 {
-    transportStreams->AddTsDescriptor0x41(tsId, onId, serviceList);
+    transportStreams->AddTsDescriptor0x41(tsId, serviceList);
 }
 
-void Nit::AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+void Nit::AddTsDescriptor0x44(uint16_t tsId,
                               uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                               uint32_t symbolRate, uint32_t fecInner)
 {
-    transportStreams->AddTsDescriptor0x44(tsId, onId, frequency, fecOuter, modulation, symbolRate, fecInner);
+    transportStreams->AddTsDescriptor0x44(tsId, frequency, fecOuter, modulation, symbolRate, fecInner);
 }
 
 size_t Nit::GetCodesSize() const

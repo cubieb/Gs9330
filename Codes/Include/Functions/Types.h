@@ -2,12 +2,16 @@
 #define _Types_h_
 
 #define MaxNitSectionLength     1024
+#define MaxSdtSectionLength     1024
 
 #define NitSectionSyntaxIndicator  0x1
+#define SdtSectionSyntaxIndicator  0x1
 
 #define Reserved1Bit               0x1
 #define Reserved2Bit               0x3
 #define Reserved4Bit               0xF
+#define Reserved6Bit               0x2F
+#define Reserved8Bit               0xFF
 #define Reserved12Bit              0xFFF
 
 /*

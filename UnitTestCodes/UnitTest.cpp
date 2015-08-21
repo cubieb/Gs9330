@@ -94,16 +94,16 @@ void NitCase::TestMakeCodes()
     serviceList.push_back(make_pair(9, 1));    
     serviceList.push_back(make_pair(6, 2));
     serviceList.push_back(make_pair(7, 2));
-    nit.AddTsDescriptor0x41(tsId, onId, serviceList);
+    nit.AddTsDescriptor0x41(tsId, serviceList);
 
-    nit.AddTsDescriptor0x44(tsId, onId, 0x03060000, 0, 5, 0x68750, 0);
+    nit.AddTsDescriptor0x44(tsId, 0x03060000, 0, 5, 0x68750, 0);
     uchar_t descriptor083TsId1[] = 
     { 
         0x00, 0x01, 0x00, 0x04, 0x00, 0x02, 0x00, 0x07, 0x00, 0x03, 0x00, 0x06, 0x00, 0x04, 0x00, 0x01,
         0x00, 0x05, 0x00, 0x03, 0x00, 0x08, 0x00, 0x02, 0x00, 0x09, 0x00, 0x05, 0x00, 0x06, 0x01, 0xF4,
         0x00, 0x07, 0x01, 0xF5
     };
-    nit.AddTsDescriptor(tsId, onId, 0x83, descriptor083TsId1, 36); 
+    nit.AddTsDescriptor(tsId, 0x83, descriptor083TsId1, 36); 
 
     size_t size = nit.GetCodesSize();
     shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
@@ -158,7 +158,7 @@ void TsCase::TestMakeCodes()
     serviceList.push_back(make_pair(9, 1));    
     serviceList.push_back(make_pair(6, 2));
     serviceList.push_back(make_pair(7, 2));
-    nit.AddTsDescriptor0x41(tsId, onId, serviceList);
+    nit.AddTsDescriptor0x41(tsId, serviceList);
 
     nit.AddTsDescriptor0x44(tsId, onId, 0x03060000, 0, 5, 0x68750, 0);
     uchar_t descriptor083TsId1[] = 
@@ -167,7 +167,7 @@ void TsCase::TestMakeCodes()
         0x00, 0x05, 0x00, 0x03, 0x00, 0x08, 0x00, 0x02, 0x00, 0x09, 0x00, 0x05, 0x00, 0x06, 0x01, 0xF4,
         0x00, 0x07, 0x01, 0xF5
     };
-    nit.AddTsDescriptor(tsId, onId, 0x83, descriptor083TsId1, 36); 
+    nit.AddTsDescriptor(tsId, 0x83, descriptor083TsId1, 36); 
 
     std::cout << nit;
 

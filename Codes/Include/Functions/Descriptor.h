@@ -136,21 +136,21 @@ public:
         : UcharDescriptor(theData, theDataSize)
     {}
     
-    CableDeliverySystemDescriptor(uint32_t frequency, uint16_t fecOunter, uchar_t modulation,
+    CableDeliverySystemDescriptor(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                                   uint32_t symbolRate, uint32_t fecInner)
         : UcharDescriptor(11)
     {
         uchar_t *ptr = data.get();
         ptr = ptr + Write32(ptr, frequency);
-        ptr = ptr + Write16(ptr, (Reserved12Bit << 4) | (fecOunter & 0xf));
+        ptr = ptr + Write16(ptr, (Reserved12Bit << 4) | (fecOuter & 0xf));
         ptr = ptr + Write8(ptr, modulation);
         ptr = ptr + Write32(ptr, (symbolRate << 4) | fecInner);
     }
 
-    static Descriptor* CreateInstance(uint32_t frequency, uint16_t fecOunter, uchar_t modulation,
+    static Descriptor* CreateInstance(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                                       uint32_t symbolRate, uint32_t fecInner)
     {
-        return new CableDeliverySystemDescriptor(frequency, fecOunter, modulation, symbolRate, fecInner);
+        return new CableDeliverySystemDescriptor(frequency, fecOuter, modulation, symbolRate, fecInner);
     }
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -211,7 +211,7 @@ public:
 
 private:
     DescriptorFactory() { /* do nothing */ }
-    std::map<uchar_t, DescriptorCreator> creatorMap;
+    std::map<uchar_t, DescriptorCreator> creators;
 };
 
 class AutoRegisterSuite

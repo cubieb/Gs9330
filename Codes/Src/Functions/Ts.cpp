@@ -23,12 +23,9 @@ Segment::Segment(const Section& section, size_t segmentSize)
     {
         segments.push_back(ptr);
     }
-    
-    if ((tail) != 0)
-    {
-        ptr = segments.back();
-        memset(ptr + segmentSize - tail, 0xff, tail);
-    }
+
+    ptr = segments.back();
+    memset(ptr + segmentSize - tail, 0xff, tail);
 }
 
 Segment::iterator Segment::begin()
@@ -63,13 +60,8 @@ size_t Ts::GetCodesSize(const Section& section) const
 {
     size_t sectionSize = section.GetCodesSize() + 1;
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
-    size_t segmentNumber = sectionSize / segmentSize;
-
-    if ((sectionSize % segmentSize) != 0)
-    {
-        segmentNumber = segmentNumber + 1;
-    }
-
+    size_t segmentNumber = (sectionSize + segmentSize - 1) / segmentSize;
+    
     return (segmentNumber * TsPacketSize);
 }
 

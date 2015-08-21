@@ -97,13 +97,13 @@ DescriptorCreatorRgistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83
 
 void DescriptorFactory::Register(uchar_t type, DescriptorCreator creator)
 {
-    creatorMap.insert(make_pair(type, creator));
+    creators.insert(make_pair(type, creator));
 }
 
 Descriptor* DescriptorFactory::Create(uchar_t type, uchar_t *data, size_t dataSize)
 {
-    auto iter = creatorMap.find(type);
-    if (iter == creatorMap.end())
+    auto iter = creators.find(type);
+    if (iter == creators.end())
         return nullptr;
 
     return iter->second(data, dataSize);

@@ -74,26 +74,26 @@ size_t TransportStreams::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     return MyBase::MakeCodes(buffer, bufferSize);
 }
 
-void TransportStreams::AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize)
+void TransportStreams::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
-    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId));
     TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
     ts.AddDescriptor(tag, data, dataSize);
 }
 
-void TransportStreams::AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+void TransportStreams::AddTsDescriptor0x41(uint16_t tsId,
                                            const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
 {
-    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId));
     TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
     ts.AddDescriptor0x41(serviceList);
 }
 
-void TransportStreams::AddTsDescriptor0x44(uint16_t tsId, uint16_t onId, 
+void TransportStreams::AddTsDescriptor0x44(uint16_t tsId,
                                            uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                                            uint32_t symbolRate, uint32_t fecInner)
 {
-    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId, onId));
+    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId));
     TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
     ts.AddDescriptor0x44(frequency, fecOuter, modulation, symbolRate, fecInner);
 }

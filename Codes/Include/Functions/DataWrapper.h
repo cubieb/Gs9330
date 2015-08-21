@@ -17,7 +17,7 @@ public:
     virtual void Start() const = 0;
     virtual std::error_code FillNit(Nit& nit) const = 0;
 
-private:
+protected:
     Trigger trigger;
 };
 

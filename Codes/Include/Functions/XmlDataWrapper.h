@@ -75,25 +75,14 @@ public:
     {
     }
 
-    template<typename RetType>
-    RetType  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName) const;
-
-    template<>
-    uchar_t GetXmlAttrValue<uchar_t>(xmlNodePtr node, const xmlChar *attrName) const
+    template<typename T>
+    T  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName) const
     {
         SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         char *ptr = (char *)attrValue.get();
-        return (uchar_t)strtol(ptr, nullptr, 16);
+        return (T)strtol(ptr, nullptr, 16);
     }
-
-    template<>
-    uint16_t GetXmlAttrValue<uint16_t>(xmlNodePtr node, const xmlChar *attrName) const
-    {
-        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
-        char *ptr = (char *)attrValue.get();
-        return (uint16_t)strtol(ptr, nullptr, 16);
-    }
-
+    
     template<>
     SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName) const
     {
@@ -104,7 +93,7 @@ public:
     void Start() const;
 
     void AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Nit& nit, uint16_t tsId, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Nit& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
     std::error_code FillNit(Nit& nit) const;    
     
 private:

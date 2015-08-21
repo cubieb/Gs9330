@@ -143,4 +143,25 @@ public:
     }
 };
 
+/******************function ConvertChar2Asc******************/
+inline uchar_t ConvertChar2Asc(uchar_t input)
+{
+    if(input >= '0' && input <= '9')
+        return input - '0';
+    if(input >= 'A' && input <= 'F')
+        return input - 'A' + 10;
+    
+    assert(input >= 'a' && input <= 'f');
+    return input - 'a' + 10;
+}
+
+inline void ConvertStr2AscStr(const uchar_t* src, size_t size, uchar_t* dst)
+{
+    assert((size & 1) == 0);
+    for(const uchar_t *ptr = src; ptr < src + size; ptr = ptr + 2)
+    {
+        *(dst++) = (ConvertChar2Asc(*ptr) << 4) | ConvertChar2Asc(ptr[1]);
+    }
+}
+
 #endif

@@ -35,21 +35,19 @@ private:
 class EqualTs: std::unary_function<const std::shared_ptr<Component>&, bool>
 {
 public:
-    EqualTs(uint16_t tsId, uint16_t onId)
-        : transportStreamId(tsId), originalNetworkId(onId)
+    EqualTs(uint16_t tsId)
+        : transportStreamId(tsId)
     {}
 
     result_type operator()(argument_type component)
     {
         TransportStream& ts = dynamic_cast<TransportStream&>(*component);
-        return (result_type)(ts.GetTsId() == transportStreamId && ts.GetOnId() == originalNetworkId);
+        return (result_type)(ts.GetTsId() == transportStreamId);
     }
 
 private:
     uint16_t transportStreamId;
-    uint16_t originalNetworkId;
 };
-
 
 /**********************class TransportStreams**********************/
 class TransportStreams: public Components
@@ -60,10 +58,10 @@ public:
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     void AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
-    void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddTsDescriptor0x41(uint16_t tsId,
                              const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
-    void AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+    void AddTsDescriptor0x44(uint16_t tsId,
                              uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                              uint32_t symbolRate, uint32_t fecInner);
 

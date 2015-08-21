@@ -8,6 +8,7 @@ using namespace std;
 template<typename Nit>
 void NitXmlWrapper<Nit>::Start() const
 {
+    trigger(*this);
 }
 
 template<typename Nit>
@@ -27,7 +28,7 @@ void NitXmlWrapper<Nit>::AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* chil
 }
 
 template<typename Nit>
-void NitXmlWrapper<Nit>::AddTsDescriptor(Nit& nit, uint16_t tsId, uint16_t onId, 
+void NitXmlWrapper<Nit>::AddTsDescriptor(Nit& nit, uint16_t tsId,
                                          xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) == 0)
@@ -38,7 +39,11 @@ void NitXmlWrapper<Nit>::AddTsDescriptor(Nit& nit, uint16_t tsId, uint16_t onId,
         {
             uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
             SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-            nit.AddTsDescriptor(tsId, onId, tag, data.get(), strlen((const char*)data.get()));
+            size_t size = strlen((const char*)data.get());
+            shared_ptr<uchar_t> ascStr(new uchar_t[size/2]);
+            ConvertStr2AscStr(data.get(), size, ascStr.get());
+
+            nit.AddTsDescriptor(tsId, tag, ascStr.get(), size/2);
         }
     }
 }
@@ -78,14 +83,19 @@ error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
 
         if (xmlStrcmp(node->name, (xmlChar*)"Transportstream") == 0)
         {
-            uint16_t tsId, onId;
-            tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
-            onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
+            uint16_t tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
+            uint16_t onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
+            uint32_t freq = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Frequency");
+            uint16_t fecOuter = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"Fec_Outer");
+            uchar_t  modulation = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Modulation");            
+            uint32_t symbolRate = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Symbol_Rate");
+            uint32_t fecInner = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Fec_Inner");
 
             nit.AddTs(tsId, onId);
+            nit.AddTsDescriptor0x44(tsId, freq, fecOuter, modulation, symbolRate, fecInner);
             
             xmlNodePtr child = xmlFirstElementChild(node);
-            AddTsDescriptor(nit, tsId, onId, child, (xmlChar*)"Descriptors");
+            AddTsDescriptor(nit, tsId, child, (xmlChar*)"Descriptors");
         }
     }
 

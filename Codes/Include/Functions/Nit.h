@@ -63,6 +63,7 @@ class TransportStreams;
 class Nit: public Section
 {
 public:
+    /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0010};
     Nit();
     ~Nit() {}
@@ -82,10 +83,10 @@ public:
 
     //TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
     void AddTs(uint16_t tsId, uint16_t onId);
-    void AddTsDescriptor(uint16_t tsId, uint16_t onId, uchar_t tag, uchar_t* data, size_t dataSize);    
-    void AddTsDescriptor0x41(uint16_t tsId, uint16_t onId,
+    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);    
+    void AddTsDescriptor0x41(uint16_t tsId,
                              const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
-    void AddTsDescriptor0x44(uint16_t tsId, uint16_t onId,
+    void AddTsDescriptor0x44(uint16_t tsId,
                              uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                              uint32_t symbolRate, uint32_t fecInner);
     

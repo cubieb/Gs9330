@@ -45,11 +45,53 @@ struct service_description_section
 };
 #pragma pack(pop)
 
+/**********************class SdtService**********************/
+class SdtService: public Component
+{
+public:
+    SdtService(uint16_t serviceId, uchar_t eitScheduleFlag, 
+        uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
+        uint16_t freeCaMode);
+    
+    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
+    size_t GetCodesSize() const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;    
+    
+    /* the following function is provided just for debug */
+    void Put(std::ostream& os) const;
+
+private:
+    uint16_t serviceId; 
+    uchar_t  eitScheduleFlag;
+    uchar_t  eitPresentFollowingFlag; 
+    uint16_t runningStatus; 
+    uint16_t freeCaMode;
+    std::shared_ptr<Descriptors> descriptors;
+};
+
+/**********************class SdtServices**********************/
+class SdtServices: public Components
+{    
+public:
+    typedef Components MyBase;
+
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+
+    void AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag, 
+        uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
+        uint16_t freeCaMode);
+    void AddServiceDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);
+
+    /* the following function is provided just for debug */
+    void Put(std::ostream& os) const;
+};
+
 /**********************class Sdt**********************/
 /* 5.2.3 Service Description Table */
 class Sdt: public Section
 {
 public:
+    /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0011};
     Sdt();
     ~Sdt() {}
@@ -57,6 +99,14 @@ public:
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
+    void SetTsId(uint16_t data);
+    void SetVersionNumber(uchar_t data);
+    void SetSectionNumber(uchar_t data);
+    void SetLastSectionNumber(uchar_t data);
+    void SetOnId(uint16_t data);
+
+    void AddService(uint16_t serviceId, uchar_t eitScheduleFlag, 
+        uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t FreeCaMode);
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize);
@@ -67,7 +117,12 @@ public:
 private:
     uchar_t  tableId;
     uint16_t transportStreamId;
+    uchar_t  versionNumber;
+    uchar_t  sectionNumber;
+    uchar_t  lastSectionNumber;
     uint16_t originalNetworkId;
+
+    std::shared_ptr<SdtServices> services;
 };
 
 #endif
