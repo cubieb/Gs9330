@@ -64,11 +64,6 @@ void Descriptors::AddDescriptor0x48(uchar_t serviceType, uchar_t *providerName, 
     AddComponent(discripter);
 }
 
-size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
-{
-    return MyBase::MakeCodes(buffer, bufferSize);
-}
-
 void Descriptors::Put(std::ostream& os) const
 {
     ios::fmtflags flags = cout.flags( );

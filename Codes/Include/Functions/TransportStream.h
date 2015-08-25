@@ -55,8 +55,6 @@ class TransportStreams: public Components
 public:
     typedef Components MyBase;
 
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
-
     void AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
     void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);
     void AddTsDescriptor0x41(uint16_t tsId,

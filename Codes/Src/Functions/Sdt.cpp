@@ -48,8 +48,7 @@ size_t SdtService::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     
     ptr = ptr + Write16(ptr, serviceId);
     ptr = ptr + Write8(ptr, (Reserved6Bit << 2) | (eitScheduleFlag << 1) | eitPresentFollowingFlag);
-    descriptors->SetReserved4Bit((runningStatus << 1) | freeCaMode);
-    ptr = ptr + descriptors->MakeCodes(ptr, bufferSize - 3);
+    ptr = ptr + descriptors->MakeCodes(ptr, bufferSize - 3, (runningStatus << 1) | freeCaMode);
     
     assert(ptr - buffer == size);
     return (ptr - buffer);

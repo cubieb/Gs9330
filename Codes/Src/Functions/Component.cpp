@@ -46,6 +46,18 @@ size_t Components::GetCodesSize() const
 size_t Components::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;    
+    
+    ptr = ptr + MakeCodes(buffer, bufferSize, Reserved4Bit);
+
+    assert(ptr - buffer == GetCodesSize());
+    return (ptr - buffer);
+}
+
+//reserved4Bit: when encodes, there are offten "4 reserved bits + descriptors_loop_length"
+//followed by component.  We give users a chance to customize the reserved4Bit
+size_t Components::MakeCodes(uchar_t *buffer, size_t bufferSize, uchar_t reserved4Bit) const
+{
+    uchar_t *ptr = buffer;    
     assert(GetCodesSize() <= bufferSize);
 
     ptr = ptr + Write16(ptr, 0);
@@ -60,11 +72,6 @@ size_t Components::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
     assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);
-}
-
-void Components::SetReserved4Bit(uchar_t value)
-{
-    reserved4Bit = value;
 }
 
 void Components::Put(std::ostream& os) const

@@ -229,7 +229,6 @@ public:
     void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                            uint32_t symbolRate, uint32_t fecInner);
     void AddDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName);
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;

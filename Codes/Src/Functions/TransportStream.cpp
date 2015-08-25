@@ -63,11 +63,6 @@ void TransportStreams::AddTransportStream(uint16_t transportStreamId, uint16_t o
     AddComponent(ts);
 }
 
-size_t TransportStreams::MakeCodes(uchar_t *buffer, size_t bufferSize) const
-{
-    return MyBase::MakeCodes(buffer, bufferSize);
-}
-
 void TransportStreams::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
     auto iter = find_if(components.begin(), components.end(), EqualTs(tsId));

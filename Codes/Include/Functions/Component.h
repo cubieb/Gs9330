@@ -44,25 +44,19 @@ inline std::ostream& operator << (std::ostream& os, const Component& value)
 class Components: public Component
 {
 public:
-    Components(): reserved4Bit(Reserved4Bit) {}
+    Components(){}
     virtual ~Components() {}
 
     void AddComponent(const std::shared_ptr<Component>& component);
     size_t GetCodesSize() const;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
-
-    void SetReserved4Bit(uchar_t value);
+    virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize, uchar_t reserved4Bit) const;
 
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const;
 
 protected:
     std::list<std::shared_ptr<Component>> components;
-
-private:
-    //reserved4Bit: when encodes, there are offten "4 reserved bits + descriptors_loop_length"
-    //followed by component.  We give users a chance to customize the reserved4Bit
-    uchar_t reserved4Bit;
 };
 
 /**********************class Descriptor**********************/
