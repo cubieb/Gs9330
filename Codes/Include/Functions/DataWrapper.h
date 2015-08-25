@@ -1,21 +1,22 @@
 #ifndef _DataWrapper_h_
 #define _DataWrapper_h_
 
-template<typename Nit>
-class NitWrapper
+/**********************class DataWrapper**********************/
+template<typename Table>
+class DataWrapper
 {
 public:
-    typedef NitWrapper<Nit> MyType;
+    typedef DataWrapper<Table> MyType;
     typedef std::function<void(const MyType&)> Trigger;
 
-    NitWrapper(Trigger& theTrigger)
+    DataWrapper(Trigger& theTrigger)
         : trigger(theTrigger)
     {}
 
-    virtual ~NitWrapper() 
+    virtual ~DataWrapper() 
     {}
     virtual void Start() const = 0;
-    virtual std::error_code FillNit(Nit& nit) const = 0;
+    virtual std::error_code Fill(Table&) const = 0;
 
 protected:
     Trigger trigger;

@@ -5,7 +5,7 @@
 
 CxxBeginNameSpace(UnitTest)
 
-/**********************class XmlDataWrapperTestCase**********************/
+///**********************class XmlDataWrapperTestCase**********************/
 class XmlDataWrapperTestCase : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE(XmlDataWrapperTestCase);
@@ -21,21 +21,7 @@ protected:
     void TestFillNit();
 
 private:
-    void Trigger(const NitWrapper<Nit>& wrapper) const;
-};
-
-/**********************class CrcTestCase**********************/
-class CrcTestCase : public CPPUNIT_NS::TestFixture
-{
-    CPPUNIT_TEST_SUITE(CrcTestCase);
-    CPPUNIT_TEST(TestCrc32);
-    CPPUNIT_TEST_SUITE_END();
-
-public:
-    void setUp();
-
-protected:
-    void TestCrc32();
+    void Trigger(const DataWrapper<Nit>& wrapper) const;
 };
 
 /**********************class NitCase**********************/
@@ -66,7 +52,7 @@ protected:
     void TestMakeCodes();
 
 private:
-    void Trigger(const NitWrapper<Nit>& wrapper) const;
+    void Trigger(const DataWrapper<Nit>& wrapper) const;
 };
 
 

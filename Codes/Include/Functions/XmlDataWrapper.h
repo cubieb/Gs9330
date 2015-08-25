@@ -4,7 +4,10 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
+#include "SystemError.h"
+
 #include "DataWrapper.h"
+
 /*
 XmlDocDeleter, auxiliary class used by shared_ptr<xmlDoc>.  Example:
 {
@@ -62,17 +65,24 @@ public:
 
 typedef std::shared_ptr<xmlChar> SharedXmlChar;
 
-/**********************class NitXmlWrapper**********************/
-template<typename Nit>
-class NitXmlWrapper: public NitWrapper<Nit>
+/**********************class XmlDataWrapper**********************/
+template<typename Table>
+class XmlDataWrapper: public DataWrapper<Table>
 {
 public:
-    typedef NitWrapper<Nit> MyBase;
-    typedef NitXmlWrapper<Nit> MyType;    
+    typedef DataWrapper<Table> MyBase;
+    typedef XmlDataWrapper<Table> MyType;
 
-    NitXmlWrapper(Trigger& theTrigger, const std::string thXmlFileName)
-        : MyBase(theTrigger), xmlFileName(thXmlFileName)
+    XmlDataWrapper(Trigger& trigger, const std::string thXmlFileName)
+        : MyBase(trigger), xmlFileName(thXmlFileName)
+    {}
+
+    virtual ~XmlDataWrapper() 
+    {}    
+
+    void Start() const
     {
+        trigger(*this);
     }
 
     template<typename T>
@@ -80,7 +90,10 @@ public:
     {
         SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
         char *ptr = (char *)attrValue.get();
-        return (T)strtol(ptr, nullptr, 16);
+        if (ptr[0] == '0' && ptr[1] == 'x')
+            return (T)strtol(ptr, nullptr, 16);
+
+        return (T)strtol(ptr, nullptr, 10);
     }
     
     template<>
@@ -90,14 +103,45 @@ public:
         return attrValue;
     }
 
-    void Start() const;
+    virtual std::error_code Fill(Table&) const = 0;
 
-    void AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Nit& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
-    std::error_code FillNit(Nit& nit) const;    
-    
-private:
+protected:
     std::string xmlFileName;
+};
+
+/**********************class NitXmlWrapper**********************/
+template<typename Table>
+class NitXmlWrapper: public XmlDataWrapper<Table>
+{
+public:
+    typedef XmlDataWrapper<Table> MyBase;
+    typedef NitXmlWrapper<Table> MyType;    
+
+    NitXmlWrapper(Trigger& trigger, const std::string xmlFileName)
+        : MyBase(trigger, xmlFileName)
+    {
+    }
+
+    void AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Table& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
+    std::error_code Fill(Table& nit) const;
+};
+
+/**********************class SdtXmlWrapper**********************/
+template<typename Table>
+class SdtXmlWrapper: public XmlDataWrapper<Table>
+{
+public:
+    typedef XmlDataWrapper<Table> MyBase;
+    typedef SdtXmlWrapper<Table> MyType;    
+
+    SdtXmlWrapper(Trigger& trigger, const std::string xmlFileName)
+        : MyBase(trigger, xmlFileName)
+    {
+    }
+
+    void AddService(Table& sdt, xmlNodePtr& node, xmlChar* child) const;
+    std::error_code Fill(Table& sdt) const;
 };
 
 #endif

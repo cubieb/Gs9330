@@ -35,24 +35,14 @@ void Descriptors::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 {
     Descriptor* ptr = CreateDescriptor(tag, data, dataSize);
     shared_ptr<Descriptor> discripter(ptr);
-    if (discripter != nullptr)
-    {
-        AddComponent(discripter);
-    }
-    else
-        errstrm << "cant create descriptor, tag = " << (uint_t)tag << endl;
+    AddComponent(discripter);
 }
 
 void Descriptors::AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
 {
     Descriptor* ptr = new ServiceListDescriptor(serviceList);
     shared_ptr<Descriptor> discripter(ptr);
-    if (discripter != nullptr)
-    {
-        AddComponent(discripter);
-    }
-    else
-        errstrm << "cant create descriptor, tag = " << (uint_t)0x41 << endl;
+    AddComponent(discripter);
 }
 
 void Descriptors::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, 
@@ -63,12 +53,15 @@ void Descriptors::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter,
         modulation, symbolRate, fecInner);
 
     shared_ptr<Descriptor> discripter(ptr);
-    if (discripter != nullptr)
-    {
-        AddComponent(discripter);
-    }
-    else
-        errstrm << "cant create descriptor, tag = " << (uint_t)0x41 << endl;
+    AddComponent(discripter);
+}
+
+void Descriptors::AddDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+{
+    Descriptor* ptr = new ServiceDescriptor(serviceType, providerName, serviceName);
+
+    shared_ptr<Descriptor> discripter(ptr);
+    AddComponent(discripter);
 }
 
 size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
@@ -90,7 +83,8 @@ DescriptorCreatorRgistration(NetworkNameDescriptor::Tag, NetworkNameDescriptor::
 DescriptorCreatorRgistration(ServiceListDescriptor::Tag, 
                              (ServiceListDescriptor::Constructor1)ServiceListDescriptor::CreateInstance);
 DescriptorCreatorRgistration(StuffingDescriptor::Tag, StuffingDescriptor::CreateInstance);
-DescriptorCreatorRgistration(SatelliteDeliverySystemDescriptor::Tag, SatelliteDeliverySystemDescriptor::CreateInstance);
+DescriptorCreatorRgistration(SatelliteDeliverySystemDescriptor::Tag, 
+                             SatelliteDeliverySystemDescriptor::CreateInstance);
 DescriptorCreatorRgistration(CableDeliverySystemDescriptor::Tag, 
                              (CableDeliverySystemDescriptor::Constructor1)CableDeliverySystemDescriptor::CreateInstance);
 DescriptorCreatorRgistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83::CreateInstance);

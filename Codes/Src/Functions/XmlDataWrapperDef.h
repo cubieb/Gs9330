@@ -5,61 +5,60 @@
 
 using namespace std;
 
-template<typename Nit>
-void NitXmlWrapper<Nit>::Start() const
+/**********************class NitXmlWrapper**********************/
+template<typename Table>
+void NitXmlWrapper<Table>::AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const
 {
-    trigger(*this);
-}
-
-template<typename Nit>
-void NitXmlWrapper<Nit>::AddDescriptor(Nit& nit, xmlNodePtr& node, xmlChar* child) const
-{
-    if (xmlStrcmp(node->name, child) == 0)
+    if (xmlStrcmp(node->name, child) != 0)
     {
-        for (xmlNodePtr cur = xmlFirstElementChild(node); 
-            cur != nullptr; 
-            cur = xmlNextElementSibling(cur))
-        {
-            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-            SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-            nit.AddDescriptor(tag, data.get(), strlen((const char*)data.get()));
-        }
+        return;
     }
+
+    for (xmlNodePtr cur = xmlFirstElementChild(node); 
+        cur != nullptr; 
+        cur = xmlNextElementSibling(cur))
+    {
+        uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        nit.AddDescriptor(tag, data.get(), strlen((const char*)data.get()));
+    }   
 }
 
-template<typename Nit>
-void NitXmlWrapper<Nit>::AddTsDescriptor(Nit& nit, uint16_t tsId,
+template<typename Table>
+void NitXmlWrapper<Table>::AddTsDescriptor(Table& nit, uint16_t tsId,
                                          xmlNodePtr& node, xmlChar* child) const
 {
-    if (xmlStrcmp(node->name, child) == 0)
+    if (xmlStrcmp(node->name, child) != 0)
     {
-        for (xmlNodePtr cur = xmlFirstElementChild(node); 
-            cur != nullptr; 
-            cur = xmlNextElementSibling(cur))
-        {
-            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-            SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-            size_t size = strlen((const char*)data.get());
-            shared_ptr<uchar_t> ascStr(new uchar_t[size/2]);
-            ConvertStr2AscStr(data.get(), size, ascStr.get());
+        return;
+    }
 
-            nit.AddTsDescriptor(tsId, tag, ascStr.get(), size/2);
-        }
+    for (xmlNodePtr cur = xmlFirstElementChild(node); 
+        cur != nullptr; 
+        cur = xmlNextElementSibling(cur))
+    {
+        uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        size_t size = strlen((const char*)data.get());
+        shared_ptr<uchar_t> ascStr(new uchar_t[size/2]);
+        ConvertStr2AscStr(data.get(), size, ascStr.get());
+
+        nit.AddTsDescriptor(tsId, tag, ascStr.get(), size/2);
     }
 }
 
-template<typename Nit>
-error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
+template<typename Table>
+error_code NitXmlWrapper<Table>::Fill(Table& nit) const
 {
     error_code err;
 
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlFileName.c_str()), XmlDocDeleter());
     if (doc == nullptr)
-    {
-        err == system_error_t::file_not_exists;
+    { 
+        err = system_error_t::file_not_exists;
         return err;
     }
-
+     
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
     nit.SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
 
@@ -96,6 +95,75 @@ error_code NitXmlWrapper<Nit>::FillNit(Nit& nit) const
             
             xmlNodePtr child = xmlFirstElementChild(node);
             AddTsDescriptor(nit, tsId, child, (xmlChar*)"Descriptors");
+        }
+    }
+    xmlCleanupParser();
+    return err;
+}
+
+/**********************class SdtXmlWrapper**********************/
+template<typename Table>
+void SdtXmlWrapper<Table>::AddService(Table& sdt, xmlNodePtr& node, xmlChar* child) const
+{
+    if (xmlStrcmp(node->name, child) != 0)
+    {
+        return;
+    }
+
+    uint16_t serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
+    uchar_t  eitScheduleFlag = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"EIT_schedule_flag");
+    uchar_t  eitPresentFollowingFlag = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"EIT_present_following_flag");
+    uchar_t  runningStatus = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"running_status");
+    uchar_t  freeCaMode = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"free_CA_mode");
+    sdt.AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
+    
+    shared_ptr<xmlChar> serviceName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
+    shared_ptr<xmlChar> providerName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Provider_Name");
+    uchar_t type = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Type");
+    sdt.AddServiceDescriptor0x48(serviceId, type, providerName.get(), serviceName.get());
+
+    for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
+        cur != nullptr; 
+        cur = xmlNextElementSibling(cur))
+    {
+        uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        sdt.AddServiceDescriptor(serviceId, tag, data.get(), strlen((const char*)data.get()));
+    }
+}
+
+template<typename Table>
+error_code SdtXmlWrapper<Table>::Fill(Table& sdt) const
+{
+    error_code err;
+
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFileName.c_str()), XmlDocDeleter());
+    if (doc == nullptr)
+    {
+        err = system_error_t::file_not_exists;
+        return err;
+    }
+
+    xmlNodePtr node = xmlDocGetRootElement(doc.get());
+    sdt.SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+
+    shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+    assert(xpathCtx != nullptr);
+
+    xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
+    shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    
+    for (int i = 0; i < nodes->nodeNr; ++i)
+    {
+        node = nodes->nodeTab[i];
+        sdt.SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
+        sdt.SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
+        sdt.SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+
+        for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+        {
+            AddService(sdt, node, (xmlChar*)"Service");      
         }
     }
 

@@ -17,6 +17,12 @@ SdtService::SdtService(uint16_t serviceId, uchar_t eitScheduleFlag,
       eitPresentFollowingFlag(eitPresentFollowingFlag),
       runningStatus(runningStatus), freeCaMode(freeCaMode)
 {
+    descriptors.reset(new Descriptors);
+}
+
+uint16_t SdtService::GetServiceId()
+{
+    return serviceId;
 }
 
 void SdtService::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
@@ -24,22 +30,28 @@ void SdtService::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
     descriptors->AddDescriptor(tag, data, dataSize);
 }
 
+void SdtService::AddServiceDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+{
+    descriptors->AddDescriptor0x48(serviceType, providerName, serviceName);
+}
+
 size_t SdtService::GetCodesSize() const
 {
-    return (descriptors->GetCodesSize() + 5);
+    return (descriptors->GetCodesSize() + 3);
 }
 
 size_t SdtService::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
-    assert(GetCodesSize() <= bufferSize);
-
+    size_t size = GetCodesSize();
+    assert(size <= bufferSize);
+    
     ptr = ptr + Write16(ptr, serviceId);
     ptr = ptr + Write8(ptr, (Reserved6Bit << 2) | (eitScheduleFlag << 1) | eitPresentFollowingFlag);
-    ptr = ptr + Write16(ptr, (runningStatus << 13) | (freeCaMode << 12) | descriptors->GetCodesSize());
-
-    ptr = ptr + descriptors->MakeCodes(ptr, bufferSize);
-
+    descriptors->SetReserved4Bit((runningStatus << 1) | freeCaMode);
+    ptr = ptr + descriptors->MakeCodes(ptr, bufferSize - 3);
+    
+    assert(ptr - buffer == size);
     return (ptr - buffer);
 }
 
@@ -56,19 +68,54 @@ void SdtService::Put(std::ostream& os) const
 }
 
 /**********************class SdtServices**********************/
+size_t SdtServices::GetCodesSize() const
+{    
+    /* 2 bytes for reserved_future_use and transport_descriptors_length */
+    size_t size = 0;
+    for (const auto iter: components)
+    {
+        size = size + iter->GetCodesSize();
+    }
+        
+    return size; 
+}
+
 size_t SdtServices::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
-    return 0;
+    uchar_t *ptr = buffer;  
+    size_t size = GetCodesSize();
+    assert(size <= bufferSize);
+
+    for (const auto iter: components)
+    {
+        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
+    }
+    assert(ptr - buffer == size);
+    return (ptr - buffer);
 }
 
 void SdtServices::AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag, 
     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
     uint16_t freeCaMode)
 {
+    auto service = make_shared<SdtService>(serviceId, eitScheduleFlag,
+        eitPresentFollowingFlag, runningStatus, freeCaMode);
+    AddComponent(service);
 }
 
-void SdtServices::AddServiceDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
+void SdtServices::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
+    auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
+    SdtService& service = dynamic_cast<SdtService&>(**iter);
+    service.AddDescriptor(tag, data, dataSize);
+}
+
+void SdtServices::AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, 
+                                           uchar_t *providerName, uchar_t *serviceName)
+{
+    auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
+    SdtService& service = dynamic_cast<SdtService&>(**iter);
+    service.AddServiceDescriptor0x48(serviceType, providerName, serviceName);
 }
 
 void SdtServices::Put(std::ostream& os) const
@@ -90,6 +137,8 @@ uint16_t Sdt::GetPid() const
 
 void Sdt::SetTableId(uchar_t data)
 {
+    /* Table 2: Allocation of table_id values */
+    assert(data == 0x42 || data == 0x46);
     tableId = data;
 }
 
@@ -118,12 +167,30 @@ void Sdt::SetOnId(uint16_t data)
     originalNetworkId = data;
 }
 
-size_t Sdt::GetCodesSize() const
+void Sdt::AddService(uint16_t serviceId, uchar_t eitScheduleFlag, 
+                     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
+                     uint16_t freeCaMode)
 {
-    return 0;
+    services->AddSdtService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, 
+                            runningStatus, freeCaMode);
 }
 
-size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize)
+void Sdt::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize)
+{
+    services->AddServiceDescriptor(serviceId, tag, data, dataSize);
+}
+
+void Sdt::AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+{
+    services->AddServiceDescriptor0x48(serviceId, serviceType, providerName, serviceName);
+}
+
+size_t Sdt::GetCodesSize() const
+{
+    return services->GetCodesSize() + 15;
+}
+
+size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
     uint16_t ui16Value; 
@@ -142,10 +209,11 @@ size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize)
     ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
     ptr = ptr + Write8(ptr, Reserved8Bit);
 
-    ptr = ptr + services->MakeCodes(ptr, bufferSize);
+    ptr = ptr + services->MakeCodes(ptr, bufferSize - 15);
 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+    assert(ptr - buffer == size);
     return (ptr - buffer);
 }
 

@@ -59,14 +59,8 @@ void TransportStream::Put(std::ostream& os) const
 /**********************class TransportStreams**********************/
 void TransportStreams::AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId)
 {
-    shared_ptr<TransportStream> ts(new TransportStream(transportStreamId, originalNetworkId));
-    if (ts != nullptr)
-    {
-        AddComponent(ts);
-    }
-    else
-        errstrm << "cant create TransportStream, tsId = " << (uint_t)transportStreamId
-            << "onId = " << (uint_t)originalNetworkId << endl;
+    auto ts = make_shared<TransportStream>(transportStreamId, originalNetworkId);
+    AddComponent(ts);
 }
 
 size_t TransportStreams::MakeCodes(uchar_t *buffer, size_t bufferSize) const

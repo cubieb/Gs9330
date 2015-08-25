@@ -2,14 +2,17 @@
 #define _Controller_h_
 
 class Nit;
+class Sdt;
 class Ts;
-template<typename Nit> class NitWrapper;
+
+template<typename Table> class DataWrapper;
 
 class Controller
 {
 public:
     void Start() const;
-    void Trigger(const NitWrapper<Nit>&);
+    void NitTrigger(const DataWrapper<Nit>&);
+    void SdtTrigger(const DataWrapper<Sdt>&);
 
     static Controller& GetInstance()
     {
@@ -19,9 +22,12 @@ public:
 
 private:
     Controller();
-    std::fstream file;
-    std::shared_ptr<Ts> ts;
-    std::list<std::shared_ptr<NitWrapper<Nit>>> nitWrappers; 
+    std::fstream nitTsFile;
+    std::fstream sdtTsFile;
+    std::shared_ptr<Ts> nitTs;
+    std::shared_ptr<Ts> sdtTs;
+    std::list<std::shared_ptr<DataWrapper<Nit>>> nitWrappers; 
+    std::list<std::shared_ptr<DataWrapper<Sdt>>> sdtWrappers; 
 };
 
 #endif

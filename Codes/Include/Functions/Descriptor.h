@@ -123,7 +123,7 @@ public:
     uchar_t GetTag() const { return Tag; }
 };
 
-/**********************class cable_delivery_system_descriptor**********************/
+/**********************class CableDeliverySystemDescriptor**********************/
 /* cable_delivery_system_descriptor  */
 class CableDeliverySystemDescriptor: public UcharDescriptor
 {
@@ -160,6 +160,47 @@ public:
     uchar_t GetTag() const { return Tag; }
 };
 
+/**********************class ServiceDescriptor**********************/
+/* service_descriptor  */
+class ServiceDescriptor: public UcharDescriptor
+{
+public: 
+    enum: uchar_t {Tag  = 0x48};
+    typedef Descriptor*(*Constructor1)(uchar_t *, size_t);
+    typedef Descriptor*(*Constructor2)(uchar_t, uchar_t*, uchar_t*);
+
+    ServiceDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
+    {}
+    
+    ServiceDescriptor(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+        : UcharDescriptor(3 + strlen((char*)providerName) + strlen((char*)serviceName))
+    {
+        uchar_t *ptr = data.get();
+        ptr = ptr + Write8(ptr, serviceType);
+
+        size_t providerNameSize = strlen((char*)providerName);
+        size_t serviceNameSize  = strlen((char*)serviceName);
+
+        ptr = ptr + Write8(ptr, providerNameSize);
+        ptr = ptr + MemCopy(ptr, dataSize - 2, providerName, providerNameSize);
+                
+        ptr = ptr + Write8(ptr, serviceNameSize);
+        ptr = ptr + MemCopy(ptr, dataSize - 3 - providerNameSize, serviceName, serviceNameSize);
+    }
+
+    static Descriptor* CreateInstance(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+    {
+        return new ServiceDescriptor(serviceType, providerName, serviceName);
+    }
+
+    static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
+    {
+        return new ServiceDescriptor(data, dataSize);
+    }
+    uchar_t GetTag() const { return Tag; }
+};
+
 /**********************class UserdefinedDscriptor83**********************/
 /* user defined dscriptor  */
 class UserdefinedDscriptor83: public UcharDescriptor
@@ -187,7 +228,7 @@ public:
     void AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
     void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                            uint32_t symbolRate, uint32_t fecInner);
-
+    void AddDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName);
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */

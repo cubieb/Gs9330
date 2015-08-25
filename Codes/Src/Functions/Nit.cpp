@@ -23,6 +23,7 @@ uint16_t Nit::GetPid() const
 
 void Nit::SetTableId(uchar_t data)
 {
+    /* Table 2: Allocation of table_id values */
     assert(data == 0x40 || data == 0x41);
     tableId = data;
 }

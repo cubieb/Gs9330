@@ -22,26 +22,26 @@ struct service_description_section
     uint16_t transport_stream_id:     16;       //uimsbf  --
     uchar_t  reserved2:                2;       //bslbf
     uchar_t  version_number:           5;       //uimsbf
-    uchar_t  current_next_indicator:   1;       //bslbf
+    uchar_t  current_next_indicator:   1;       //bslbf   -
     uchar_t  section_number:           8;       //uimsbf  -
     uchar_t  last_section_number:      8;       //uimsbf  -
     uint16_t original_network_id:     16;       //uimsbf  --
     uchar_t  reserved_future_use2:     8;       //bslbf   -
     //for (i=0;i<N;i++)
     //{
-    //    service_id 16 uimsbf
+    //    service_id 16 uimsbf                     --
     //    reserved_future_use3 6 bslbf
     //    EIT_schedule_flag 1 bslbf
-    //    EIT_present_following_flag 1 bslbf
-    //    running_status 3 uimsbf
+    //    EIT_present_following_flag 1 bslbf       -
+    //    running_status 3 uimsbf 
     //    free_CA_mode 1 bslbf
-    //    descriptors_loop_length 12 uimsbf
+    //    descriptors_loop_length 12 uimsbf        --
     //    for (j=0;j<N;j++)
     //    {
     //        descriptor()
     //    }
     //}
-    uint32_t CRC_32:                  32;       //rpchof
+    uint32_t CRC_32:                  32;       //rpchof ----
 };
 #pragma pack(pop)
 
@@ -53,10 +53,14 @@ public:
         uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
         uint16_t freeCaMode);
     
+    uint16_t GetServiceId();
+
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddServiceDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName);
+
     size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;    
-    
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;   
+
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
 
@@ -69,18 +73,38 @@ private:
     std::shared_ptr<Descriptors> descriptors;
 };
 
+class EqualSdtService: std::unary_function<const std::shared_ptr<Component>&, bool>
+{
+public:
+    EqualSdtService(uint16_t serviceId)
+        : serviceId(serviceId)
+    {}
+
+    result_type operator()(argument_type component)
+    {
+        SdtService& service = dynamic_cast<SdtService&>(*component);
+        return (result_type)(service.GetServiceId() == serviceId);
+    }
+
+private:
+    uint16_t serviceId;
+};
+
 /**********************class SdtServices**********************/
 class SdtServices: public Components
 {    
 public:
     typedef Components MyBase;
 
+    size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     void AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag, 
         uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
         uint16_t freeCaMode);
-    void AddServiceDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, 
+                                  uchar_t *providerName, uchar_t *serviceName);
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
@@ -106,10 +130,13 @@ public:
     void SetOnId(uint16_t data);
 
     void AddService(uint16_t serviceId, uchar_t eitScheduleFlag, 
-        uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t FreeCaMode);
+        uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
+    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize);
+    void AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType,
+                                  uchar_t *providerName, uchar_t *serviceName);
 
     size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize);
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;

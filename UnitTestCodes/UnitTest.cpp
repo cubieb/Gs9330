@@ -21,7 +21,7 @@ void XmlDataWrapperTestCase::setUp()
 {
 } 
 
-void XmlDataWrapperTestCase::Trigger(const NitWrapper<Nit>& wrapper) const
+void XmlDataWrapperTestCase::Trigger(const DataWrapper<Nit>& wrapper) const
 {
     /* do nothing */
 }
@@ -35,9 +35,9 @@ void XmlDataWrapperTestCase::TestFillNit()
 {
     Nit nit1, nit2;
 
-    function<void(const NitWrapper<Nit>&)> trigger(bind(&XmlDataWrapperTestCase::Trigger, this, _1));
+    function<void(const DataWrapper<Nit>&)> trigger(bind(&XmlDataWrapperTestCase::Trigger, this, _1));
     NitXmlWrapper<Nit> nitWrapper(trigger, "../XmlFiles/Nit.UnitTest1.xml"); 
-    nitWrapper.FillNit(nit1);
+    nitWrapper.Fill(nit1);
 
     nit2.SetTableId(0x40);
     nit2.SetNetworkId(1);
@@ -45,19 +45,9 @@ void XmlDataWrapperTestCase::TestFillNit()
     char *name = "Chengdu Broadcast Television Network";
     nit2.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
     nit2.AddTs(5, 5);
+    nit2.AddTsDescriptor0x44(5, 0x38, 0x10, 0x2, 0x6, 0x10);
 
     CPPUNIT_ASSERT(nit1 == nit2);
-} 
-
-/**********************class CrcTestCase**********************/
-CPPUNIT_TEST_SUITE_REGISTRATION(CrcTestCase);
-void CrcTestCase::setUp()
-{
-}
-
-void CrcTestCase::TestCrc32()
-{
-    CPPUNIT_ASSERT(true);
 } 
 
 /**********************class NitCase**********************/
@@ -115,7 +105,7 @@ void NitCase::TestMakeCodes()
     CPPUNIT_ASSERT(nitCrc == 0xa711da84);
 } 
 
-/**********************class ControllerCase**********************/
+///**********************class ControllerCase**********************/
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
@@ -125,7 +115,7 @@ void TsCase::setUp()
 {
 }
 
-void TsCase::Trigger(const NitWrapper<Nit>& wrapper) const
+void TsCase::Trigger(const DataWrapper<Nit>& wrapper) const
 {
     /* do nothing */
 }
@@ -160,7 +150,7 @@ void TsCase::TestMakeCodes()
     serviceList.push_back(make_pair(7, 2));
     nit.AddTsDescriptor0x41(tsId, serviceList);
 
-    nit.AddTsDescriptor0x44(tsId, onId, 0x03060000, 0, 5, 0x68750, 0);
+    nit.AddTsDescriptor0x44(tsId, 0x03060000, 0, 5, 0x68750, 0);
     uchar_t descriptor083TsId1[] = 
     { 
         0x00, 0x01, 0x00, 0x04, 0x00, 0x02, 0x00, 0x07, 0x00, 0x03, 0x00, 0x06, 0x00, 0x04, 0x00, 0x01,

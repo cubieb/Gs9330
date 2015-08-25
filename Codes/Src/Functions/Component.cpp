@@ -55,10 +55,16 @@ size_t Components::MakeCodes(uchar_t *buffer, size_t bufferSize) const
         ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
         size = size + iter->GetCodesSize();
     }
-    uint16_t ui16Value = (Reserved4Bit << 12) | size;
+    uint16_t ui16Value = (reserved4Bit << 12) | size;
     Write16(buffer, ui16Value);
 
+    assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);
+}
+
+void Components::SetReserved4Bit(uchar_t value)
+{
+    reserved4Bit = value;
 }
 
 void Components::Put(std::ostream& os) const
