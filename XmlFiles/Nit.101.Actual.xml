@@ -1,43 +1,43 @@
 <?xml version = "1.0" encoding="gb2312"?>
 
 <Root TableType ="NIT"  TableID="0x40" >
-	<Network ID="0x65"  Name ="沈阳市网"  Version="0x0c" >
-		<Descriptors Sum="1">
+    <Network ID="0x65"  Name ="沈阳市网"  Version="0x0c" >
+        <Descriptors Sum="1">
             <!--<Item1 Tag="0x43" Data="000021"/> -->
-		</Descriptors>
+        </Descriptors>
         <!-- cable_delivery_system_descriptor {Frequency, Fec_Outer ...} -->
-		<Transportstream  TSID="1" ONID="0x65" Frequency = "0x0379000" Fec_Outer = "0x2"  
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
-			<Descriptors Sum="1">
+        <Transportstream  TSID="1" ONID="0x65" Frequency = "0x03790000" Fec_Outer = "0x2"  
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+            <Descriptors Sum="1">
                 <Item1 Tag="0x41" Data="000201000301000401000501000601001901006401"/>
             </Descriptors>
-		</Transportstream>
-        <Transportstream  TSID="51" ONID="0x65" Frequency = "0x0419000" Fec_Outer = "0x2"
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+        </Transportstream>
+        <Transportstream  TSID="51" ONID="0x65" Frequency = "0x04190000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
             <Descriptors Sum="1">
                 <Item1 Tag="0x41" Data="025901025a01025b01025c01025d01025e01025f01"/>
             </Descriptors>
         </Transportstream>
-        <Transportstream  TSID="52" ONID="0x65" Frequency = "0x0427000" Fec_Outer = "0x2"
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+        <Transportstream  TSID="52" ONID="0x65" Frequency = "0x04270000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
             <Descriptors Sum="0">
             </Descriptors>
         </Transportstream>
-        <Transportstream  TSID="53" ONID="0x65" Frequency = "0x0435000" Fec_Outer = "0x2"
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+        <Transportstream  TSID="53" ONID="0x65" Frequency = "0x04350000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
             <Descriptors Sum="0">
             </Descriptors>
         </Transportstream>
-        <Transportstream  TSID="54" ONID="0x65" Frequency = "0x0443000" Fec_Outer = "0x2"
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+        <Transportstream  TSID="54" ONID="0x65" Frequency = "0x04430000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
             <Descriptors Sum="0">
             </Descriptors>
         </Transportstream>
-        <Transportstream  TSID="55" ONID="0x65" Frequency = "0x0451000" Fec_Outer = "0x2"
-		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+        <Transportstream  TSID="55" ONID="0x65" Frequency = "0x04510000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
             <Descriptors Sum="0">
             </Descriptors>
         </Transportstream>        
-	</Network>
+    </Network>
 </Root>
 

@@ -6,7 +6,7 @@
             <!--<Item1 Tag="0x43" Data="000021"/> -->
 		</Descriptors>
         <!-- cable_delivery_system_descriptor {Frequency, Fec_Outer ...} -->
-		<Transportstream  TSID="1" ONID="0x66" Frequency = "0x0305000" Fec_Outer = "0x2"  
+		<Transportstream  TSID="70" ONID="0x66" Frequency = "0x03050000" Fec_Outer = "0x2"  
 		    Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
 			<Descriptors Sum="0">
                 <Item1 Tag="0x41" Data="03e90103ea0103eb01"/>

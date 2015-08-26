@@ -186,7 +186,7 @@ void Sdt::AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, ucha
 
 size_t Sdt::GetCodesSize() const
 {
-    return services->GetCodesSize() + 15;
+    return services->GetCodesSize() + sizeof(service_description_section);
 }
 
 size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize) const
@@ -208,7 +208,7 @@ size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
     ptr = ptr + Write8(ptr, Reserved8Bit);
 
-    ptr = ptr + services->MakeCodes(ptr, bufferSize - 15);
+    ptr = ptr + services->MakeCodes(ptr, bufferSize - sizeof(service_description_section));
 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));

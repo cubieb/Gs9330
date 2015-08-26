@@ -57,7 +57,6 @@ struct network_information_section
 class Descriptors;
 class TransportStreams;
 
-#include "TransportStream.h"
 /**********************class Nit**********************/
 /* 5.2.1 Network Information Table */
 class Nit: public Section
@@ -81,7 +80,6 @@ public:
     void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
                            uint32_t symbolRate, uint32_t fecInner);
 
-    //TransportStream& AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
     void AddTs(uint16_t tsId, uint16_t onId);
     void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);    
     void AddTsDescriptor0x41(uint16_t tsId,

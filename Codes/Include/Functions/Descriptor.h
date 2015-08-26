@@ -42,8 +42,8 @@ class NetworkNameDescriptor: public UcharDescriptor
 {
 public:
     enum: uchar_t {Tag  = 0x40};
-    NetworkNameDescriptor(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    NetworkNameDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -62,8 +62,8 @@ public:
     typedef Descriptor*(*Constructor1)(uchar_t *, size_t);
     typedef Descriptor*(*Constructor2)(const std::list<std::pair<uint16_t, uchar_t>>&);
 
-    ServiceListDescriptor(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    ServiceListDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
 
     ServiceListDescriptor(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
@@ -95,8 +95,8 @@ class StuffingDescriptor: public UcharDescriptor
 {
 public: 
     enum: uchar_t {Tag  = 0x42};
-    StuffingDescriptor(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    StuffingDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -112,8 +112,8 @@ class SatelliteDeliverySystemDescriptor: public UcharDescriptor
 {
 public: 
     enum: uchar_t {Tag  = 0x43};
-    SatelliteDeliverySystemDescriptor(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    SatelliteDeliverySystemDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
@@ -132,8 +132,8 @@ public:
     typedef Descriptor*(*Constructor1)(uchar_t *, size_t);
     typedef Descriptor*(*Constructor2)(uint32_t, uint16_t, uchar_t, uint32_t, uint32_t);
 
-    CableDeliverySystemDescriptor(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    CableDeliverySystemDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
     
     CableDeliverySystemDescriptor(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
@@ -201,14 +201,31 @@ public:
     uchar_t GetTag() const { return Tag; }
 };
 
+/**********************class NetworkNameDescriptor**********************/
+/* bouquet_name_descriptor */
+class BouquetNameDescriptor: public UcharDescriptor
+{
+public:
+    enum: uchar_t {Tag  = 0x47};
+    BouquetNameDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
+    {}
+
+    static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
+    {
+        return new BouquetNameDescriptor(data, dataSize);
+    }
+    uchar_t GetTag() const { return Tag; }
+};
+
 /**********************class UserdefinedDscriptor83**********************/
 /* user defined dscriptor  */
 class UserdefinedDscriptor83: public UcharDescriptor
 {
 public: 
     enum: uchar_t {Tag  = 0x83};
-    UserdefinedDscriptor83(uchar_t *theData, size_t theDataSize)
-        : UcharDescriptor(theData, theDataSize)
+    UserdefinedDscriptor83(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
     {}
 
     static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)

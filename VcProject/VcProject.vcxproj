@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Main.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
@@ -95,6 +96,7 @@
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Codes\Include\Functions\Bat.h" />
     <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />

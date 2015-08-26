@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Component.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="..\UnitTestCodes\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Codes\Include\Functions\Bat.h" />
     <ClInclude Include="..\Codes\Include\Functions\Component.h" />
     <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />

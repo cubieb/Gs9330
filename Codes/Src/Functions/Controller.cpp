@@ -5,6 +5,7 @@
 #include "Descriptor.h"
 #include "Nit.h"
 #include "Sdt.h"
+#include "Bat.h"
 #include "XmlDataWrapper.h"
 #include "Ts.h"
 #include "Controller.h"
@@ -17,10 +18,10 @@ using std::placeholders::_3;
 Controller::Controller()
     : nitTsFile("D:/Temp/ActualAndOther.ts", ios_base::out  | ios::binary), 
       sdtTsFile("D:/Temp/Sdt.ts", ios_base::out  | ios::binary), 
-      nitTs(new Ts), sdtTs(new Ts)
+      batTsFile("D:/Temp/Bat.ts", ios_base::out  | ios::binary), 
+      nitTs(new Ts), sdtTs(new Ts), batTs(new Ts)
 {
     function<void(const DataWrapper<Nit>&)> nitTrigger(bind(&Controller::NitTrigger, this, _1));
-
     DataWrapper<Nit> *nit;
     nit = new NitXmlWrapper<Nit>(nitTrigger, "../XmlFiles/Nit.101.Actual.xml");
     nitWrappers.push_back(shared_ptr<DataWrapper<Nit>>(nit));
@@ -32,10 +33,14 @@ Controller::Controller()
     nitWrappers.push_back(shared_ptr<DataWrapper<Nit>>(nit));
 
     function<void(const DataWrapper<Sdt>&)> sdtTrigger(bind(&Controller::SdtTrigger, this, _1));
-
     DataWrapper<Sdt> *sdt;
     sdt = new SdtXmlWrapper<Sdt>(sdtTrigger, "../XmlFiles/SDT.xml");
     sdtWrappers.push_back(shared_ptr<DataWrapper<Sdt>>(sdt));
+
+    function<void(const DataWrapper<Bat>&)> batTrigger(bind(&Controller::BatTrigger, this, _1));
+    DataWrapper<Bat> *bat;
+    bat = new BatXmlWrapper<Bat>(batTrigger, "../XmlFiles/BAT.xml");
+    batWrappers.push_back(shared_ptr<DataWrapper<Bat>>(bat));
 }
 
 void Controller::Start() const
@@ -46,6 +51,11 @@ void Controller::Start() const
     }
 
     for (auto iter: sdtWrappers)
+    {
+        iter->Start();
+    }
+
+    for (auto iter: batWrappers)
     {
         iter->Start();
     }
@@ -71,4 +81,15 @@ void Controller::SdtTrigger(const DataWrapper<Sdt>& wrapper)
     shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
     sdtTs->MakeCodes(sdt, buffer.get(), size);
     sdtTsFile.write((char*)buffer.get(), size); 
+}
+
+void Controller::BatTrigger(const DataWrapper<Bat>& wrapper)
+{
+    Bat bat;
+    wrapper.Fill(bat);
+        
+    size_t size = batTs->GetCodesSize(bat);
+    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
+    batTs->MakeCodes(bat, buffer.get(), size);
+    batTsFile.write((char*)buffer.get(), size); 
 }

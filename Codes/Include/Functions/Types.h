@@ -6,6 +6,7 @@
 
 #define NitSectionSyntaxIndicator  0x1
 #define SdtSectionSyntaxIndicator  0x1
+#define BatSectionSyntaxIndicator  0x1
 
 #define Reserved1Bit               0x1
 #define Reserved2Bit               0x3

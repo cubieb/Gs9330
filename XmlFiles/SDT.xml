@@ -2,12 +2,37 @@
 
  <Root TableType ="SDT"  TableID="0x46" >
     <Transportstream TSID="1" ONID="0x65" Version="0xc">
-		<Service ServiceID="2" Name = "CCTV-1 "  Provider_Name = "ChengDu Network" Type = "0x01" 
+        <Service ServiceID="2" Name = "CCTV-1 "  Provider_Name = "ChengDu Network" Type = "0x01" 
 		         EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
-			<Descriptors Sum="0">
-			</Descriptors>
-		</Service>
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
         <Service ServiceID="3" Name = "CCTV-2 " Provider_Name = "ChengDu Network" Type = "0x01"
+                 EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
+        <Service ServiceID="4" Name = "CCTV-3 " Provider_Name = "ChengDu Network" Type = "0x01"
+                 EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
+        <Service ServiceID="5" Name = "CCTV-4 " Provider_Name = "ChengDu Network" Type = "0x01"
+                 EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
+        <Service ServiceID="6" Name = "CCTV-5 " Provider_Name = "ChengDu Network" Type = "0x01"
+                 EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
+        <Service ServiceID="0x19" Name = "CCTV-6 " Provider_Name = "ChengDu Network" Type = "0x01"
+                 EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
+            <Descriptors Sum="0">
+            </Descriptors>
+        </Service>
+        <Service ServiceID="0x64" Name = "CCTV-7 " Provider_Name = "ChengDu Network" Type = "0x01"
                  EIT_schedule_flag="0" EIT_present_following_flag="1" running_status="4" free_CA_mode="0">
             <Descriptors Sum="0">
             </Descriptors>

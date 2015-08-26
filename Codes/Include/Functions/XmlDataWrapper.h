@@ -144,4 +144,25 @@ public:
     std::error_code Fill(Table& sdt) const;
 };
 
+/**********************class BatXmlWrapper**********************/
+template<typename Table>
+class BatXmlWrapper: public XmlDataWrapper<Table>
+{
+public:
+    typedef XmlDataWrapper<Table> MyBase;
+    typedef BatXmlWrapper<Table> MyType;    
+
+    BatXmlWrapper(Trigger& trigger, const std::string xmlFileName)
+        : MyBase(trigger, xmlFileName)
+    {
+    }
+
+    void AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Table& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor0x41(Table& bat, uint16_t tsId,
+                             xmlNodePtr& node, xmlChar* child) const;
+
+    std::error_code Fill(Table& nit) const;
+};
+
 #endif

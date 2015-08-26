@@ -44,8 +44,17 @@ void XmlDataWrapperTestCase::TestFillNit()
     nit2.SetVersionNumber(1);
     char *name = "Chengdu Broadcast Television Network";
     nit2.AddDescriptor(0x40, (uchar_t*)name, strlen(name)); 
-    nit2.AddTs(5, 5);
-    nit2.AddTsDescriptor0x44(5, 0x38, 0x10, 0x2, 0x6, 0x10);
+
+    uint16_t tsId = 0x1;
+    uint16_t onId = 0x65;
+    uint32_t freq = 0x04190000;
+    uint16_t fecOuter = 0x2;
+    uchar_t  modulation = 0x3;
+    uint32_t symbolRate = 0x68750;
+    uint32_t fecInner = 0x0;
+
+    nit2.AddTs(tsId, onId);
+    nit2.AddTsDescriptor0x44(tsId, freq, fecOuter, modulation, symbolRate, fecInner);
 
     CPPUNIT_ASSERT(nit1 == nit2);
 } 

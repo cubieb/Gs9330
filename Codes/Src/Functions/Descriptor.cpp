@@ -34,6 +34,7 @@ void UcharDescriptor::Put(std::ostream& os) const
 void Descriptors::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
 {
     Descriptor* ptr = CreateDescriptor(tag, data, dataSize);
+    assert(ptr != nullptr);
     shared_ptr<Descriptor> discripter(ptr);
     AddComponent(discripter);
 }
@@ -82,6 +83,7 @@ DescriptorCreatorRgistration(SatelliteDeliverySystemDescriptor::Tag,
                              SatelliteDeliverySystemDescriptor::CreateInstance);
 DescriptorCreatorRgistration(CableDeliverySystemDescriptor::Tag, 
                              (CableDeliverySystemDescriptor::Constructor1)CableDeliverySystemDescriptor::CreateInstance);
+DescriptorCreatorRgistration(BouquetNameDescriptor::Tag, BouquetNameDescriptor::CreateInstance);
 DescriptorCreatorRgistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83::CreateInstance);
 
 void DescriptorFactory::Register(uchar_t type, DescriptorCreator creator)

@@ -5,11 +5,11 @@
 		<Descriptors Sum="0">
 		</Descriptors>
         <!-- cable_delivery_system_descriptor {Frequency, Fec_Outer ...} -->
-		<Transportstream  TSID="5" ONID="5" Frequency = "56.23" Fec_Outer = "0x0010"  
-		    Modulation ="0x02" Symbol_Rate = "6.9" Fec_Inner = "0x0010" >
-			<Descriptors Sum="0">
+        <Transportstream  TSID="0x1" ONID="0x65" Frequency = "0x04190000" Fec_Outer = "0x2"
+            Modulation ="0x03" Symbol_Rate = "0x68750" Fec_Inner = "0x0" >
+            <Descriptors Sum="0">
             </Descriptors>
-		</Transportstream>
+        </Transportstream>
 	</Network>
 </Root>
 
