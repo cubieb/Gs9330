@@ -1,25 +1,29 @@
 #ifndef _DataWrapper_h_
 #define _DataWrapper_h_
 
+class Section;
+
 /**********************class DataWrapper**********************/
-template<typename Table>
 class DataWrapper
 {
 public:
-    typedef DataWrapper<Table> MyType;
-    typedef std::function<void(const MyType&)> Trigger;
+    typedef std::function<void(Section&, uint16_t)> DbInsertHandler;;
 
-    DataWrapper(Trigger& theTrigger)
-        : trigger(theTrigger)
+    DataWrapper(DbInsertHandler& handler)
+        : handler(handler)
     {}
 
     virtual ~DataWrapper() 
     {}
-    virtual void Start() const = 0;
-    virtual std::error_code Fill(Table&) const = 0;
+    virtual void Start() = 0;
 
-protected:
-    Trigger trigger;
+    void HandleDbInsert(Section& section, uint16_t sectionSn)
+    {
+        handler(section, sectionSn);
+    }
+
+private:
+    DbInsertHandler handler;
 };
 
 #endif

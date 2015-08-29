@@ -134,6 +134,11 @@ uint16_t Sdt::GetPid() const
     return Pid;
 }
 
+uint16_t Sdt::GetClassId() const
+{
+    return ClassId;
+}
+
 void Sdt::SetTableId(uchar_t data)
 {
     /* Table 2: Allocation of table_id values */
@@ -218,5 +223,13 @@ size_t Sdt::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
 void Sdt::Put(std::ostream& os) const
 {
-    os  << "tableId = " << (uint_t)tableId << endl ;
+    ios::fmtflags flags = cout.flags( );
+    os  << "table_id = " << showbase << hex <<(uint_t)tableId
+        << ", section_length = " << dec << (uint_t)GetCodesSize() - 3
+        << ", transport_stream_id = " << (uint_t)transportStreamId
+        << ", version_number = " << hex << (uint_t)versionNumber 
+        << endl ;
+    cout.flags(flags);
+
+    os << *services;
 }

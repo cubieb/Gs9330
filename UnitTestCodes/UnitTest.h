@@ -5,7 +5,8 @@
 
 CxxBeginNameSpace(UnitTest)
 
-///**********************class XmlDataWrapperTestCase**********************/
+#if 0
+/**********************class XmlDataWrapperTestCase**********************/
 class XmlDataWrapperTestCase : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE(XmlDataWrapperTestCase);
@@ -54,7 +55,7 @@ protected:
 private:
     void Trigger(const DataWrapper<Nit>& wrapper) const;
 };
-
+#endif
 
 CxxEndNameSpace
 #endif

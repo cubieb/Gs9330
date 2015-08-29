@@ -14,6 +14,7 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 
 CxxBeginNameSpace(UnitTest)
+#if 0
 
 /**********************class XmlDataWrapperTestCase**********************/
 CPPUNIT_TEST_SUITE_REGISTRATION( XmlDataWrapperTestCase );
@@ -180,5 +181,6 @@ void TsCase::TestMakeCodes()
     CPPUNIT_ASSERT(tsCrc == 0x77362314);
 } 
 
+#endif
 CxxEndNameSpace
 //EOF

@@ -141,10 +141,24 @@ public:
         : UcharDescriptor(11)
     {
         uchar_t *ptr = data.get();
-        ptr = ptr + Write32(ptr, frequency);
+        frequency = frequency * 1000 / 100; //KHz to Hz, Minimal accurace is 100 Hz
+        for (int i = 0; i < 4; i++)
+        {
+            ptr[3 - i] = ConvertValueToBcd(frequency % 100);
+            frequency = frequency / 100;
+        }
+        //ptr = ptr + Write32(ptr, frequency);
+        ptr = ptr + 4;
         ptr = ptr + Write16(ptr, (Reserved12Bit << 4) | (fecOuter & 0xf));
         ptr = ptr + Write8(ptr, modulation);
-        ptr = ptr + Write32(ptr, (symbolRate << 4) | fecInner);
+
+        symbolRate = symbolRate * 1000 / 10; //KHz to Hz, Minimal accurace is 10 Hz
+        for (int i = 0; i < 4; i++)
+        {
+            ptr[3 - i] = ConvertValueToBcd(symbolRate % 100);
+            symbolRate = symbolRate / 100;
+        }
+        ptr[3] = (ptr[3] & 0xf0) | fecInner;
     }
 
     static Descriptor* CreateInstance(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,

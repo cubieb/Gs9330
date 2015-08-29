@@ -63,11 +63,12 @@ class Nit: public Section
 {
 public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
-    enum: uint16_t {Pid = 0x0010};
+    enum: uint16_t {Pid = 0x0010, ClassId = NitClassId};
     Nit();
     ~Nit() {}
     
-    uint16_t GetPid()  const; 
+    uint16_t GetPid() const; 
+    uint16_t GetClassId() const; 
 
     void SetTableId(uchar_t data);
     void SetNetworkId(uint16_t data);

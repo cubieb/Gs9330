@@ -5,16 +5,55 @@ class Nit;
 class Sdt;
 class Bat;
 class Ts;
+class DataWrapper;
+struct Config;
 
-template<typename Table> class DataWrapper;
+#define InvalidSectionNumber -1
+
+//#define SendModeFile
+
+struct TsRuntimeInfo
+{
+    /* Section Serial Numbers is used to identify if two .xml should packed into
+       a single TS packet.
+     */
+    uint16_t sectionSn;
+
+    /* when debug, we packet ts into output .ts files. */
+    std::string tsOutPutFileNmae;
+    std::shared_ptr<Ts> tsInstance;    
+#if !defined(SendModeFile)
+    std::list<std::pair<std::shared_ptr<uchar_t>, size_t>> tsBinary; /* catch for ready ts binary */
+#endif
+
+    TsRuntimeInfo(uint16_t sectionSn, std::string tsOutPutFileNmae,  std::shared_ptr<Ts> tsInstance)
+        : sectionSn(sectionSn), 
+          tsOutPutFileNmae(tsOutPutFileNmae),
+          tsInstance(tsInstance) 
+    { }
+
+#if defined(SendModeFile)
+    TsRuntimeInfo(const TsRuntimeInfo& right)
+        : sectionSn(right.sectionSn), 
+          tsOutPutFileNmae(right.tsOutPutFileNmae),
+          tsInstance(right.tsInstance)
+    { }
+#else
+    TsRuntimeInfo(const TsRuntimeInfo& right)
+        : sectionSn(right.sectionSn), 
+          tsOutPutFileNmae(right.tsOutPutFileNmae),
+          tsInstance(right.tsInstance),
+          tsBinary(right.tsBinary)
+    { }
+#endif
+};
 
 class Controller
 {
 public:
-    void Start() const;
-    void NitTrigger(const DataWrapper<Nit>&);
-    void SdtTrigger(const DataWrapper<Sdt>&);
-    void BatTrigger(const DataWrapper<Bat>&);
+    typedef uint16_t SectionClassId;
+    void Start();
+    void HandleDbInsert(Section& section, uint16_t sectionSn);
 
     static Controller& GetInstance()
     {
@@ -24,15 +63,14 @@ public:
 
 private:
     Controller();
-    std::fstream nitTsFile;
-    std::fstream sdtTsFile;
-    std::fstream batTsFile;
-    std::shared_ptr<Ts> nitTs;
-    std::shared_ptr<Ts> sdtTs;
-    std::shared_ptr<Ts> batTs;
-    std::list<std::shared_ptr<DataWrapper<Nit>>> nitWrappers; 
-    std::list<std::shared_ptr<DataWrapper<Sdt>>> sdtWrappers; 
-    std::list<std::shared_ptr<DataWrapper<Bat>>> batWrappers; 
+    void SendUdp(int socketFd);
+    void ThreadMain();
+    std::thread myThread;
+    std::mutex  myMutext;
+
+    Config config;
+    std::map<SectionClassId, TsRuntimeInfo> tsInfors;
+    std::list<std::shared_ptr<DataWrapper>> wrappers;
 };
 
 #endif

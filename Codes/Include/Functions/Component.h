@@ -82,6 +82,7 @@ public:
     virtual ~Section() {}
 
     virtual uint16_t GetPid()  const = 0; 
+    virtual uint16_t GetClassId() const = 0; 
     
     virtual size_t GetCodesSize() const = 0;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
@@ -89,5 +90,10 @@ public:
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 };
+
+/**********************Class Id Definition**********************/
+#define NitClassId 1
+#define SdtClassId 2
+#define BatClassId 3
 
 #endif

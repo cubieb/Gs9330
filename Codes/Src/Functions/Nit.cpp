@@ -21,6 +21,11 @@ uint16_t Nit::GetPid() const
     return Pid;
 }
 
+uint16_t Nit::GetClassId() const
+{
+    return ClassId;
+}
+
 void Nit::SetTableId(uchar_t data)
 {
     /* Table 2: Allocation of table_id values */

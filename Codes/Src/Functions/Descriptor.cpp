@@ -5,6 +5,7 @@
 #include "Descriptor.h"
 
 using namespace std;
+
 /**********************class UcharDescriptor**********************/
 size_t UcharDescriptor::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {

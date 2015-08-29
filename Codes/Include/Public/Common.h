@@ -164,4 +164,9 @@ inline void ConvertStr2AscStr(const uchar_t* src, size_t size, uchar_t* dst)
     }
 }
 
+inline uchar_t ConvertValueToBcd(uchar_t value)
+{
+	return( ( ( value / 10 ) << 4 ) | ( value % 10 ) );				/* Convert Value to BCD */
+}
+
 #endif

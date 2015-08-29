@@ -6,6 +6,7 @@
 
 #include "SystemError.h"
 
+#include "DirMonitor.h"
 #include "DataWrapper.h"
 
 /*
@@ -65,104 +66,105 @@ public:
 
 typedef std::shared_ptr<xmlChar> SharedXmlChar;
 
+template<typename T>
+inline T  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName)
+{
+    SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+    char *ptr = (char *)attrValue.get();
+    if (ptr[0] == '0' && (ptr[1] == 'x' || ptr[1] == 'X'))
+        return (T)strtol(ptr, nullptr, 16);
+
+    return (T)strtol(ptr, nullptr, 10);
+}
+    
+template<>
+inline SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName)
+{
+    SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+    return attrValue;
+}   
+
 /**********************class XmlDataWrapper**********************/
-template<typename Table>
-class XmlDataWrapper: public DataWrapper<Table>
+template<typename Section>
+class XmlDataWrapper: public DataWrapper
 {
 public:
-    typedef DataWrapper<Table> MyBase;
-    typedef XmlDataWrapper<Table> MyType;
+    typedef DataWrapper MyBase;
+    typedef XmlDataWrapper<Section> MyType;
 
-    XmlDataWrapper(Trigger& trigger, const std::string thXmlFileName)
-        : MyBase(trigger), xmlFileName(thXmlFileName)
-    {}
+    XmlDataWrapper(DbInsertHandler& handler, const char *xmlFileDir, const char *xmlFileMatch);
+    virtual ~XmlDataWrapper();
 
-    virtual ~XmlDataWrapper() 
-    {}    
+    void Start();
+    void FileIoCompletionRoutine(const char *file);
 
-    void Start() const
-    {
-        trigger(*this);
-    }
-
-    template<typename T>
-    T  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName) const
-    {
-        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
-        char *ptr = (char *)attrValue.get();
-        if (ptr[0] == '0' && ptr[1] == 'x')
-            return (T)strtol(ptr, nullptr, 16);
-
-        return (T)strtol(ptr, nullptr, 10);
-    }
-    
-    template<>
-    SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName) const
-    {
-        SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
-        return attrValue;
-    }
-
-    virtual std::error_code Fill(Table&) const = 0;
+    virtual std::shared_ptr<Section> CreateSection(const char* xmlPath) const = 0;
 
 protected:
-    std::string xmlFileName;
+    std::string xmlFileDir;
+    std::string xmlFileRegularExp;
+    DirMonitor dirMonitor;
 };
 
 /**********************class NitXmlWrapper**********************/
-template<typename Table>
-class NitXmlWrapper: public XmlDataWrapper<Table>
+template<typename Section>
+class NitXmlWrapper: public XmlDataWrapper<Section>
 {
 public:
-    typedef XmlDataWrapper<Table> MyBase;
-    typedef NitXmlWrapper<Table> MyType;    
+    typedef XmlDataWrapper<Section> MyBase;
+    typedef NitXmlWrapper<Section> MyType;    
 
-    NitXmlWrapper(Trigger& trigger, const std::string xmlFileName)
-        : MyBase(trigger, xmlFileName)
+    NitXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
+        : MyBase(handler, xmlFileDir, ".*nit.*\\.xml")
     {
     }
 
-    void AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Table& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
-    std::error_code Fill(Table& nit) const;
+    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+
+private:
+    void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;    
 };
 
 /**********************class SdtXmlWrapper**********************/
-template<typename Table>
-class SdtXmlWrapper: public XmlDataWrapper<Table>
+template<typename Section>
+class SdtXmlWrapper: public XmlDataWrapper<Section>
 {
 public:
-    typedef XmlDataWrapper<Table> MyBase;
-    typedef SdtXmlWrapper<Table> MyType;    
+    typedef XmlDataWrapper<Section> MyBase;
+    typedef SdtXmlWrapper<Section> MyType;    
 
-    SdtXmlWrapper(Trigger& trigger, const std::string xmlFileName)
-        : MyBase(trigger, xmlFileName)
+    SdtXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
+        : MyBase(handler, xmlFileDir, ".*sdt.*\\.xml")
     {
     }
 
-    void AddService(Table& sdt, xmlNodePtr& node, xmlChar* child) const;
-    std::error_code Fill(Table& sdt) const;
+    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+
+private:
+    void AddService(Section& sdt, xmlNodePtr& node, xmlChar* child) const;
 };
 
 /**********************class BatXmlWrapper**********************/
-template<typename Table>
-class BatXmlWrapper: public XmlDataWrapper<Table>
+template<typename Section>
+class BatXmlWrapper: public XmlDataWrapper<Section>
 {
 public:
-    typedef XmlDataWrapper<Table> MyBase;
-    typedef BatXmlWrapper<Table> MyType;    
+    typedef XmlDataWrapper<Section> MyBase;
+    typedef BatXmlWrapper<Section> MyType;    
 
-    BatXmlWrapper(Trigger& trigger, const std::string xmlFileName)
-        : MyBase(trigger, xmlFileName)
+    BatXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
+        : MyBase(handler, xmlFileDir, ".*bat.*\\.xml")
     {
     }
 
-    void AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Table& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor0x41(Table& bat, uint16_t tsId,
-                             xmlNodePtr& node, xmlChar* child) const;
+    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
 
-    std::error_code Fill(Table& nit) const;
+private:
+    void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
+    void AddTsDescriptor0x41(Section& bat, uint16_t tsId,
+                             xmlNodePtr& node, xmlChar* child) const;
 };
 
 #endif

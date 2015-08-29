@@ -8,6 +8,7 @@
 #include "Bat.h"
 #include "XmlDataWrapper.h"
 #include "Ts.h"
+#include "Gs9330Config.h"
 #include "Controller.h"
 
 using namespace std;
@@ -16,80 +17,137 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 
 Controller::Controller()
-    : nitTsFile("D:/Temp/ActualAndOther.ts", ios_base::out  | ios::binary), 
-      sdtTsFile("D:/Temp/Sdt.ts", ios_base::out  | ios::binary), 
-      batTsFile("D:/Temp/Bat.ts", ios_base::out  | ios::binary), 
-      nitTs(new Ts), sdtTs(new Ts), batTs(new Ts)
 {
-    function<void(const DataWrapper<Nit>&)> nitTrigger(bind(&Controller::NitTrigger, this, _1));
-    DataWrapper<Nit> *nit;
-    nit = new NitXmlWrapper<Nit>(nitTrigger, "../XmlFiles/Nit.101.Actual.xml");
-    nitWrappers.push_back(shared_ptr<DataWrapper<Nit>>(nit));
+    ConfigDataWrapper wrapper;
+    wrapper.ReadConfig(config);
 
-    nit = new NitXmlWrapper<Nit>(nitTrigger, "../XmlFiles/Nit.101.Other.xml");
-    nitWrappers.push_back(shared_ptr<DataWrapper<Nit>>(nit));
+    function<void(Section&, uint16_t)> handler(bind(&Controller::HandleDbInsert, this, _1, _2));
 
-    nit = new NitXmlWrapper<Nit>(nitTrigger, "../XmlFiles/Nit.102.Other.xml");
-    nitWrappers.push_back(shared_ptr<DataWrapper<Nit>>(nit));
+    auto nitTs = make_shared<Ts>();
+    tsInfors.insert(make_pair(Nit::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Nit.ts", nitTs)));
+    wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(handler, config.xmlDir.c_str()));
 
-    function<void(const DataWrapper<Sdt>&)> sdtTrigger(bind(&Controller::SdtTrigger, this, _1));
-    DataWrapper<Sdt> *sdt;
-    sdt = new SdtXmlWrapper<Sdt>(sdtTrigger, "../XmlFiles/SDT.xml");
-    sdtWrappers.push_back(shared_ptr<DataWrapper<Sdt>>(sdt));
+    auto sdtTs = make_shared<Ts>();
+    tsInfors.insert(make_pair(Sdt::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Sdt.ts", sdtTs)));
+    wrappers.push_back(make_shared<SdtXmlWrapper<Sdt>>(handler, config.xmlDir.c_str()));
 
-    function<void(const DataWrapper<Bat>&)> batTrigger(bind(&Controller::BatTrigger, this, _1));
-    DataWrapper<Bat> *bat;
-    bat = new BatXmlWrapper<Bat>(batTrigger, "../XmlFiles/BAT.xml");
-    batWrappers.push_back(shared_ptr<DataWrapper<Bat>>(bat));
+    auto batTs = make_shared<Ts>();
+    tsInfors.insert(make_pair(Bat::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Bat.ts", batTs)));
+    wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(handler, config.xmlDir.c_str()));
 }
 
-void Controller::Start() const
+void Controller::Start()
 {
-    for (auto iter: nitWrappers)
+    for (auto iter: wrappers)
     {
         iter->Start();
     }
 
-    for (auto iter: sdtWrappers)
+    myThread = std::thread(bind(&Controller::ThreadMain, this));
+}
+
+void Controller::HandleDbInsert(Section& section, uint16_t sectionSn)
+{
+    uint16_t classId= section.GetClassId();
+    auto iter = tsInfors.find(classId);
+    auto tsFileName = iter->second.tsOutPutFileNmae;
+    auto ts = iter->second.tsInstance;
+
+#if !defined(SendModeFile)
     {
-        iter->Start();
+        lock_guard<mutex> lock(myMutext);
+        if (sectionSn != iter->second.sectionSn && iter->second.tsBinary.size() != 0)
+        {        
+            iter->second.tsBinary.clear();
+        }
     }
+#endif
 
-    for (auto iter: batWrappers)
+    size_t size = ts->GetCodesSize(section);
+    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
+    ts->MakeCodes(section, buffer.get(), size);    
+
+#if defined(_DEBUG)
+    /* write data to Ts file */
+    ios_base::openmode mode;
+    if (sectionSn == iter->second.sectionSn)
     {
-        iter->Start();
+        mode = ios_base::app  | ios::binary;
+    }
+    else
+    {
+        mode = ios_base::out  | ios::binary;
+    }
+    fstream tsFile(tsFileName, mode);
+    tsFile.write((char*)buffer.get(), size); 
+    tsFile.close();
+#endif
+
+#if !defined(SendModeFile)
+    {
+        lock_guard<mutex> lock(myMutext);
+        iter->second.tsBinary.push_back(make_pair(buffer, size)); 
+    }
+#endif
+    iter->second.sectionSn = sectionSn;
+}
+
+void Controller::SendUdp(int socketFd)
+{
+    struct sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(config.tsDstPort);
+    serverAddr.sin_addr.s_addr = config.tsDstIp;
+
+    for (auto iter: tsInfors)
+    {
+#if defined(SendModeFile)
+        auto tsFileName = iter.second.tsOutPutFileNmae;
+        fstream tsFile(tsFileName, ios_base::in  | ios::binary);
+
+        tsFile.seekg (0, tsFile.end);
+        int length = (int)tsFile.tellg();
+        tsFile.seekg (0, tsFile.beg);
+
+        shared_ptr<uchar_t> buffer(new uchar_t[length], UcharDeleter());
+        tsFile.read((char*)buffer.get(), length); 
+        tsFile.close();
+#else
+        int length = 0;
+        shared_ptr<uchar_t> buffer;
+        {
+            lock_guard<mutex> lock(myMutext);
+            for (auto buffer: iter.second.tsBinary)
+            {
+                length = length + buffer.second;
+            }
+            buffer.reset(new uchar_t[length], UcharDeleter());
+            uchar_t *ptr = buffer.get();
+            for (auto buffer: iter.second.tsBinary)
+            {
+                memcpy(ptr, buffer.first.get(), buffer.second);
+                ptr = ptr +  buffer.second;
+            }
+        }
+#endif
+        int pktNumber = (length + 1459) / 1460;
+        for (int i = 0; i < pktNumber; ++i)
+        {
+            int udpSize = min(length - 1460 * i, 1460);
+            sendto(socketFd, (char*)buffer.get() + 1460 * i, (int)udpSize, 0, 
+                  (SOCKADDR *)&serverAddr, 
+                  sizeof(struct sockaddr_in));
+        }
     }
 }
 
-void Controller::NitTrigger(const DataWrapper<Nit>& wrapper)
+void Controller::ThreadMain()
 {
-    Nit nit;
-    wrapper.Fill(nit);
-        
-    size_t size = nitTs->GetCodesSize(nit);
-    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-    nitTs->MakeCodes(nit, buffer.get(), size);
-    nitTsFile.write((char*)buffer.get(), size); 
-}
-
-void Controller::SdtTrigger(const DataWrapper<Sdt>& wrapper)
-{
-    Sdt sdt;
-    wrapper.Fill(sdt);
-        
-    size_t size = sdtTs->GetCodesSize(sdt);
-    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-    sdtTs->MakeCodes(sdt, buffer.get(), size);
-    sdtTsFile.write((char*)buffer.get(), size); 
-}
-
-void Controller::BatTrigger(const DataWrapper<Bat>& wrapper)
-{
-    Bat bat;
-    wrapper.Fill(bat);
-        
-    size_t size = batTs->GetCodesSize(bat);
-    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-    batTs->MakeCodes(bat, buffer.get(), size);
-    batTsFile.write((char*)buffer.get(), size); 
+    int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    while (true)
+    {
+        SendUdp(socketFd);
+        Sleep(config.tsInterval);
+    }
+    closesocket(socketFd);
 }

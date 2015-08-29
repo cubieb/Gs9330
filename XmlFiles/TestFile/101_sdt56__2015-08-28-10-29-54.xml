@@ -1,0 +1,24 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="SDT" TableID="0x46">
+	<Transportstream TSID="56" ONID="101" Version="1">
+		<Service ServiceID="45" Name="安徽卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="46" Name="江苏卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="47" Name="黑龙江卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="48" Name="山东卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="49" Name="吉林卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="50" Name="天津卫视" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+	</Transportstream>
+</Root>
+

@@ -11,7 +11,7 @@ Segment::Segment(const Section& section, size_t segmentSize)
 {
     /* refer to <ISO/IEC 13818-1> "pointer_field" */    
     size_t size = section.GetCodesSize() + 1;           /* 1 bytes for pointer_field and */
-    size_t tail = segmentSize - (size % segmentSize);
+    size_t tail = (segmentSize - (size % segmentSize)) % segmentSize;
     size = size + tail; /* size must be times of segmentSize */
     buffer.reset(new uchar_t[size], UcharDeleter());
 
@@ -87,7 +87,7 @@ size_t Ts::MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize)
 		   continuity_counter[4] = 'xxxx';
 		*/
         ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
-        ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);
+        ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);        
     }
 
     return (ptr - buffer);

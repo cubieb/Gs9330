@@ -84,6 +84,8 @@
     <ClCompile Include="..\Codes\Src\Functions\Bat.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\DirMonitor.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Component.cpp" />
@@ -97,9 +99,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Include\Functions\Bat.h" />
+    <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h" />
     <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />
+    <ClInclude Include="..\Codes\Include\Functions\DirMonitor.h" />
     <ClInclude Include="..\Codes\Include\Functions\Nit.h" />
     <ClInclude Include="..\Codes\Include\Functions\Sdt.h" />
     <ClInclude Include="..\Codes\Include\Functions\Component.h" />
@@ -119,6 +123,7 @@
     <Text Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Configuration\Gs9330SoapClient.xml" />
     <Xml Include="..\XmlFiles\BAT.xml" />
     <Xml Include="..\XmlFiles\Nit.101.Actual.xml" />
     <Xml Include="..\XmlFiles\Nit.101.Other.xml" />
@@ -127,9 +132,6 @@
     <Xml Include="..\XmlFiles\SDT.xml">
       <SubType>Designer</SubType>
     </Xml>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\XmlFiles\SI各个表对应的XML格式.doc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

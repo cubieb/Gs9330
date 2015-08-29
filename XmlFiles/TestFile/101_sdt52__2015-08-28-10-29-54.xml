@@ -1,0 +1,24 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="SDT" TableID="0x46">
+	<Transportstream TSID="52" ONID="101" Version="1">
+		<Service ServiceID="17" Name="CCTV3" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="18" Name="CCTV5" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="19" Name="CCTV6" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="20" Name="CCTV8" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="21" Name="CCTV少儿" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="22" Name="CCTV新闻" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+	</Transportstream>
+</Root>
+

@@ -1,13 +1,64 @@
 #ifndef _XmlDataWrapperDef_h_
 #define _XmlDataWrapperDef_h_
 
+#include <regex>
+#include "DirMonitor.h"
 #include "XmlDataWrapper.h"
 
 using namespace std;
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
+
+/**********************class XmlDataWrapper**********************/
+template<typename Section>
+XmlDataWrapper<Section>::XmlDataWrapper(DbInsertHandler& handler, const char *xmlFileDir, const char *xmlFileRegularExp)
+    : MyBase(handler), xmlFileDir(xmlFileDir), xmlFileRegularExp(xmlFileRegularExp),
+      dirMonitor(xmlFileDir, bind(&XmlDataWrapper::FileIoCompletionRoutine, this, _1))
+{}
+
+template<typename Section>
+XmlDataWrapper<Section>::~XmlDataWrapper() 
+{}   
+
+template<typename Section>
+void XmlDataWrapper<Section>::Start()
+{
+    /* linux api  : http://linux.die.net/man/7/inotify
+        windows api: ReadDirectoryChangesW() or FileSystemWatcher component
+        */
+    dirMonitor.StartMonitoring();
+}
+
+template<typename Section>
+void XmlDataWrapper<Section>::FileIoCompletionRoutine(const char *file)
+{
+    if (!regex_match(file, regex(xmlFileRegularExp)))
+        return;
+
+    const char *ptr;
+    for (ptr = file; ptr < file + strlen(file); ++ptr)
+    {
+        if (*ptr == '_')
+        {
+            ++ptr;
+            break;
+        }
+    }
+    
+    uint16_t sectionSn = (uint16_t)strtol(ptr, nullptr, 10);
+    
+    string xmlPath = xmlFileDir + string("/") + string(file);
+    cout << xmlPath << endl;
+    auto section = CreateSection(xmlPath.c_str()); 
+    HandleDbInsert(*section, sectionSn);
+
+    remove(xmlPath.c_str());
+}
 
 /**********************class NitXmlWrapper**********************/
-template<typename Table>
-void NitXmlWrapper<Table>::AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* child) const
+template<typename Section>
+void NitXmlWrapper<Section>::AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
     {
@@ -24,8 +75,8 @@ void NitXmlWrapper<Table>::AddDescriptor(Table& nit, xmlNodePtr& node, xmlChar* 
     }   
 }
 
-template<typename Table>
-void NitXmlWrapper<Table>::AddTsDescriptor(Table& nit, uint16_t tsId,
+template<typename Section>
+void NitXmlWrapper<Section>::AddTsDescriptor(Section& nit, uint16_t tsId,
                                          xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
@@ -47,20 +98,16 @@ void NitXmlWrapper<Table>::AddTsDescriptor(Table& nit, uint16_t tsId,
     }
 }
 
-template<typename Table>
-error_code NitXmlWrapper<Table>::Fill(Table& nit) const
+template<typename Section>
+shared_ptr<Section> NitXmlWrapper<Section>::CreateSection(const char* xmlPath) const
 {
-    error_code err;
+    auto nit = std::make_shared<Section>();
 
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFileName.c_str()), XmlDocDeleter());
-    if (doc == nullptr)
-    { 
-        err = system_error_t::file_not_exists;
-        return err;
-    }
-     
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    assert(doc != nullptr);
+
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
-    nit.SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+    nit->SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
@@ -71,14 +118,14 @@ error_code NitXmlWrapper<Table>::Fill(Table& nit) const
     assert(nodes != nullptr && nodes->nodeNr == 1);
 
     node = nodes->nodeTab[0];
-    nit.SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
-    nit.SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+    nit->SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
+    nit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    nit.AddDescriptor(NetworkNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
+    nit->AddDescriptor(NetworkNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {
-        AddDescriptor(nit, node, (xmlChar*)"Descriptors");
+        AddDescriptor(*nit, node, (xmlChar*)"Descriptors");
 
         if (xmlStrcmp(node->name, (xmlChar*)"Transportstream") == 0)
         {
@@ -90,20 +137,21 @@ error_code NitXmlWrapper<Table>::Fill(Table& nit) const
             uint32_t symbolRate = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Symbol_Rate");
             uint32_t fecInner = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Fec_Inner");
 
-            nit.AddTs(tsId, onId);
-            nit.AddTsDescriptor0x44(tsId, freq, fecOuter, modulation, symbolRate, fecInner);
+            nit->AddTs(tsId, onId);
+            nit->AddTsDescriptor0x44(tsId, freq, fecOuter, modulation, symbolRate, fecInner);
             
             xmlNodePtr child = xmlFirstElementChild(node);
-            AddTsDescriptor(nit, tsId, child, (xmlChar*)"Descriptors");
+            AddTsDescriptor(*nit, tsId, child, (xmlChar*)"Descriptors");
         }
     }
     xmlCleanupParser();
-    return err;
+
+    return nit;
 }
 
 /**********************class SdtXmlWrapper**********************/
-template<typename Table>
-void SdtXmlWrapper<Table>::AddService(Table& sdt, xmlNodePtr& node, xmlChar* child) const
+template<typename Section>
+void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
     {
@@ -132,20 +180,15 @@ void SdtXmlWrapper<Table>::AddService(Table& sdt, xmlNodePtr& node, xmlChar* chi
     }
 }
 
-template<typename Table>
-error_code SdtXmlWrapper<Table>::Fill(Table& sdt) const
+template<typename Section>
+shared_ptr<Section> SdtXmlWrapper<Section>::CreateSection(const char* xmlPath) const
 {
-    error_code err;
-
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFileName.c_str()), XmlDocDeleter());
-    if (doc == nullptr)
-    {
-        err = system_error_t::file_not_exists;
-        return err;
-    }
+    auto sdt = std::make_shared<Section>();
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
-    sdt.SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+    sdt->SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
@@ -157,23 +200,23 @@ error_code SdtXmlWrapper<Table>::Fill(Table& sdt) const
     for (int i = 0; i < nodes->nodeNr; ++i)
     {
         node = nodes->nodeTab[i];
-        sdt.SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
-        sdt.SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
-        sdt.SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+        sdt->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
+        sdt->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
+        sdt->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
 
         for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
         {
-            AddService(sdt, node, (xmlChar*)"Service");      
+            AddService(*sdt, node, (xmlChar*)"Service");      
         }
     }
 
     xmlCleanupParser();
-    return err;
+    return sdt;
 }
 
 /**********************class BatXmlWrapper**********************/
-template<typename Table>
-void BatXmlWrapper<Table>::AddDescriptor(Table& bat, xmlNodePtr& node, xmlChar* child) const
+template<typename Section>
+void BatXmlWrapper<Section>::AddDescriptor(Section& bat, xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
     {
@@ -190,8 +233,8 @@ void BatXmlWrapper<Table>::AddDescriptor(Table& bat, xmlNodePtr& node, xmlChar* 
     }   
 }
 
-template<typename Table>
-void BatXmlWrapper<Table>::AddTsDescriptor(Table& bat, uint16_t tsId,
+template<typename Section>
+void BatXmlWrapper<Section>::AddTsDescriptor(Section& bat, uint16_t tsId,
                                          xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
@@ -213,9 +256,9 @@ void BatXmlWrapper<Table>::AddTsDescriptor(Table& bat, uint16_t tsId,
     }
 }
 
-template<typename Table>
-void BatXmlWrapper<Table>::AddTsDescriptor0x41(Table& bat, uint16_t tsId,
-                                         xmlNodePtr& node, xmlChar* child) const
+template<typename Section>
+void BatXmlWrapper<Section>::AddTsDescriptor0x41(Section& bat, uint16_t tsId,
+                                                 xmlNodePtr& node, xmlChar* child) const
 {
     if (xmlStrcmp(node->name, child) != 0)
     {
@@ -234,20 +277,15 @@ void BatXmlWrapper<Table>::AddTsDescriptor0x41(Table& bat, uint16_t tsId,
     bat.AddTsDescriptor0x41(tsId, serviceList);
 }
 
-template<typename Table>
-error_code BatXmlWrapper<Table>::Fill(Table& bat) const
+template<typename Section>
+shared_ptr<Section> BatXmlWrapper<Section>::CreateSection(const char* xmlPath) const
 {
-    error_code err;
+    auto bat = std::make_shared<Section>();
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    assert(doc != nullptr);
 
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFileName.c_str()), XmlDocDeleter());
-    if (doc == nullptr)
-    { 
-        err = system_error_t::file_not_exists;
-        return err;
-    }
-     
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
-    bat.SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+    bat->SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
@@ -258,31 +296,32 @@ error_code BatXmlWrapper<Table>::Fill(Table& bat) const
     assert(nodes != nullptr && nodes->nodeNr == 1);
 
     node = nodes->nodeTab[0];
-    bat.SetBouquetId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"BouquetID"));
-    bat.SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+    bat->SetBouquetId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"BouquetID"));
+    bat->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    bat.AddDescriptor(BouquetNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
+    bat->AddDescriptor(BouquetNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {
-        AddDescriptor(bat, node, (xmlChar*)"Descriptors");
+        AddDescriptor(*bat, node, (xmlChar*)"Descriptors");
 
         if (xmlStrcmp(node->name, (xmlChar*)"Transportstream") == 0)
         {
             uint16_t tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
             uint16_t onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
 
-            bat.AddTs(tsId, onId);
+            bat->AddTs(tsId, onId);
             
             xmlNodePtr child = xmlFirstElementChild(node);
-            AddTsDescriptor0x41(bat, tsId, child, (xmlChar*)"ServiceList");
+            AddTsDescriptor0x41(*bat, tsId, child, (xmlChar*)"ServiceList");
 
             child = xmlNextElementSibling(child);
-            AddTsDescriptor(bat, tsId, child, (xmlChar*)"Descriptors");
+            AddTsDescriptor(*bat, tsId, child, (xmlChar*)"Descriptors");
         }
     }
+
     xmlCleanupParser();
-    return err;
+    return bat;
 }
 
 #endif

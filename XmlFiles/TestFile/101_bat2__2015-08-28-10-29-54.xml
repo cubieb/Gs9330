@@ -1,0 +1,49 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="BAT" TableID="0x4A">
+	<Bouquet BouquetID="2" Name="央视节目" Version="">
+		<Descriptors Sum="0"/>
+		<Transportstream TSID="51" ONID="101">
+			<ServiceList>
+				<Service ID="601" Type="1"/>
+				<Service ID="602" Type="1"/>
+				<Service ID="603" Type="1"/>
+				<Service ID="604" Type="1"/>
+				<Service ID="605" Type="1"/>
+				<Service ID="606" Type="1"/>
+				<Service ID="607" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="52" ONID="101">
+			<ServiceList>
+				<Service ID="611" Type="1"/>
+				<Service ID="612" Type="1"/>
+				<Service ID="613" Type="1"/>
+				<Service ID="614" Type="1"/>
+				<Service ID="615" Type="1"/>
+				<Service ID="616" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="53" ONID="101">
+			<ServiceList>
+				<Service ID="621" Type="1"/>
+				<Service ID="622" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="61" ONID="101">
+			<ServiceList>
+				<Service ID="703" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="62" ONID="101">
+			<ServiceList>
+				<Service ID="721" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+	</Bouquet>
+</Root>
+

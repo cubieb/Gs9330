@@ -72,6 +72,12 @@
     <ClCompile Include="..\Codes\Src\Functions\Bat.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\DirMonitor.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">
@@ -128,6 +134,12 @@
     <ClInclude Include="..\Codes\Include\Functions\Bat.h">
       <Filter>头文件\Functions</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\DirMonitor.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />
@@ -151,10 +163,8 @@
     <Xml Include="..\XmlFiles\Nit.102.Other.xml">
       <Filter>资源文件</Filter>
     </Xml>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\XmlFiles\SI各个表对应的XML格式.doc">
+    <Xml Include="..\Configuration\Gs9330SoapClient.xml">
       <Filter>资源文件</Filter>
-    </None>
+    </Xml>
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 
 <Root TableType ="NIT"  TableID="0x40" >
     <Network ID="0x65"  Name ="ÉòÑôÊÐÍø"  Version="0x0c" >
-        <Descriptors Sum="1">
+        <Descriptors Sum="0">
             <!--<Item1 Tag="0x43" Data="000021"/> -->
         </Descriptors>
         <!-- cable_delivery_system_descriptor {Frequency, Fec_Outer ...} -->
