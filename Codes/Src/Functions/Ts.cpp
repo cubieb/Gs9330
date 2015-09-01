@@ -7,17 +7,27 @@
 using namespace std;
 
 /**********************class Segment**********************/
-Segment::Segment(const Section& section, size_t segmentSize)
+Segment::Segment()
+{}
+
+void Segment::Init(std::list<std::shared_ptr<Section>> sections, size_t segmentSize)
 {
-    /* refer to <ISO/IEC 13818-1> "pointer_field" */    
-    size_t size = section.GetCodesSize() + 1;           /* 1 bytes for pointer_field and */
+    size_t size = 1;
+    for (auto iter: sections)
+    {
+        size = size + iter->GetCodesSize();
+    }
     size_t tail = (segmentSize - (size % segmentSize)) % segmentSize;
     size = size + tail; /* size must be times of segmentSize */
     buffer.reset(new uchar_t[size], UcharDeleter());
 
     uchar_t *ptr = buffer.get();
-    ptr[0] = 0x0; //pointer_field    
-    section.MakeCodes(ptr + 1, section.GetCodesSize());
+    ptr = ptr + Write8(ptr, 0x0); //pointer_field
+
+    for (auto iter: sections)
+    {
+        ptr = ptr + iter->MakeCodes(ptr, size - (buffer.get() - ptr));
+    }
 
     for (ptr = buffer.get(); ptr < buffer.get() + size; ptr = ptr + segmentSize)
     {
@@ -38,8 +48,19 @@ Segment::iterator Segment::end()
     return segments.end();
 }
 
+uint_t Segment::GetSegmentNumber(list<shared_ptr<Section>> sections, size_t segmentSize)
+{
+    size_t size = 1;
+    for (auto iter: sections)
+    {
+        size = size + iter->GetCodesSize();
+    }
+
+    return (size + segmentSize - 1) / segmentSize;
+}
+
 /**********************class Ts**********************/
-Ts::Ts()
+Ts::Ts(uint16_t pid): pid(pid)
 {
     transporPacket.transportPriority = 0;
     transporPacket.adaptationFieldControl = 1;
@@ -56,22 +77,28 @@ void Ts::SetContinuityCounter(uchar_t theContinuityCounter)
     transporPacket.continuityCounter = theContinuityCounter;
 }
 
-size_t Ts::GetCodesSize(const Section& section) const
+uint16_t Ts::GetPid()
 {
-    size_t sectionSize = section.GetCodesSize() + 1;
-    size_t segmentSize = TsPacketSize - sizeof(transport_packet);
-    size_t segmentNumber = (sectionSize + segmentSize - 1) / segmentSize;
-    
-    return (segmentNumber * TsPacketSize);
+    return pid;
 }
 
-size_t Ts::MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize)
+size_t Ts::GetCodesSize() const
 {
     size_t segmentSize = TsPacketSize - sizeof(transport_packet);
-    Segment segment(section, segmentSize);
+    uint32_t segmentNumber = Segment().GetSegmentNumber(sections, segmentSize);
+    
+    return (TsPacketSize * segmentNumber);
+}
+
+size_t Ts::MakeCodes(uchar_t *buffer, size_t bufferSize)
+{
+    size_t segmentSize = TsPacketSize - sizeof(transport_packet);
+    Segment segment;    
     uchar_t *ptr = buffer;
 
-    assert(GetCodesSize(section) <= bufferSize);
+    segment.Init(sections, segmentSize);
+
+    assert(GetCodesSize() <= bufferSize);
     for (auto iter = segment.begin(); iter != segment.end(); ++iter)
     {
         ptr = ptr + Write8(ptr, 0x47);
@@ -81,14 +108,42 @@ size_t Ts::MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize)
            transport_priority = 0;
          */
         uint16_t startIndicator = (iter == segment.begin() ? 1 : 0);
-        ptr = ptr + Write16(ptr, (startIndicator << 14) | (transporPacket.transportPriority << 13) | section.GetPid());
+        ptr = ptr + Write16(ptr, (startIndicator << 14) | (transporPacket.transportPriority << 13) | pid);
         /* transport_scrambling_control[2] = '00';
 		   adaptation_field_control[2] = '01';
 		   continuity_counter[4] = 'xxxx';
 		*/
+        /* refer to "2.4.3.3 Semantic definition of fields in Transport Stream packet layer",
+           continuity_counter should be increase by 1 in all case.  
+           when send udp packet, we may send duplicate packet two time, in this circumstance, the
+           continuity_counter keep same with the oringinal packet.
+           for example, the udp sending function may like this:
+           ts.MakeCodes(buffer, bufferSize);
+           for (ptr = buffer; ptr = ptr < buffer + buffersize; buffer + 188)
+           {
+               SendUdp(ptr, 188);
+               SendUdp(ptr, 188);   //again
+           }
+         */
         ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
         ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);        
     }
 
     return (ptr - buffer);
+}
+
+void Ts::AddSection(std::shared_ptr<Section> section)
+{
+    assert(pid == section->GetPid());
+    sections.push_back(section);
+}
+
+size_t Ts::GetSectionNumber()
+{
+    return sections.size();
+}
+
+void Ts::Clear()
+{
+    sections.clear();
 }

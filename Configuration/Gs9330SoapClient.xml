@@ -1,5 +1,4 @@
 <?xml version='1.0'  encoding='gb2312' ?>
 <Root>
-    <ChildXML ReceivDir ="D:/Project.VC/Gs9330/XmlFiles" ServerIP ="192.168.3.153" RegionCode ="101"
-              TsDstIP ="20.0.0.111" TsDstPort ="5001" TsInterval ="250" />
+    <ChildXML ReceivDir ="D:/Temp/XmlFiles" ServerIP ="192.168.3.153" RegionCode ="101"/>
 </Root>

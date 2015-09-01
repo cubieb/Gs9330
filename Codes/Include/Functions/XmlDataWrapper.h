@@ -71,6 +71,11 @@ inline T  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName)
 {
     SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
     char *ptr = (char *)attrValue.get();
+    if (ptr == nullptr || strlen(ptr) == 0)
+    {
+        return 0;
+    }
+
     if (ptr[0] == '0' && (ptr[1] == 'x' || ptr[1] == 'X'))
         return (T)strtol(ptr, nullptr, 16);
 

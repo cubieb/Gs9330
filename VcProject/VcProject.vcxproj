@@ -123,6 +123,7 @@
     <Text Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Configuration\Gs9330Netwok.xml" />
     <Xml Include="..\Configuration\Gs9330SoapClient.xml" />
     <Xml Include="..\XmlFiles\BAT.xml" />
     <Xml Include="..\XmlFiles\Nit.101.Actual.xml" />

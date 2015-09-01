@@ -1,4 +1,5 @@
 #include "SystemInclude.h"
+#include <io.h>
 #include "Common.h"
 #include "Debug.h"
 
@@ -18,22 +19,31 @@ using std::placeholders::_3;
 
 Controller::Controller()
 {
-    ConfigDataWrapper wrapper;
-    wrapper.ReadConfig(config);
+    NetworkIpConfigWrapper networkIpConfigWrapper;
+    networkIpConfigWrapper.ReadConfig(netConfig);
 
-    function<void(Section&, uint16_t)> handler(bind(&Controller::HandleDbInsert, this, _1, _2));
+    XmlConfigWrapper xmlWrapper;
+    xmlWrapper.ReadConfig(xmlConfig);
+    
+    for (auto iter: netConfig.entries)
+    {
+        std::map<uint16_t, std::shared_ptr<TsSnInfo>> tsSns;
+        tsSns.insert(make_pair(0x0010, make_shared<TsSnInfo>(make_shared<Ts>(0x0010), InvalidSectionNumber)));
+        tsSns.insert(make_pair(0x0011, make_shared<TsSnInfo>(make_shared<Ts>(0x0011), InvalidSectionNumber)));
 
-    auto nitTs = make_shared<Ts>();
-    tsInfors.insert(make_pair(Nit::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Nit.ts", nitTs)));
-    wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(handler, config.xmlDir.c_str()));
+        netTsSnInfors.insert(make_pair(iter.networkId, tsSns));
+    }
 
-    auto sdtTs = make_shared<Ts>();
-    tsInfors.insert(make_pair(Sdt::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Sdt.ts", sdtTs)));
-    wrappers.push_back(make_shared<SdtXmlWrapper<Sdt>>(handler, config.xmlDir.c_str()));
+#if defined(_DEBUG)
+    /* PID, lastSectionSn => tsDebug */
+    tsDebug.insert(make_pair(0x0010, InvalidSectionNumber));
+    tsDebug.insert(make_pair(0x0011, InvalidSectionNumber));
+#endif
 
-    auto batTs = make_shared<Ts>();
-    tsInfors.insert(make_pair(Bat::ClassId, TsRuntimeInfo(InvalidSectionNumber, "D:/Temp/Bat.ts", batTs)));
-    wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(handler, config.xmlDir.c_str()));
+    DataWrapper::DbInsertHandler handler(bind(&Controller::HandleDbInsert, this, _1, _2, _3));
+    wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(handler, xmlConfig.xmlDir.c_str()));
+    wrappers.push_back(make_shared<SdtXmlWrapper<Sdt>>(handler, xmlConfig.xmlDir.c_str()));
+    wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(handler, xmlConfig.xmlDir.c_str()));
 }
 
 void Controller::Start()
@@ -46,97 +56,91 @@ void Controller::Start()
     myThread = std::thread(bind(&Controller::ThreadMain, this));
 }
 
-void Controller::HandleDbInsert(Section& section, uint16_t sectionSn)
+void Controller::HandleDbInsert(uint16_t netId, shared_ptr<Section> section, uint16_t sectionSn)
 {
-    uint16_t classId= section.GetClassId();
-    auto iter = tsInfors.find(classId);
-    auto tsFileName = iter->second.tsOutPutFileNmae;
-    auto ts = iter->second.tsInstance;
+    string xmlPath = xmlConfig.xmlDir + string("/") + string("NetWorkNode.xml");
 
-#if !defined(SendModeFile)
+    if (_access(xmlPath.c_str(), 0) != -1)
     {
-        lock_guard<mutex> lock(myMutext);
-        if (sectionSn != iter->second.sectionSn && iter->second.tsBinary.size() != 0)
-        {        
-            iter->second.tsBinary.clear();
+        NetworkRelationConfigWrapper relationWrapper(xmlPath.c_str());    
+        relationWrapper.ReadConfig(relationConfig);
+        //remove(xmlPath.c_str());
+    }
+
+    for (auto tsSnInfors: netTsSnInfors)
+    {
+        if (!relationConfig.IsChildNetwork(tsSnInfors.first, netId))
+        {
+            continue;
         }
-    }
-#endif
 
-    size_t size = ts->GetCodesSize(section);
-    shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-    ts->MakeCodes(section, buffer.get(), size);    
-
-#if defined(_DEBUG)
-    /* write data to Ts file */
-    ios_base::openmode mode;
-    if (sectionSn == iter->second.sectionSn)
-    {
-        mode = ios_base::app  | ios::binary;
-    }
-    else
-    {
-        mode = ios_base::out  | ios::binary;
-    }
-    fstream tsFile(tsFileName, mode);
-    tsFile.write((char*)buffer.get(), size); 
-    tsFile.close();
-#endif
-
-#if !defined(SendModeFile)
-    {
         lock_guard<mutex> lock(myMutext);
-        iter->second.tsBinary.push_back(make_pair(buffer, size)); 
+        auto tsSnInfor = tsSnInfors.second.find(section->GetPid());
+        if (tsSnInfor->second->sn != sectionSn)
+        {
+            tsSnInfor->second->ts->Clear();
+            tsSnInfor->second->sn = sectionSn;
+        }
+        tsSnInfor->second->ts->AddSection(section);
+
     }
-#endif
-    iter->second.sectionSn = sectionSn;
 }
 
 void Controller::SendUdp(int socketFd)
 {
-    struct sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(config.tsDstPort);
-    serverAddr.sin_addr.s_addr = config.tsDstIp;
-
-    for (auto iter: tsInfors)
+    for (auto tsSnInfors: netTsSnInfors)
     {
-#if defined(SendModeFile)
-        auto tsFileName = iter.second.tsOutPutFileNmae;
-        fstream tsFile(tsFileName, ios_base::in  | ios::binary);
-
-        tsFile.seekg (0, tsFile.end);
-        int length = (int)tsFile.tellg();
-        tsFile.seekg (0, tsFile.beg);
-
-        shared_ptr<uchar_t> buffer(new uchar_t[length], UcharDeleter());
-        tsFile.read((char*)buffer.get(), length); 
-        tsFile.close();
-#else
-        int length = 0;
-        shared_ptr<uchar_t> buffer;
+        list<NetworkIpConfig::Entry>::iterator ipAddr;
+        for (ipAddr = netConfig.entries.begin(); 
+            ipAddr != netConfig.entries.end();
+            ++ipAddr)
         {
-            lock_guard<mutex> lock(myMutext);
-            for (auto buffer: iter.second.tsBinary)
-            {
-                length = length + buffer.second;
-            }
-            buffer.reset(new uchar_t[length], UcharDeleter());
-            uchar_t *ptr = buffer.get();
-            for (auto buffer: iter.second.tsBinary)
-            {
-                memcpy(ptr, buffer.first.get(), buffer.second);
-                ptr = ptr +  buffer.second;
-            }
+            if (ipAddr->networkId = tsSnInfors.first)
+                break;
         }
-#endif
-        int pktNumber = (length + 1459) / 1460;
-        for (int i = 0; i < pktNumber; ++i)
+        assert(ipAddr != netConfig.entries.end());
+
+        struct sockaddr_in serverAddr;
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(ipAddr->tsDstPort);
+        serverAddr.sin_addr.s_addr = ipAddr->tsDstIp;
+
+        lock_guard<mutex> lock(myMutext);
+        for(auto tsSnInfor: tsSnInfors.second)
         {
-            int udpSize = min(length - 1460 * i, 1460);
-            sendto(socketFd, (char*)buffer.get() + 1460 * i, (int)udpSize, 0, 
-                  (SOCKADDR *)&serverAddr, 
-                  sizeof(struct sockaddr_in));
+            if (tsSnInfor.second->ts->GetSectionNumber() == 0)
+            {
+                continue;
+            }
+
+            size_t size = tsSnInfor.second->ts->GetCodesSize();
+            shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
+            tsSnInfor.second->ts->MakeCodes(buffer.get(), size);
+            int pktNumber = (size + 1459) / 1460;
+            for (int i = 0; i < pktNumber; ++i)
+            {
+                int udpSize = min(size - 1460 * i, 1460);
+                sendto(socketFd, (char*)buffer.get() + 1460 * i, (int)udpSize, 0, 
+                       (SOCKADDR *)&serverAddr, 
+                       sizeof(struct sockaddr_in));
+            }
+
+#if defined(_DEBUG)
+            auto dbg = tsDebug.find(tsSnInfor.second->ts->GetPid());
+            if (dbg->second != tsSnInfor.second->sn)
+            {
+                char file[MAX_PATH];
+                sprintf(file, "D:/Temp/%03d%03d.ts",
+                        tsSnInfor.second->ts->GetPid(),
+                        tsSnInfor.second->sn);
+    
+                fstream tsFile(file, ios_base::out  | ios::binary);
+                tsFile.write((char*)buffer.get(), size); 
+                tsFile.close();
+
+                dbg->second = tsSnInfor.second->sn;
+            }
+#endif
         }
     }
 }
@@ -147,7 +151,7 @@ void Controller::ThreadMain()
     while (true)
     {
         SendUdp(socketFd);
-        Sleep(config.tsInterval);
+        Sleep(netConfig.tsInterval);
     }
     closesocket(socketFd);
 }

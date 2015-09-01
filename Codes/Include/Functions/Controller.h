@@ -10,50 +10,25 @@ struct Config;
 
 #define InvalidSectionNumber -1
 
-//#define SendModeFile
-
-struct TsRuntimeInfo
+struct TsSnInfo
 {
-    /* Section Serial Numbers is used to identify if two .xml should packed into
-       a single TS packet.
+    std::shared_ptr<Ts> ts;
+
+    /* Section Serial Number is used to identify if two .xml should packed into
+       a group of TS packet.
      */
-    uint16_t sectionSn;
+    uint16_t sn;
 
-    /* when debug, we packet ts into output .ts files. */
-    std::string tsOutPutFileNmae;
-    std::shared_ptr<Ts> tsInstance;    
-#if !defined(SendModeFile)
-    std::list<std::pair<std::shared_ptr<uchar_t>, size_t>> tsBinary; /* catch for ready ts binary */
-#endif
-
-    TsRuntimeInfo(uint16_t sectionSn, std::string tsOutPutFileNmae,  std::shared_ptr<Ts> tsInstance)
-        : sectionSn(sectionSn), 
-          tsOutPutFileNmae(tsOutPutFileNmae),
-          tsInstance(tsInstance) 
-    { }
-
-#if defined(SendModeFile)
-    TsRuntimeInfo(const TsRuntimeInfo& right)
-        : sectionSn(right.sectionSn), 
-          tsOutPutFileNmae(right.tsOutPutFileNmae),
-          tsInstance(right.tsInstance)
-    { }
-#else
-    TsRuntimeInfo(const TsRuntimeInfo& right)
-        : sectionSn(right.sectionSn), 
-          tsOutPutFileNmae(right.tsOutPutFileNmae),
-          tsInstance(right.tsInstance),
-          tsBinary(right.tsBinary)
-    { }
-#endif
+    TsSnInfo(std::shared_ptr<Ts> ts, uint16_t sn)
+        : ts(ts), sn(sn)
+    {}
 };
 
 class Controller
 {
 public:
-    typedef uint16_t SectionClassId;
     void Start();
-    void HandleDbInsert(Section& section, uint16_t sectionSn);
+    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn);
 
     static Controller& GetInstance()
     {
@@ -68,9 +43,17 @@ private:
     std::thread myThread;
     std::mutex  myMutext;
 
-    Config config;
-    std::map<SectionClassId, TsRuntimeInfo> tsInfors;
+    NetworkIpConfig       netConfig;
+    XmlConfig             xmlConfig;
+    NetworkRelationConfig relationConfig;
+    /* NetwordId, PID => TsSnInfo */
+    std::map<uint16_t, std::map<uint16_t, std::shared_ptr<TsSnInfo>>> netTsSnInfors;
     std::list<std::shared_ptr<DataWrapper>> wrappers;
+
+#if defined(_DEBUG)
+    /* PID, lastSectionSn => tsDebug */
+    std::map<uint16_t, uint16_t> tsDebug;
+#endif
 };
 
 #endif

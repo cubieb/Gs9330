@@ -7,7 +7,7 @@ class Section;
 class DataWrapper
 {
 public:
-    typedef std::function<void(Section&, uint16_t)> DbInsertHandler;;
+    typedef std::function<void(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn)> DbInsertHandler;;
 
     DataWrapper(DbInsertHandler& handler)
         : handler(handler)
@@ -17,9 +17,9 @@ public:
     {}
     virtual void Start() = 0;
 
-    void HandleDbInsert(Section& section, uint16_t sectionSn)
+    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn)
     {
-        handler(section, sectionSn);
+        handler(netId, section, sectionSn);
     }
 
 private:

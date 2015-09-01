@@ -46,12 +46,13 @@ void XmlDataWrapper<Section>::FileIoCompletionRoutine(const char *file)
         }
     }
     
+    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
     uint16_t sectionSn = (uint16_t)strtol(ptr, nullptr, 10);
     
     string xmlPath = xmlFileDir + string("/") + string(file);
-    cout << xmlPath << endl;
+
     auto section = CreateSection(xmlPath.c_str()); 
-    HandleDbInsert(*section, sectionSn);
+    HandleDbInsert(netId, section, sectionSn);
 
     remove(xmlPath.c_str());
 }

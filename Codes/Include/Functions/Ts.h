@@ -26,13 +26,15 @@ class Segment
 {
 public:
     typedef std::list<uchar_t*>::iterator iterator;
-    Segment(const Section& section, size_t segmentSize);
+    Segment();
 
+    void Init(std::list<std::shared_ptr<Section>> sections, size_t segmentSize);
     iterator begin();
     iterator end();
 
+    uint_t GetSegmentNumber(std::list<std::shared_ptr<Section>> sections, size_t segmentSize);
+
 private:
-    Segment();
     std::shared_ptr<uchar_t> buffer;
     std::list<uchar_t*> segments;
 };
@@ -41,13 +43,18 @@ private:
 class Ts
 {
 public:
-    Ts();
+    Ts(uint16_t pid);
 
     void SetTransportPriority(uint16_t theTransportPriority);
     void SetContinuityCounter(uchar_t theContinuityCounter);
+    uint16_t GetPid();
 
-    size_t GetCodesSize(const Section& section) const;
-    size_t MakeCodes(const Section& section, uchar_t *buffer, size_t bufferSize);
+    size_t GetCodesSize() const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize);
+
+    void AddSection(std::shared_ptr<Section> section);
+    size_t GetSectionNumber();
+    void Clear();
 
 private:
     struct transporPacket
@@ -56,6 +63,8 @@ private:
         uchar_t  adaptationFieldControl:2;
         uchar_t  continuityCounter:4; 
     }transporPacket;
+    std::list<std::shared_ptr<Section>> sections;
+    uint16_t pid;
 };
 
 #endif
