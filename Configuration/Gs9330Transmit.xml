@@ -1,0 +1,7 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root NitActualInterval="2" NitOtherInterval="2" BatInterval="2"
+      SdtActualInterval="2" SdtOtherInterval="2" Eit4EInterval="2" Eit4FInterval="2"
+      Eit50Interval="2" Eit60Interval="2">
+    <Network ID="101" DstIP="20.0.0.111" DstPort="5001"/>
+    <Network ID="102" DstIP="20.0.0.112" DstPort="5001"/>
+</Root>

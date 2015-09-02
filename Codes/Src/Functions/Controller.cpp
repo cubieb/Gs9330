@@ -19,26 +19,14 @@ using std::placeholders::_3;
 
 Controller::Controller()
 {
-    NetworkIpConfigWrapper networkIpConfigWrapper;
-    networkIpConfigWrapper.ReadConfig(netConfig);
-
-    XmlConfigWrapper xmlWrapper;
-    xmlWrapper.ReadConfig(xmlConfig);
-    
-    for (auto iter: netConfig.entries)
+    for (auto iter: tranmitConfig.netAddresses)
     {
         std::map<uint16_t, std::shared_ptr<TsSnInfo>> tsSns;
-        tsSns.insert(make_pair(0x0010, make_shared<TsSnInfo>(make_shared<Ts>(0x0010), InvalidSectionNumber)));
-        tsSns.insert(make_pair(0x0011, make_shared<TsSnInfo>(make_shared<Ts>(0x0011), InvalidSectionNumber)));
+        tsSns.insert(make_pair(0x0010, make_shared<TsSnInfo>(make_shared<Ts>(0x0010), InvalidSerialNumber)));
+        tsSns.insert(make_pair(0x0011, make_shared<TsSnInfo>(make_shared<Ts>(0x0011), InvalidSerialNumber)));
 
-        netTsSnInfors.insert(make_pair(iter.networkId, tsSns));
+        netTsSnInfors.insert(make_pair(iter->networkId, tsSns));
     }
-
-#if defined(_DEBUG)
-    /* PID, lastSectionSn => tsDebug */
-    tsDebug.insert(make_pair(0x0010, InvalidSectionNumber));
-    tsDebug.insert(make_pair(0x0011, InvalidSectionNumber));
-#endif
 
     DataWrapper::DbInsertHandler handler(bind(&Controller::HandleDbInsert, this, _1, _2, _3));
     wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(handler, xmlConfig.xmlDir.c_str()));
@@ -62,96 +50,140 @@ void Controller::HandleDbInsert(uint16_t netId, shared_ptr<Section> section, uin
 
     if (_access(xmlPath.c_str(), 0) != -1)
     {
-        NetworkRelationConfigWrapper relationWrapper(xmlPath.c_str());    
-        relationWrapper.ReadConfig(relationConfig);
+        relationConfig = make_shared<NetworkRelationConfig>(xmlPath.c_str());   
         //remove(xmlPath.c_str());
     }
 
     for (auto tsSnInfors: netTsSnInfors)
     {
-        if (!relationConfig.IsChildNetwork(tsSnInfors.first, netId))
+        uint16_t networkId = tsSnInfors.first;
+        if (!relationConfig->IsChildNetwork(netId, tsSnInfors.first))
         {
             continue;
         }
 
         lock_guard<mutex> lock(myMutext);
         auto tsSnInfor = tsSnInfors.second.find(section->GetPid());
-        if (tsSnInfor->second->sn != sectionSn)
+        uint16_t& sn = tsSnInfor->second->sn;
+        if (sn != sectionSn)
         {
-            tsSnInfor->second->ts->Clear();
-            tsSnInfor->second->sn = sectionSn;
+            tsSnInfor->second->ts->Clear();    
+            sn = sectionSn;
         }
         tsSnInfor->second->ts->AddSection(section);
+        
+#if defined(_DEBUG)
+        bitset<256> tableIds;
+        tableIds.set(section->GetTableId());
+        size_t size = tsSnInfor->second->ts->GetCodesSize(tableIds);
+        shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
+        tsSnInfor->second->ts->MakeCodes(buffer.get(), size, tableIds);
+        ostringstream file;
+        file << "D:/Temp/NetId" <<  setfill('0') << setw(3) << (uint32_t)networkId 
+            << ".Pid" <<  setfill('0') << setw(4) << hex << tsSnInfor->second->ts->GetPid() 
+            << ".Sn" << setfill('0') << setw(3) << dec << sectionSn << ".ts";
 
+        fstream tsFile(file.str(), ios_base::app  | ios::binary);
+        tsFile.write((char*)buffer.get(), size); 
+        tsFile.close();
+#endif        
     }
 }
 
-void Controller::SendUdp(int socketFd)
+void Controller::SendUdpToNetId(int socketFd, 
+                                struct sockaddr_in& serverAddr,
+                                std::bitset<256>& tableIds, 
+                                std::map<uint16_t, std::shared_ptr<TsSnInfo>>& tsPids)
+{
+    lock_guard<mutex> lock(myMutext);
+
+    /* Send upd packet for every TS(with specific PID) */
+    for(auto tsSnInfor: tsPids)
+    {
+        uint16_t pid = tsSnInfor.first;
+        size_t size = tsSnInfor.second->ts->GetCodesSize(tableIds);
+        if (size == 0)
+            continue;
+
+        shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
+        tsSnInfor.second->ts->MakeCodes(buffer.get(), size, tableIds);
+        int pktNumber = (size + 1459) / 1460;
+        for (int i = 0; i < pktNumber; ++i)
+        {
+            int udpSize = min(size - 1460 * i, 1460);
+            sendto(socketFd, (char*)buffer.get() + 1460 * i, (int)udpSize, 0, 
+                   (SOCKADDR *)&serverAddr, 
+                   sizeof(struct sockaddr_in));
+        }
+    }
+}
+
+void Controller::SendUdp(int socketFd, bitset<256>& tableIds)
 {
     for (auto tsSnInfors: netTsSnInfors)
     {
-        list<NetworkIpConfig::Entry>::iterator ipAddr;
-        for (ipAddr = netConfig.entries.begin(); 
-            ipAddr != netConfig.entries.end();
-            ++ipAddr)
+        uint16_t networkId = tsSnInfors.first;
+
+        list<shared_ptr<NetworkIdAddress>>::iterator iter;
+        for (iter = tranmitConfig.netAddresses.begin(); 
+            iter != tranmitConfig.netAddresses.end();
+            ++iter)
         {
-            if (ipAddr->networkId = tsSnInfors.first)
+            if ((*iter)->networkId == networkId)
                 break;
         }
-        assert(ipAddr != netConfig.entries.end());
+        assert(iter != tranmitConfig.netAddresses.end());
+        NetworkIdAddress& ipAddr = *(*iter);
 
         struct sockaddr_in serverAddr;
         serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(ipAddr->tsDstPort);
-        serverAddr.sin_addr.s_addr = ipAddr->tsDstIp;
+        serverAddr.sin_port = htons(ipAddr.tsDstPort);
+        serverAddr.sin_addr.s_addr = ipAddr.tsDstIp;
 
-        lock_guard<mutex> lock(myMutext);
-        for(auto tsSnInfor: tsSnInfors.second)
-        {
-            if (tsSnInfor.second->ts->GetSectionNumber() == 0)
-            {
-                continue;
-            }
-
-            size_t size = tsSnInfor.second->ts->GetCodesSize();
-            shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
-            tsSnInfor.second->ts->MakeCodes(buffer.get(), size);
-            int pktNumber = (size + 1459) / 1460;
-            for (int i = 0; i < pktNumber; ++i)
-            {
-                int udpSize = min(size - 1460 * i, 1460);
-                sendto(socketFd, (char*)buffer.get() + 1460 * i, (int)udpSize, 0, 
-                       (SOCKADDR *)&serverAddr, 
-                       sizeof(struct sockaddr_in));
-            }
-
-#if defined(_DEBUG)
-            auto dbg = tsDebug.find(tsSnInfor.second->ts->GetPid());
-            if (dbg->second != tsSnInfor.second->sn)
-            {
-                char file[MAX_PATH];
-                sprintf(file, "D:/Temp/%03d%03d.ts",
-                        tsSnInfor.second->ts->GetPid(),
-                        tsSnInfor.second->sn);
-    
-                fstream tsFile(file, ios_base::out  | ios::binary);
-                tsFile.write((char*)buffer.get(), size); 
-                tsFile.close();
-
-                dbg->second = tsSnInfor.second->sn;
-            }
-#endif
-        }
+        SendUdpToNetId(socketFd, serverAddr, tableIds, tsSnInfors.second);        
     }
 }
 
 void Controller::ThreadMain()
 {
+    nitActualTimer = tranmitConfig.nitActualInterval;
+    nitOtherTimer = tranmitConfig.nitOtherInterval;
+    batTimer = tranmitConfig.batInterval;
+    sdtActualTimer = tranmitConfig.sdtActualInterval;
+    sdtOtherTimer = tranmitConfig.sdtOtherInterval;
+    eit4ETimer = tranmitConfig.eit4EInterval;
+    eit4FTimer = tranmitConfig.eit4FInterval;
+    eit50to5FTimer = tranmitConfig.eit50Interval;
+    eit60to6FTimer = tranmitConfig.eit60Interval;
+
     int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    bitset<256> tableIds;
     while (true)
     {
-        SendUdp(socketFd);
-        Sleep(netConfig.tsInterval);
+        tableIds.reset();
+
+        TheckTimer(nitActualTimer, tranmitConfig.nitActualInterval, tableIds, 0x40);
+        TheckTimer(nitOtherTimer, tranmitConfig.nitOtherInterval, tableIds, 0x41);
+        TheckTimer(batTimer, tranmitConfig.batInterval, tableIds, 0x4A);
+        TheckTimer(sdtActualTimer, tranmitConfig.sdtActualInterval, tableIds, 0x42);
+        TheckTimer(sdtOtherTimer, tranmitConfig.sdtOtherInterval, tableIds, 0x46);
+        TheckTimer(eit4ETimer, tranmitConfig.eit4EInterval, tableIds, 0x4E);
+        TheckTimer(eit4FTimer, tranmitConfig.eit4FInterval, tableIds, 0x4F);
+        TheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
+        TheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
+
+        if (tableIds.any())
+            SendUdp(socketFd, tableIds);
+        Sleep(1000);
     }
     closesocket(socketFd);
+}
+
+void Controller::TheckTimer(uint32_t& cur, uint32_t orignal, bitset<256>& bits, uchar_t indexInBits)
+{
+    if (--cur == 0)
+    {
+        cur = orignal;
+        bits.set(indexInBits);
+    }
 }

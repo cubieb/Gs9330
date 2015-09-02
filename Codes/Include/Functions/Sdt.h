@@ -123,6 +123,8 @@ public:
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
+    uchar_t GetTableId();
+
     void SetTsId(uint16_t data);
     void SetVersionNumber(uchar_t data);
     void SetSectionNumber(uchar_t data);

@@ -28,6 +28,11 @@ void Nit::SetTableId(uchar_t data)
     tableId = data;
 }
 
+uchar_t Nit::GetTableId()
+{
+    return tableId;
+}
+
 void Nit::SetNetworkId(uint16_t data)
 {
     networkId = data;

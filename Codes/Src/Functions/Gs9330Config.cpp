@@ -7,28 +7,42 @@ using namespace std;
 
 #if defined(_WIN32)
 
-/**********************class NetworkIpConfig**********************/
-NetworkIpConfigWrapper::NetworkIpConfigWrapper()
-{
-}
-
-void NetworkIpConfigWrapper::ReadConfig(NetworkIpConfig& config)
+/**********************class TransmitConfig**********************/
+TransmitConfig::TransmitConfig()
 {
     char xmlPath[MAX_PATH];
     DWORD dword = ExpandEnvironmentStrings("%APPDATA%", xmlPath, MAX_PATH);
     assert(dword != 0);
 
-    strcat(xmlPath, "\\Gospell\\Gs9330Netwok.xml");
+    strcat(xmlPath, "\\Gospell\\Gs9330Transmit.xml");
 
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
-    config.tsInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"PacketInterval");
+    nitActualInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"NitActualInterval");
+    nitOtherInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"NitOtherInterval");
+    batInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"BatInterval");
+    sdtActualInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"SdtActualInterval");
+    sdtOtherInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"SdtOtherInterval");
+    eit4EInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Eit4EInterval");
+    eit4FInterval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Eit4FInterval");
+    eit50Interval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Eit50Interval");
+    eit60Interval = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Eit60Interval");
+    assert(nitActualInterval != 0);
+    assert(nitOtherInterval != 0);
+    assert(batInterval != 0);
+    assert(sdtOtherInterval != 0);
+    assert(sdtOtherInterval != 0);
+    assert(eit4EInterval != 0);    
+    assert(eit4FInterval != 0);
+    assert(eit50Interval != 0);
+    assert(eit60Interval != 0);
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
 
+    //xpathExpr cant be "/Root/Network[*], because Network has no child node."
     xmlChar *xpathExpr = (xmlChar*)"/Root/Network";
     shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -38,52 +52,19 @@ void NetworkIpConfigWrapper::ReadConfig(NetworkIpConfig& config)
         xmlNodePtr node = nodes->nodeTab[i];
 
         uint16_t networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
-        shared_ptr<xmlChar> addr = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"TsDstIP");
-        uint32_t tsDstIp = inet_addr((const char *)addr.get());
-        
-        uint16_t tsDstPort = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TsDstPort");
-        config.entries.push_back(NetworkIpConfig::Entry(networkId, tsDstIp, tsDstPort));
+        shared_ptr<xmlChar> addr = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"DstIP");
+        uint32_t dstIp = inet_addr((const char *)addr.get());        
+        uint16_t dstPort = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"DstPort");
+
+        netAddresses.push_back(make_shared<NetworkIdAddress>(networkId, dstIp, dstPort));
     }
 
     xmlCleanupParser();
 }
 
-/**********************class NetworkRelationConfig**********************/
-NetworkRelationConfigWrapper::NetworkRelationConfigWrapper(const char *xmlFile)
-    : xmlFile(xmlFile)
-{}
-
-void NetworkRelationConfigWrapper::ReadConfig(NetworkRelationConfig& config)
-{
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile.c_str()), XmlDocDeleter());
-    assert(doc != nullptr);
-    config.Clear();
-
-    shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-    assert(xpathCtx != nullptr);
-
-    xmlChar *xpathExpr = (xmlChar*)"/Root/NetNode";
-    shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-
-    for (int i = 0; i < nodes->nodeNr; ++i)
-    {
-        xmlNodePtr node = nodes->nodeTab[i];
-        uint16_t networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"NetID");
-        uint16_t tsDstPort = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"FatherID");
-        config.relation.insert(make_pair(networkId, tsDstPort));
-    }
-
-    xmlCleanupParser();
-}
-
-/**********************class XmlConfigWrapper**********************/
-XmlConfigWrapper::XmlConfigWrapper()
-{
-}
-
-void XmlConfigWrapper::ReadConfig(XmlConfig& config)
-{
+/**********************class XmlConfig**********************/
+XmlConfig::XmlConfig()
+{    
     char xmlPath[MAX_PATH];
     DWORD dword = ExpandEnvironmentStrings("%APPDATA%", xmlPath, MAX_PATH);
     assert(dword != 0);
@@ -96,8 +77,51 @@ void XmlConfigWrapper::ReadConfig(XmlConfig& config)
     node = xmlFirstElementChild(node);  /* ChildXML */
     assert(strcmp((const char *)node->name, "ChildXML") == 0);
 
-    shared_ptr<xmlChar> xmlDir = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"ReceivDir");
-    config.xmlDir = (char*)xmlDir.get();
+    shared_ptr<xmlChar> dir = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"ReceivDir");
+    xmlDir = (char*)dir.get();
 }
 
+/**********************class NetworkRelationConfig**********************/
+NetworkRelationConfig::NetworkRelationConfig(const char *xmlFile)
+{
+    relations.clear();
+
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile), XmlDocDeleter());
+    assert(doc != nullptr);
+    
+    shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+    assert(xpathCtx != nullptr);
+
+    //xpathExpr cant be "/Root/NetNode[*], because Network has no child node."
+    xmlChar *xpathExpr = (xmlChar*)"/Root/NetNode";
+    shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+
+    for (int i = 0; i < nodes->nodeNr; ++i)
+    {
+        xmlNodePtr node = nodes->nodeTab[i];
+        uint16_t networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"NetID");
+        uint16_t tsDstPort = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"FatherID");
+        relations.insert(make_pair(networkId, tsDstPort));
+    }
+
+    xmlCleanupParser();
+}
+
+bool NetworkRelationConfig::IsChildNetwork(uint16_t ancestor, uint16_t offspring)
+{
+    if (ancestor == offspring)
+        return true;
+
+    std::map<uint16_t, uint16_t>::iterator iter;  
+    for (auto iter = relations.find(offspring); 
+            iter != relations.end();
+            iter = relations.find(iter->second))
+    {
+        if (iter->first == ancestor)
+            return true;
+    }
+
+    return false;
+}
 #endif

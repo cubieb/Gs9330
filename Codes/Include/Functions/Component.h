@@ -82,6 +82,7 @@ public:
     virtual ~Section() {}
 
     virtual uint16_t GetPid()  const = 0; 
+    virtual uchar_t GetTableId() = 0;
     
     virtual size_t GetCodesSize() const = 0;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;

@@ -141,6 +141,11 @@ void Sdt::SetTableId(uchar_t data)
     tableId = data;
 }
 
+uchar_t Sdt::GetTableId()
+{
+    return tableId;
+}
+
 void Sdt::SetTsId(uint16_t data)
 {
     transportStreamId = data;

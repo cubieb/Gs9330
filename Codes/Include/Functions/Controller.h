@@ -8,7 +8,7 @@ class Ts;
 class DataWrapper;
 struct Config;
 
-#define InvalidSectionNumber -1
+#define InvalidSerialNumber -1
 
 struct TsSnInfo
 {
@@ -38,22 +38,33 @@ public:
 
 private:
     Controller();
-    void SendUdp(int socketFd);
+    void SendUdpToNetId(int socketFd, 
+                        struct sockaddr_in& serverAddr,
+                        std::bitset<256>& tableIds, 
+                        std::map<uint16_t, std::shared_ptr<TsSnInfo>>& tsPids);
+    void SendUdp(int socketFd, std::bitset<256>& tableIds);
     void ThreadMain();
+    void TheckTimer(uint32_t& cur, uint32_t orignal, std::bitset<256>& bits, uchar_t indexInBits);
+
     std::thread myThread;
     std::mutex  myMutext;
 
-    NetworkIpConfig       netConfig;
+    TransmitConfig        tranmitConfig;
     XmlConfig             xmlConfig;
-    NetworkRelationConfig relationConfig;
+    std::shared_ptr<NetworkRelationConfig> relationConfig;
     /* NetwordId, PID => TsSnInfo */
     std::map<uint16_t, std::map<uint16_t, std::shared_ptr<TsSnInfo>>> netTsSnInfors;
     std::list<std::shared_ptr<DataWrapper>> wrappers;
 
-#if defined(_DEBUG)
-    /* PID, lastSectionSn => tsDebug */
-    std::map<uint16_t, uint16_t> tsDebug;
-#endif
+    uint32_t   nitActualTimer;
+    uint32_t   nitOtherTimer;
+    uint32_t   batTimer;
+    uint32_t   sdtActualTimer;
+    uint32_t   sdtOtherTimer;
+    uint32_t   eit4ETimer;
+    uint32_t   eit4FTimer;
+    uint32_t   eit50to5FTimer;
+    uint32_t   eit60to6FTimer;
 };
 
 #endif

@@ -166,7 +166,7 @@
     <Xml Include="..\Configuration\Gs9330SoapClient.xml">
       <Filter>资源文件</Filter>
     </Xml>
-    <Xml Include="..\Configuration\Gs9330Netwok.xml">
+    <Xml Include="..\Configuration\Gs9330Transmit.xml">
       <Filter>资源文件</Filter>
     </Xml>
   </ItemGroup>

@@ -2,82 +2,64 @@
 #define _Gs9330Config_h_
 
 #include "SystemInclude.h"
-/**********************class NetworkIpConfig**********************/
-struct NetworkIpConfig
-{
-    struct Entry
-    {
-        uint16_t    networkId;
-        uint32_t    tsDstIp;
-        uint16_t    tsDstPort;
-        Entry(uint16_t networkId, uint32_t tsDstIp, uint16_t tsDstPort)
-            : networkId(networkId), tsDstIp(tsDstIp), tsDstPort(tsDstPort)
-        {}
-    };
-    std::list<Entry> entries;
-    uint32_t         tsInterval;  /* upd packet interval in mini seconds */
-};
 
-/**********************class NetworkIpConfigWrapper**********************/
-class NetworkIpConfigWrapper
+/**********************class NetworkIpEntry**********************/
+class NetworkIdAddress
 {
 public:
-    NetworkIpConfigWrapper();
-    void ReadConfig(NetworkIpConfig&);
+    NetworkIdAddress(uint16_t networkId, uint32_t tsDstIp, uint16_t tsDstPort)
+        : networkId(networkId), tsDstIp(tsDstIp), tsDstPort(tsDstPort)
+    {}
+
+public:
+    uint16_t    networkId;
+    uint32_t    tsDstIp;
+    uint16_t    tsDstPort;
 };
 
-/**********************class NetworkRelationConfig**********************/
-struct NetworkRelationConfig
-{
-    //uint16_t networkId;
-    //uint16_t parentNetworkId;
-    std::map<uint16_t, uint16_t> relation;
-    bool IsChildNetwork(uint16_t ancestor, uint16_t offspring)
-    {
-        if (ancestor == offspring)
-            return true;
-
-        std::map<uint16_t, uint16_t>::iterator iter;  
-        for (auto iter = relation.find(offspring); 
-             iter != relation.end();
-             iter = relation.find(iter->second))
-        {
-            if (iter->first == ancestor)
-                return true;
-        }
-
-        return false;
-    }
-
-    void Clear()
-    {
-        relation.clear();
-    }
-};
-
-/**********************class NetworkRelationConfigWrapper**********************/
-class NetworkRelationConfigWrapper
+/**********************class TransmitConfig**********************/
+class TransmitConfig
 {
 public:
-    NetworkRelationConfigWrapper(const char *xmlFile);
-    void ReadConfig(NetworkRelationConfig&);
+    TransmitConfig();
+    void AddNetAddr(uint16_t networkId, uint32_t tsDstIp, uint16_t tsDstPort);
 
-private:
-    std::string xmlFile;
+public:
+    /* upd packet interval in seconds */
+    uint32_t   nitActualInterval;
+    uint32_t   nitOtherInterval;
+    uint32_t   batInterval;
+    uint32_t   sdtActualInterval;
+    uint32_t   sdtOtherInterval;
+    uint32_t   eit4EInterval;
+    uint32_t   eit4FInterval;
+    uint32_t   eit50Interval;
+    uint32_t   eit60Interval;
+    
+    std::list<std::shared_ptr<NetworkIdAddress>> netAddresses;
 };
 
 /**********************class XmlConfig**********************/
-struct XmlConfig
+class XmlConfig
 {
+public:
+    XmlConfig();
+
+public:
     std::string xmlDir;
 };
 
-/**********************class XmlConfigWrapper**********************/
-class XmlConfigWrapper
+/**********************class NetworkRelationConfig**********************/
+class NetworkRelationConfig
 {
 public:
-    XmlConfigWrapper();
-    void ReadConfig(XmlConfig&);
+    NetworkRelationConfig(const char *xmlFile);
+    
+    bool IsChildNetwork(uint16_t ancestor, uint16_t offspring);
+
+public:
+    //map<networkId, parentNetworkId>
+    std::map<uint16_t, uint16_t> relations;
 };
 
 #endif

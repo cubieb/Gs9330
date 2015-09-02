@@ -28,11 +28,11 @@ public:
     typedef std::list<uchar_t*>::iterator iterator;
     Segment();
 
-    void Init(std::list<std::shared_ptr<Section>> sections, size_t segmentSize);
+    void Init(std::shared_ptr<Section> section, size_t segmentSize);
     iterator begin();
     iterator end();
 
-    uint_t GetSegmentNumber(std::list<std::shared_ptr<Section>> sections, size_t segmentSize);
+    uint_t GetSegmentNumber(std::shared_ptr<Section> section, size_t segmentSize);
 
 private:
     std::shared_ptr<uchar_t> buffer;
@@ -49,11 +49,10 @@ public:
     void SetContinuityCounter(uchar_t theContinuityCounter);
     uint16_t GetPid();
 
-    size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize);
+    size_t GetCodesSize(const std::bitset<256>& tableIds) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>& tableIds);
 
     void AddSection(std::shared_ptr<Section> section);
-    size_t GetSectionNumber();
     void Clear();
 
 private:
