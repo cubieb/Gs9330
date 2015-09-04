@@ -85,6 +85,7 @@
     <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\DirMonitor.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\Eit.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp" />
@@ -99,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Include\Functions\Bat.h" />
+    <ClInclude Include="..\Codes\Include\Functions\Eit.h" />
     <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h" />
     <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
@@ -126,6 +128,7 @@
     <Xml Include="..\Configuration\Gs9330Transmit.xml" />
     <Xml Include="..\Configuration\Gs9330SoapClient.xml" />
     <Xml Include="..\XmlFiles\BAT.xml" />
+    <Xml Include="..\XmlFiles\EIT.xml" />
     <Xml Include="..\XmlFiles\Nit.101.Actual.xml" />
     <Xml Include="..\XmlFiles\Nit.101.Other.xml" />
     <Xml Include="..\XmlFiles\Nit.102.Other.xml" />

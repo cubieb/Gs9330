@@ -172,4 +172,20 @@ private:
                              xmlNodePtr& node, xmlChar* child) const;
 };
 
+/**********************class EitXmlWrapper**********************/
+template<typename Section>
+class EitXmlWrapper: public XmlDataWrapper<Section>
+{
+public:
+    typedef XmlDataWrapper<Section> MyBase;
+    typedef EitXmlWrapper<Section> MyType;    
+
+    EitXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
+        : MyBase(handler, xmlFileDir, ".*eit.*\\.xml")
+    {
+    }
+
+    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+};
+
 #endif

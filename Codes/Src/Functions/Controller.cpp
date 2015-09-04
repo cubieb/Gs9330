@@ -174,6 +174,7 @@ void Controller::ThreadMain()
 
         if (tableIds.any())
             SendUdp(socketFd, tableIds);
+
         Sleep(1000);
     }
     closesocket(socketFd);

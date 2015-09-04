@@ -78,6 +78,9 @@
     <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Eit.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Main.h">
@@ -140,6 +143,9 @@
     <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h">
       <Filter>头文件\Functions</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Eit.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />
@@ -167,6 +173,9 @@
       <Filter>资源文件</Filter>
     </Xml>
     <Xml Include="..\Configuration\Gs9330Transmit.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\XmlFiles\EIT.xml">
       <Filter>资源文件</Filter>
     </Xml>
   </ItemGroup>

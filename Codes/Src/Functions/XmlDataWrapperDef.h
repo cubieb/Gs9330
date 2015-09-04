@@ -198,17 +198,14 @@ shared_ptr<Section> SdtXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     
-    for (int i = 0; i < nodes->nodeNr; ++i)
-    {
-        node = nodes->nodeTab[i];
-        sdt->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
-        sdt->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
-        sdt->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+    node = nodes->nodeTab[0];
+    sdt->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
+    sdt->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
+    sdt->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
 
-        for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
-        {
-            AddService(*sdt, node, (xmlChar*)"Service");      
-        }
+    for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+    {
+        AddService(*sdt, node, (xmlChar*)"Service");      
     }
 
     xmlCleanupParser();
@@ -323,6 +320,41 @@ shared_ptr<Section> BatXmlWrapper<Section>::CreateSection(const char* xmlPath) c
 
     xmlCleanupParser();
     return bat;
+}
+
+/**********************class EitXmlWrapper**********************/
+template<typename Section>
+shared_ptr<Section> EitXmlWrapper<Section>::CreateSection(const char* xmlPath) const
+{
+    auto eit = std::make_shared<Section>();
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    assert(doc != nullptr);
+
+    xmlNodePtr node = xmlDocGetRootElement(doc.get());
+    bat->SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+
+    shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+    assert(xpathCtx != nullptr);
+
+    xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
+    shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    
+    node = nodes->nodeTab[0];
+    eit->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
+    eit->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
+    eit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+
+    uint16_t serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
+
+    for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+    {      
+
+        AddEvent(*sdt, node, (xmlChar*)"Service");      
+    }
+
+    xmlCleanupParser();
+    return eit;
 }
 
 #endif
