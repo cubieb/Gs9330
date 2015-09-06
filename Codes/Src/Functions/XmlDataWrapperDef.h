@@ -35,24 +35,9 @@ void XmlDataWrapper<Section>::FileIoCompletionRoutine(const char *file)
 {
     if (!regex_match(file, regex(xmlFileRegularExp)))
         return;
-
-    const char *ptr;
-    for (ptr = file; ptr < file + strlen(file); ++ptr)
-    {
-        if (*ptr == '_')
-        {
-            ++ptr;
-            break;
-        }
-    }
-    
-    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
-    uint16_t sectionSn = (uint16_t)strtol(ptr, nullptr, 10);
     
     string xmlPath = xmlFileDir + string("/") + string(file);
-
-    auto section = CreateSection(xmlPath.c_str()); 
-    HandleDbInsert(netId, section, sectionSn);
+    CreateSection(file); 
 
     remove(xmlPath.c_str());
 }
@@ -100,11 +85,12 @@ void NitXmlWrapper<Section>::AddTsDescriptor(Section& nit, uint16_t tsId,
 }
 
 template<typename Section>
-shared_ptr<Section> NitXmlWrapper<Section>::CreateSection(const char* xmlPath) const
+void NitXmlWrapper<Section>::CreateSection(const char *file) const
 {
-    auto nit = std::make_shared<Section>();
+    string xmlPath = xmlFileDir + string("/") + string(file);
 
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    auto nit = std::make_shared<Section>();
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -117,7 +103,7 @@ shared_ptr<Section> NitXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     assert(nodes != nullptr && nodes->nodeNr == 1);
-
+    
     node = nodes->nodeTab[0];
     nit->SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
     nit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
@@ -147,7 +133,10 @@ shared_ptr<Section> NitXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     }
     xmlCleanupParser();
 
-    return nit;
+    const char *ptr = find(file, file + strlen(file), '_') + 1;
+    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
+    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
+    HandleDbInsert(netId, nit, sn);
 }
 
 /**********************class SdtXmlWrapper**********************/
@@ -182,10 +171,12 @@ void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar*
 }
 
 template<typename Section>
-shared_ptr<Section> SdtXmlWrapper<Section>::CreateSection(const char* xmlPath) const
+void SdtXmlWrapper<Section>::CreateSection(const char *file) const
 {
+    string xmlPath = xmlFileDir + string("/") + string(file);
+
     auto sdt = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -209,7 +200,12 @@ shared_ptr<Section> SdtXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     }
 
     xmlCleanupParser();
-    return sdt;
+
+    const char *ptr = find(file, file + strlen(file), '_') + 1;
+    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
+    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
+    sdt->SetNetworkId(netId);
+    HandleDbInsert(netId, sdt, sn);
 }
 
 /**********************class BatXmlWrapper**********************/
@@ -276,10 +272,12 @@ void BatXmlWrapper<Section>::AddTsDescriptor0x41(Section& bat, uint16_t tsId,
 }
 
 template<typename Section>
-shared_ptr<Section> BatXmlWrapper<Section>::CreateSection(const char* xmlPath) const
+void BatXmlWrapper<Section>::CreateSection(const char *file) const
 {
+    string xmlPath = xmlFileDir + string("/") + string(file);
+
     auto bat = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -319,15 +317,22 @@ shared_ptr<Section> BatXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     }
 
     xmlCleanupParser();
-    return bat;
+    
+    const char *ptr = find(file, file + strlen(file), '_') + 1;
+    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
+    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
+    bat->SetNetworkId(netId);
+    HandleDbInsert(netId, bat, sn);
 }
 
 /**********************class EitXmlWrapper**********************/
 template<typename Section>
-shared_ptr<Section> EitXmlWrapper<Section>::CreateSection(const char* xmlPath) const
-{
+void EitXmlWrapper<Section>::CreateSection(const char *file) const
+{    
+    string xmlPath = xmlFileDir + string("/") + string(file);
+
     auto eit = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -354,7 +359,11 @@ shared_ptr<Section> EitXmlWrapper<Section>::CreateSection(const char* xmlPath) c
     }
 
     xmlCleanupParser();
-    return eit;
+    
+    const char *ptr = find(file, file + strlen(file), '_') + 1;
+    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
+    uint16_t sectionSn = (uint16_t)strtol(ptr, nullptr, 10);
+    //HandleDbInsert(netId, sdt, sectionSn);
 }
 
 #endif

@@ -7,14 +7,25 @@
 class NetworkIdAddress
 {
 public:
-    NetworkIdAddress(uint16_t networkId, uint32_t tsDstIp, uint16_t tsDstPort)
-        : networkId(networkId), tsDstIp(tsDstIp), tsDstPort(tsDstPort)
+    NetworkIdAddress(uint16_t networkId, const char *dstIp, uint16_t dstPort)
+        : networkId(networkId), dstIp(dstIp), dstPort(dstPort)
     {}
 
 public:
     uint16_t    networkId;
-    uint32_t    tsDstIp;
-    uint16_t    tsDstPort;
+    std::string dstIp;
+    uint16_t    dstPort;
+};
+
+struct CmpNetworkIdAddressId: public std::binary_function<NetworkIdAddress, uint16_t, bool>
+{
+    bool operator()(const std::shared_ptr<first_argument_type>& left, second_argument_type right) const
+    {
+        if (left->networkId == right)
+            return true;
+
+        return false;
+    }
 };
 
 /**********************class TransmitConfig**********************/
@@ -22,7 +33,6 @@ class TransmitConfig
 {
 public:
     TransmitConfig();
-    void AddNetAddr(uint16_t networkId, uint32_t tsDstIp, uint16_t tsDstPort);
 
 public:
     /* upd packet interval in seconds */
@@ -53,6 +63,7 @@ public:
 class NetworkRelationConfig
 {
 public:
+    NetworkRelationConfig();
     NetworkRelationConfig(const char *xmlFile);
     
     bool IsChildNetwork(uint16_t ancestor, uint16_t offspring);

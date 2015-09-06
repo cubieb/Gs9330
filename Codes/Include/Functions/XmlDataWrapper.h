@@ -86,6 +86,7 @@ template<>
 inline SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName)
 {
     SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
+
     return attrValue;
 }   
 
@@ -103,7 +104,7 @@ public:
     void Start();
     void FileIoCompletionRoutine(const char *file);
 
-    virtual std::shared_ptr<Section> CreateSection(const char* xmlPath) const = 0;
+    virtual void CreateSection(const char *file) const = 0;
 
 protected:
     std::string xmlFileDir;
@@ -124,7 +125,7 @@ public:
     {
     }
 
-    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+    void CreateSection(const char *file) const;
 
 private:
     void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
@@ -144,7 +145,7 @@ public:
     {
     }
 
-    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+    void CreateSection(const char *file) const;
 
 private:
     void AddService(Section& sdt, xmlNodePtr& node, xmlChar* child) const;
@@ -163,7 +164,7 @@ public:
     {
     }
 
-    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+    void CreateSection(const char* file) const;
 
 private:
     void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
@@ -185,7 +186,7 @@ public:
     {
     }
 
-    std::shared_ptr<Section> CreateSection(const char* xmlPath) const;
+    void CreateSection(const char *file) const;
 };
 
 #endif

@@ -52,11 +52,10 @@ TransmitConfig::TransmitConfig()
         xmlNodePtr node = nodes->nodeTab[i];
 
         uint16_t networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
-        shared_ptr<xmlChar> addr = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"DstIP");
-        uint32_t dstIp = inet_addr((const char *)addr.get());        
+        shared_ptr<xmlChar> dstIp = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"DstIP");
         uint16_t dstPort = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"DstPort");
 
-        netAddresses.push_back(make_shared<NetworkIdAddress>(networkId, dstIp, dstPort));
+        netAddresses.push_back(make_shared<NetworkIdAddress>(networkId, (const char *)dstIp.get(), dstPort));
     }
 
     xmlCleanupParser();
@@ -82,6 +81,9 @@ XmlConfig::XmlConfig()
 }
 
 /**********************class NetworkRelationConfig**********************/
+NetworkRelationConfig::NetworkRelationConfig()
+{}
+
 NetworkRelationConfig::NetworkRelationConfig(const char *xmlFile)
 {
     relations.clear();

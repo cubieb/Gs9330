@@ -28,9 +28,19 @@ void Bat::SetTableId(uchar_t data)
     tableId = data;
 }
 
-uchar_t Bat::GetTableId()
+uchar_t Bat::GetTableId() const
 {
     return tableId;
+}
+
+void Bat::SetNetworkId(uint16_t data)
+{
+    networkId = data;
+}
+
+uint16_t Bat::GetNetworkId() const
+{
+    return networkId;
 }
 
 void Bat::SetBouquetId(uint16_t data)

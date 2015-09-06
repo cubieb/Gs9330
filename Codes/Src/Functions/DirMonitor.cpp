@@ -89,13 +89,13 @@ void DirMonitor::FileIoCompletionRoutine(DWORD errCode, DWORD numberOfBytesTrans
 
             if (ptr->Action == FILE_ACTION_ADDED)
             {
-                /*just for debug, to triger a bug, some file event was missed.
+                DWORD bytes = 0;
+                /*
                 MSDN: Returning from this function allows another pending I/O completion routine to be called. 
                 All waiting completion routines are called before the alertable thread's wait is completed 
                 with a return code of WAIT_IO_COMPLETION. The system may call the waiting completion routines 
                 in any order. They may or may not be called in the order the I/O functions are completed.
                 */
-                //SleepEx(5, true); 
                 routine(file);
             }
 		} while (ptr->NextEntryOffset != 0);

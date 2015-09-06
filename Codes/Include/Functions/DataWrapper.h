@@ -17,7 +17,7 @@ public:
     {}
     virtual void Start() = 0;
 
-    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn)
+    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn) const
     {
         handler(netId, section, sectionSn);
     }

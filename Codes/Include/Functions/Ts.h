@@ -53,7 +53,7 @@ public:
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>& tableIds);
 
     void AddSection(std::shared_ptr<Section> section);
-    void Clear();
+    void Clear(uint16_t netId);
 
 private:
     struct transporPacket

@@ -141,9 +141,19 @@ void Sdt::SetTableId(uchar_t data)
     tableId = data;
 }
 
-uchar_t Sdt::GetTableId()
+uchar_t Sdt::GetTableId() const
 {
     return tableId;
+}
+
+void Sdt::SetNetworkId(uint16_t data)
+{
+    networkId = data;
+}
+
+uint16_t Sdt::GetNetworkId() const
+{
+    return networkId;
 }
 
 void Sdt::SetTsId(uint16_t data)

@@ -28,7 +28,7 @@ void Nit::SetTableId(uchar_t data)
     tableId = data;
 }
 
-uchar_t Nit::GetTableId()
+uchar_t Nit::GetTableId() const
 {
     return tableId;
 }
@@ -36,6 +36,11 @@ uchar_t Nit::GetTableId()
 void Nit::SetNetworkId(uint16_t data)
 {
     networkId = data;
+}
+
+uint16_t Nit::GetNetworkId() const
+{
+    return networkId;
 }
 
 void Nit::SetVersionNumber(uchar_t data)

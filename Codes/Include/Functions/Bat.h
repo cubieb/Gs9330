@@ -60,7 +60,10 @@ public:
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
-    uchar_t GetTableId();
+    uchar_t GetTableId() const;
+
+    void SetNetworkId(uint16_t data);
+    uint16_t GetNetworkId() const;
 
     void SetBouquetId(uint16_t data);
     void SetVersionNumber(uchar_t data);
@@ -79,6 +82,9 @@ public:
 
 private:
     uchar_t  tableId;
+    //protocol do not define network Id for this section, we use this networkId to
+    //determine whether the current section should be send to a sub-network
+    uint16_t networkId;   
     uint16_t bouquetId;
     uchar_t  versionNumber;
     uchar_t  sectionNumber;

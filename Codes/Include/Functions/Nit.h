@@ -70,9 +70,11 @@ public:
     uint16_t GetPid() const; 
 
     void SetTableId(uchar_t data);
-    uchar_t GetTableId();
+    uchar_t GetTableId() const;
 
     void SetNetworkId(uint16_t data);
+    uint16_t GetNetworkId() const;
+
     void SetVersionNumber(uchar_t data);
     void SetSectionNumber(uchar_t data);
     void SetLastSectionNumber(uchar_t data);

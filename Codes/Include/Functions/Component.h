@@ -82,7 +82,8 @@ public:
     virtual ~Section() {}
 
     virtual uint16_t GetPid()  const = 0; 
-    virtual uchar_t GetTableId() = 0;
+    virtual uchar_t GetTableId() const = 0;
+    virtual uint16_t GetNetworkId() const = 0;
     
     virtual size_t GetCodesSize() const = 0;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
@@ -90,5 +91,24 @@ public:
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 };
+
+class CompareSectionNetId : public std::unary_function<Section, bool>
+{
+public:
+    CompareSectionNetId(uint16_t netId): netId(netId)
+    {}
+
+    bool operator()(const std::shared_ptr<argument_type>& arg) const
+    {
+        if (arg->GetNetworkId() == netId)
+            return true;
+
+        return false;
+    }
+
+private:
+    uint16_t netId;
+};
+
 
 #endif

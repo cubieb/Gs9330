@@ -10,25 +10,11 @@ struct Config;
 
 #define InvalidSerialNumber -1
 
-struct TsSnInfo
-{
-    std::shared_ptr<Ts> ts;
-
-    /* Section Serial Number is used to identify if two .xml should packed into
-       a group of TS packet.
-     */
-    uint16_t sn;
-
-    TsSnInfo(std::shared_ptr<Ts> ts, uint16_t sn)
-        : ts(ts), sn(sn)
-    {}
-};
-
 class Controller
 {
 public:
     void Start();
-    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t sectionSn);
+    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t netPidSn);
 
     static Controller& GetInstance()
     {
@@ -41,7 +27,7 @@ private:
     void SendUdpToNetId(int socketFd, 
                         struct sockaddr_in& serverAddr,
                         std::bitset<256>& tableIds, 
-                        std::map<uint16_t, std::shared_ptr<TsSnInfo>>& tsPids);
+                        std::map<uint16_t, std::shared_ptr<Ts>>& pidTsInfors);
     void SendUdp(int socketFd, std::bitset<256>& tableIds);
     void ThreadMain();
     void TheckTimer(uint32_t& cur, uint32_t orignal, std::bitset<256>& bits, uchar_t indexInBits);
@@ -52,8 +38,12 @@ private:
     TransmitConfig        tranmitConfig;
     XmlConfig             xmlConfig;
     std::shared_ptr<NetworkRelationConfig> relationConfig;
+
+    /* NetwordId, PID => Section Serial Number */
+    std::map<uint16_t, std::map<uint16_t, uint16_t>> netPidSnInfors;
+
     /* NetwordId, PID => TsSnInfo */
-    std::map<uint16_t, std::map<uint16_t, std::shared_ptr<TsSnInfo>>> netTsSnInfors;
+    std::map<uint16_t, std::map<uint16_t, std::shared_ptr<Ts>>> netPidTsInfors;
     std::list<std::shared_ptr<DataWrapper>> wrappers;
 
     uint32_t   nitActualTimer;

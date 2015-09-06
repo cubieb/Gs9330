@@ -1,0 +1,10 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="NIT" TableID="0x41">
+	<Network ID="102" Name="新民市网" Version="1">
+		<Descriptors Sum="0"/>
+		<Transportstream TSID="1" ONID="102" Frequency="305000" Fec_Outer="0x2" Modulation="0x03" Symbol_Rate="6875" Fec_Inner="0x0">
+			<Descriptors Sum="0"/>
+		</Transportstream>
+	</Network>
+</Root>
+

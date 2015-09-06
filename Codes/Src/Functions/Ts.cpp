@@ -137,6 +137,7 @@ size_t Ts::MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>&
         }
     }
     
+    assert (ptr - buffer == bufferSize);
     return (ptr - buffer);
 }
 
@@ -146,7 +147,7 @@ void Ts::AddSection(std::shared_ptr<Section> section)
     sections.push_back(section);
 }
 
-void Ts::Clear()
+void Ts::Clear(uint16_t netId)
 {
-    sections.clear();
+    sections.remove_if(CompareSectionNetId(netId));
 }
