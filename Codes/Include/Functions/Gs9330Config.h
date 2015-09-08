@@ -17,12 +17,12 @@ public:
     uint16_t    dstPort;
 };
 
-struct CmpNetworkIdAddressId: public std::binary_function<NetworkIdAddress, uint16_t, bool>
+struct CmpNetworkIdAddressId: public std::binary_function<std::shared_ptr<NetworkIdAddress>, uint16_t, bool>
 {
-    bool operator()(const std::shared_ptr<first_argument_type>& left, second_argument_type right) const
+    bool operator()(const first_argument_type left, second_argument_type right) const
     {
         if (left->networkId == right)
-            return true;
+            return true; 
 
         return false;
     }

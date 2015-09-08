@@ -64,7 +64,7 @@ class Nit: public Section
 public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0010};
-    Nit();
+    Nit(const char *key);
     ~Nit() {}
     
     uint16_t GetPid() const; 

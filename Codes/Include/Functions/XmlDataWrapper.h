@@ -98,18 +98,19 @@ public:
     typedef DataWrapper MyBase;
     typedef XmlDataWrapper<Section> MyType;
 
-    XmlDataWrapper(DbInsertHandler& handler, const char *xmlFileDir, const char *xmlFileMatch);
+    XmlDataWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler,
+        const char *xmlFileDir, const char *xmlFileRegularExp);
     virtual ~XmlDataWrapper();
 
     void Start();
-    void FileIoCompletionRoutine(const char *file);
+    void HandleDbInsert(const char *file);
+    void HandleDbDelete(const char *file);
 
     virtual void CreateSection(const char *file) const = 0;
 
 protected:
     std::string xmlFileDir;
     std::string xmlFileRegularExp;
-    DirMonitor dirMonitor;
 };
 
 /**********************class NitXmlWrapper**********************/
@@ -120,11 +121,7 @@ public:
     typedef XmlDataWrapper<Section> MyBase;
     typedef NitXmlWrapper<Section> MyType;    
 
-    NitXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
-        : MyBase(handler, xmlFileDir, ".*nit.*\\.xml")
-    {
-    }
-
+    NitXmlWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler, const char *xmlFileDir);
     void CreateSection(const char *file) const;
 
 private:
@@ -140,11 +137,7 @@ public:
     typedef XmlDataWrapper<Section> MyBase;
     typedef SdtXmlWrapper<Section> MyType;    
 
-    SdtXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
-        : MyBase(handler, xmlFileDir, ".*sdt.*\\.xml")
-    {
-    }
-
+    SdtXmlWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler, const char *xmlFileDir);
     void CreateSection(const char *file) const;
 
 private:
@@ -159,11 +152,7 @@ public:
     typedef XmlDataWrapper<Section> MyBase;
     typedef BatXmlWrapper<Section> MyType;    
 
-    BatXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
-        : MyBase(handler, xmlFileDir, ".*bat.*\\.xml")
-    {
-    }
-
+    BatXmlWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler, const char *xmlFileDir);
     void CreateSection(const char* file) const;
 
 private:
@@ -179,14 +168,13 @@ class EitXmlWrapper: public XmlDataWrapper<Section>
 {
 public:
     typedef XmlDataWrapper<Section> MyBase;
-    typedef EitXmlWrapper<Section> MyType;    
+    typedef EitXmlWrapper<Section> MyType;
 
-    EitXmlWrapper(DbInsertHandler& handler, const char *xmlFileDir)
-        : MyBase(handler, xmlFileDir, ".*eit.*\\.xml")
-    {
-    }
-
+    EitXmlWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler, const char *xmlFileDir);
     void CreateSection(const char *file) const;
+
+private:
+    void AddEvent(Section& eit, xmlNodePtr& node, xmlChar* child) const;
 };
 
 #endif

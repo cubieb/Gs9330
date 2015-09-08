@@ -3,37 +3,52 @@
 
 #if defined(_WIN32)
 
-class DirMonitor;
-struct DirMonitorData
-{
-    enum: uint32_t { BufferSize = 1024 * 16 };
-	OVERLAPPED overlapped;
-	char       buffer[BufferSize];
-    DirMonitor *dirMonitor;
-};
+typedef std::function<void (const char*)> CompletionRoutine;
 
-void CALLBACK FileIoCompletionRoutine(DWORD errCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped);
-
-class DirMonitor
+/**********************class MonitorState**********************/
+class MonitorState
 {
 public:
-    typedef std::function<void (const char*)> CompletionRoutine;
+    enum { BufferSize = 2048 };
 
-    DirMonitor(const char *dir, CompletionRoutine routine);
+public:
+    MonitorState(const char *dir);
+    ~MonitorState();
+
+    std::shared_ptr<char>  buffer;
+    std::string            dir;
+    ULONG                  completionKey;
+    std::list<CompletionRoutine>  insertHandlers;
+    std::list<CompletionRoutine>  deleteHandlers;
+
+    HANDLE     dirHandle;   //folder under monitoring
+    HANDLE     ioPortHandle;
+    OVERLAPPED overlapped;
+
+    std::thread     monitorThread;
+};
+
+/**********************class DirMonitor**********************/
+class DirMonitor
+{
+public:    
     ~DirMonitor();
 
-    void RereshMonitoring();
-    void StartMonitoring();
-    void StopMonitoring();
-    void FileIoCompletionRoutine(DWORD errCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped);
+    void AddDir(const char *dir, CompletionRoutine insertHandler, CompletionRoutine deleteHandlers);
+    void RemoveDir(const char *dir);
+
+    static DirMonitor& GetInstance()
+    {
+        static DirMonitor instance;
+        return instance;
+    }
 
 private:
-    std::string dir;
-    CompletionRoutine routine;
-    HANDLE dirHandle;
+    DirMonitor();
+    void ThreadRoutine(std::shared_ptr<MonitorState> state);
 
-    bool isMonitering;
-    std::shared_ptr<DirMonitorData> dirMonitorData;
+private:
+    std::map<std::string, std::shared_ptr<MonitorState>> states;
 };
 
 #endif

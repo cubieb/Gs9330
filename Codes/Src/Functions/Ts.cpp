@@ -2,6 +2,7 @@
 #include "Common.h"
 
 #include "Nit.h"
+#include "Eit.h"
 #include "Ts.h"
 
 using namespace std;
@@ -33,6 +34,31 @@ void Segment::Init(shared_ptr<Section> section, size_t segmentSize)
     memset(ptr + segmentSize - tail, 0xff, tail);
 }
 
+void Segment::InitEitExt(shared_ptr<Section> section, size_t segmentSize)
+{
+    shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(section); 
+
+    size_t size = 1; //1 byte for pointer_field
+    size = size + eit->GetCodesSizeExt();
+    size_t tail = (segmentSize - (size % segmentSize)) % segmentSize;
+    size = size + tail; /* size must be times of segmentSize */
+    buffer.reset(new uchar_t[size], UcharDeleter());
+
+    uchar_t *ptr = buffer.get();
+    ptr = ptr + Write8(ptr, 0x0); //pointer_field
+
+    ptr = ptr + eit->MakeCodesExt(ptr, size - (buffer.get() - ptr));
+
+    segments.clear();
+    for (ptr = buffer.get(); ptr < buffer.get() + size; ptr = ptr + segmentSize)
+    {
+        segments.push_back(ptr);
+    }
+
+    ptr = segments.back();
+    memset(ptr + segmentSize - tail, 0xff, tail);
+}
+
 Segment::iterator Segment::begin()
 {
     return segments.begin();
@@ -47,6 +73,16 @@ uint_t Segment::GetSegmentNumber(shared_ptr<Section> section, size_t segmentSize
 {
     size_t size = 1; //1 byte for pointer_field
     size = size + section->GetCodesSize();
+
+    return (size + segmentSize - 1) / segmentSize;
+}
+
+uint_t Segment::GetEitExtSegmentNumber(shared_ptr<Section> section, size_t segmentSize)
+{
+    shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(section); 
+
+    size_t size = 1; //1 byte for pointer_field
+    size = size + eit->GetCodesSizeExt();
 
     return (size + segmentSize - 1) / segmentSize;
 }
@@ -86,9 +122,58 @@ size_t Ts::GetCodesSize(const std::bitset<256>& tableIds) const
         {
             segmentNumber = segmentNumber + segment.GetSegmentNumber(iter, segmentSize);
         }
+
+        if (iter->GetTableId() == 0x4E)
+        {
+            if (tableIds.test(0x50))
+                segmentNumber = segmentNumber + segment.GetEitExtSegmentNumber(iter, segmentSize);
+        }
+        else if (iter->GetTableId() == 0x4F)
+        {
+            if (tableIds.test(0x60))
+                segmentNumber = segmentNumber + segment.GetEitExtSegmentNumber(iter, segmentSize);
+        }
     }
     
     return (TsPacketSize * segmentNumber);
+}
+
+size_t Ts::MakeCodeImpl(Segment& segment, uchar_t *buffer)
+{
+    size_t segmentSize = TsPacketSize - sizeof(transport_packet);
+    uchar_t *ptr = buffer;
+    for (auto iter = segment.begin(); iter != segment.end(); ++iter)
+    {
+        ptr = ptr + Write8(ptr, 0x47);
+        /* transport_error_indicator(1 bit), payload_unit_start_indicator(1 bit), 
+            transport_priority(1 bit), PID(13 bits)
+            transport_error_indicator = 0;
+            transport_priority = 0;
+            payload_unit_start_indicator = (first byte of current section) ? 1 : 0;
+            */
+        uint16_t startIndicator = (iter == segment.begin() ? 1 : 0);
+        ptr = ptr + Write16(ptr, (startIndicator << 14) | (transporPacket.transportPriority << 13) | pid);
+        /* transport_scrambling_control[2] = '00';
+		    adaptation_field_control[2] = '01';
+		    continuity_counter[4] = 'xxxx';
+		*/
+        /* refer to "2.4.3.3 Semantic definition of fields in Transport Stream packet layer",
+            continuity_counter should be increase by 1 in all case.  
+            when send udp packet, we may send duplicate packet two time, in this circumstance, the
+            continuity_counter keep same with the oringinal packet.
+            for example, the udp sending function may like this:
+            ts.MakeCodes(buffer, bufferSize);
+            for (ptr = buffer; ptr = ptr < buffer + buffersize; buffer + 188)
+            {
+                SendUdp(ptr, 188);
+                SendUdp(ptr, 188);   //again
+            }
+            */
+        ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
+        ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);        
+    }
+
+    return ptr - buffer;
 }
 
 size_t Ts::MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>& tableIds)
@@ -105,36 +190,28 @@ size_t Ts::MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>&
         
         Segment segment;    
         segment.Init(iter, segmentSize);
-        for (auto iter = segment.begin(); iter != segment.end(); ++iter)
+        ptr = ptr + MakeCodeImpl(segment, ptr);
+    }
+
+    for (auto iter: sections)
+    {
+        uchar_t tableId = iter->GetTableId();
+        uchar_t extTableId;
+        if (tableId == 0x4e)
+            extTableId = 0x50;
+        else if (tableId == 0x4f)
+            extTableId = 0x60;
+        else
+            continue;
+
+        if (!tableIds.test(extTableId))
         {
-            ptr = ptr + Write8(ptr, 0x47);
-            /* transport_error_indicator(1 bit), payload_unit_start_indicator(1 bit), 
-               transport_priority(1 bit), PID(13 bits)
-               transport_error_indicator = 0;
-               transport_priority = 0;
-               payload_unit_start_indicator = (first byte of current section) ? 1 : 0;
-             */
-            uint16_t startIndicator = (iter == segment.begin() ? 1 : 0);
-            ptr = ptr + Write16(ptr, (startIndicator << 14) | (transporPacket.transportPriority << 13) | pid);
-            /* transport_scrambling_control[2] = '00';
-		       adaptation_field_control[2] = '01';
-		       continuity_counter[4] = 'xxxx';
-		    */
-            /* refer to "2.4.3.3 Semantic definition of fields in Transport Stream packet layer",
-               continuity_counter should be increase by 1 in all case.  
-               when send udp packet, we may send duplicate packet two time, in this circumstance, the
-               continuity_counter keep same with the oringinal packet.
-               for example, the udp sending function may like this:
-               ts.MakeCodes(buffer, bufferSize);
-               for (ptr = buffer; ptr = ptr < buffer + buffersize; buffer + 188)
-               {
-                   SendUdp(ptr, 188);
-                   SendUdp(ptr, 188);   //again
-               }
-             */
-            ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
-            ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);        
+            continue;
         }
+        
+        Segment segment;    
+        segment.InitEitExt(iter, segmentSize);       
+        ptr = ptr + MakeCodeImpl(segment, ptr);
     }
     
     assert (ptr - buffer == bufferSize);
@@ -147,7 +224,25 @@ void Ts::AddSection(std::shared_ptr<Section> section)
     sections.push_back(section);
 }
 
-void Ts::Clear(uint16_t netId)
+void Ts::RemoveSection(const char *key)
 {
-    sections.remove_if(CompareSectionNetId(netId));
+    sections.remove_if(CompareSectionKey(key));
+}
+
+/* the following function is provided just for debug */
+void Ts::Put(std::ostream& os) const
+{
+    ios::fmtflags flags = cout.flags( );
+    os << "Section Nuber: " << sections.size()
+        << endl;
+    for (auto iter: sections)
+    {
+        os << "nid = " << (uint32_t)iter->GetNetworkId() 
+            << ", pid = " << (uint32_t)iter->GetPid()
+            << ", tableid = " << (uint32_t)iter->GetTableId()
+            << ", key = " << iter->GetKey()
+            << endl;
+    }
+
+    cout.flags(flags);
 }

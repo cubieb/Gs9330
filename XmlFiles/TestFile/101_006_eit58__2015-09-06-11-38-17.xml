@@ -1,0 +1,22 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="EIT" TableID="0x60">
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="57" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="58" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="59" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="60" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="61" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+	<Transportstream TSID="58" ONID="101" Version="58">
+		<Service ServiceID="62" running_status="4" free_CA_mode="0"/>
+	</Transportstream>
+</Root>
+

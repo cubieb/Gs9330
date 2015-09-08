@@ -10,7 +10,8 @@
 using namespace std;
 
 /**********************class Bat**********************/
-Bat::Bat(): tableId(0), versionNumber(0), sectionNumber(0), lastSectionNumber(0)
+Bat::Bat(const char *key)
+    : Section(key), tableId(0), versionNumber(0), sectionNumber(0), lastSectionNumber(0)
 {
     descriptors.reset(new Descriptors);
     transportStreams.reset(new TransportStreams);

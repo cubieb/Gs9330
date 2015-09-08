@@ -78,18 +78,24 @@ public:
 class Section: public Component
 {
 public:
-    Section() {}
+    Section(const char *key): key(key) {}
     virtual ~Section() {}
 
     virtual uint16_t GetPid()  const = 0; 
     virtual uchar_t GetTableId() const = 0;
     virtual uint16_t GetNetworkId() const = 0;
+    virtual std::string GetKey() { return key; }
     
     virtual size_t GetCodesSize() const = 0;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;
 
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
+
+protected:
+    /* we regard a section as a iterm in table, tableKey is the key for current record
+    */
+    std::string key;
 };
 
 class CompareSectionNetId : public std::unary_function<Section, bool>
@@ -108,6 +114,24 @@ public:
 
 private:
     uint16_t netId;
+};
+
+class CompareSectionKey: public std::unary_function<Section, bool>
+{
+public:
+    CompareSectionKey(const char *key): key(key)
+    {}
+
+    bool operator()(const std::shared_ptr<argument_type>& arg) const
+    {
+        if (arg->GetKey() == key)
+            return true;
+
+        return false;
+    }
+
+private:
+    std::string key;
 };
 
 

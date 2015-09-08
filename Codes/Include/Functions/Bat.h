@@ -54,14 +54,14 @@ class Bat: public Section
 public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0011};
-    Bat();
+    Bat(const char *key);
     ~Bat() {}
     
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
     uchar_t GetTableId() const;
-
+    
     void SetNetworkId(uint16_t data);
     uint16_t GetNetworkId() const;
 

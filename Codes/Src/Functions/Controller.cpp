@@ -7,6 +7,7 @@
 #include "Nit.h"
 #include "Sdt.h"
 #include "Bat.h"
+#include "Eit.h"
 #include "XmlDataWrapper.h"
 #include "Ts.h"
 #include "Gs9330Config.h"
@@ -24,14 +25,18 @@ Controller::Controller()
         std::map<uint16_t, std::shared_ptr<Ts>> pidTses;
         pidTses.insert(make_pair(0x0010, make_shared<Ts>(0x0010)));
         pidTses.insert(make_pair(0x0011, make_shared<Ts>(0x0011)));
+        pidTses.insert(make_pair(0x0012, make_shared<Ts>(0x0012)));
 
         netPidTsInfors.insert(make_pair(iter->networkId, pidTses));
     }
 
-    DataWrapper::DbInsertHandler handler(bind(&Controller::HandleDbInsert, this, _1, _2, _3));
-    wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(handler, xmlConfig.xmlDir.c_str()));
-    wrappers.push_back(make_shared<SdtXmlWrapper<Sdt>>(handler, xmlConfig.xmlDir.c_str()));
-    wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(handler, xmlConfig.xmlDir.c_str()));
+    DataWrapper::DbInsertHandler insertHandler(bind(&Controller::HandleDbInsert, this, _1));
+    DataWrapper::DbDeleteHandler deleteHandler(bind(&Controller::HandleDbDelete, this, _1, _2));
+
+    wrappers.push_back(make_shared<NitXmlWrapper<Nit>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
+    wrappers.push_back(make_shared<SdtXmlWrapper<Sdt>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
+    wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
+    wrappers.push_back(make_shared<EitXmlWrapper<Eit>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
 
     relationConfig = make_shared<NetworkRelationConfig>(); 
 }
@@ -46,50 +51,27 @@ void Controller::Start()
     myThread = std::thread(bind(&Controller::ThreadMain, this));
 }
 
-void Controller::HandleDbInsert(uint16_t netId, shared_ptr<Section> section, uint16_t netPidSn)
-{
-    string xmlPath = xmlConfig.xmlDir + string("/") + string("NetWorkNode.xml");
-
-    uint16_t pid = section->GetPid();
-    uint16_t oldSn = InvalidSerialNumber;
-    auto netPidSnIter = netPidSnInfors.find(netId);
-    if (netPidSnIter == netPidSnInfors.end())
-    {
-        std::map<uint16_t, uint16_t> pidSnInfor;
-        pidSnInfor.insert(make_pair(pid, netPidSn));
-        netPidSnInfors.insert(make_pair(netId, pidSnInfor));
-    }
-    else
-    {
-        auto pidSnIter = netPidSnIter->second.find(pid);
-        if (pidSnIter == netPidSnIter->second.end())
-            netPidSnIter->second.insert(make_pair(pid, netPidSn));
-        else
-            oldSn = pidSnIter->second;
-    }
-
+void Controller::HandleDbInsert(shared_ptr<Section> section)
+{    
+    string xmlPath = xmlConfig.xmlDir + string("/") + string("NetWorkNode.xml");    
     if (_access(xmlPath.c_str(), 0) != -1)
     {
-        relationConfig = make_shared<NetworkRelationConfig>(xmlPath.c_str());   
-        //remove(xmlPath.c_str());  //delete "NetWorkNode.xml"
+        relationConfig = make_shared<NetworkRelationConfig>(xmlPath.c_str());
     }
+
+    uint16_t sectionOwnerNetId = section->GetNetworkId();
+    uint16_t pid = section->GetPid();
 
     for (auto netPidTsIter: netPidTsInfors)
     {
-        uint16_t networkId = netPidTsIter.first;
-
-        if (!relationConfig->IsChildNetwork(netId, netPidTsIter.first))
+        uint16_t tsDestNetId = netPidTsIter.first;
+        if (!relationConfig->IsChildNetwork(sectionOwnerNetId, tsDestNetId))
         {
             continue;
         }
 
         lock_guard<mutex> lock(myMutext);
         auto pidTsIter = netPidTsIter.second.find(pid);
-        
-        if (oldSn != netPidSn)
-        {
-            pidTsIter->second->Clear(networkId);  
-        }
         pidTsIter->second->AddSection(section);
         
 #if defined(_DEBUG)
@@ -99,14 +81,31 @@ void Controller::HandleDbInsert(uint16_t netId, shared_ptr<Section> section, uin
         shared_ptr<uchar_t> buffer(new uchar_t[size], UcharDeleter());
         pidTsIter->second->MakeCodes(buffer.get(), size, tableIds);
         ostringstream file;
-        file << "D:/Temp/NetId" <<  setfill('0') << setw(3) << (uint32_t)networkId 
-            << ".Pid" <<  setfill('0') << setw(4) << hex << pidTsIter->second->GetPid() 
-            << ".Sn" << setfill('0') << setw(3) << dec << netPidSn << ".ts";
+        file << "D:/Temp/NetId" <<  setfill('0') << setw(3) << (uint32_t)tsDestNetId 
+            << ".Pid" <<  setfill('0') << setw(4) << hex << pid 
+            << ".ts";
 
         fstream tsFile(file.str(), ios_base::out  | ios::binary);
         tsFile.write((char*)buffer.get(), size); 
         tsFile.close();
 #endif        
+    }
+}
+
+void Controller::HandleDbDelete(const char *tableName, const char *tableKey)
+{
+    if (tableName == nullptr) {}  //tableName not used
+
+    for (auto netPidTsIter: netPidTsInfors)
+    {
+        //uint16_t tsDestNetId = netPidTsIter.first;
+        //cout << "Ts Dest NetId = " << tsDestNetId << endl;
+        for(auto pidTsIter: netPidTsIter.second)
+        {
+            //cout << "====> Befor(pid=" << pidTsIter.first << "):" << *pidTsIter.second << endl;
+            pidTsIter.second->RemoveSection(tableKey);
+            //cout << "====> End:" << *pidTsIter.second << endl << endl;
+        }
     }
 }
 
@@ -189,15 +188,15 @@ void Controller::ThreadMain()
         TheckTimer(batTimer, tranmitConfig.batInterval, tableIds, 0x4A);
         TheckTimer(sdtActualTimer, tranmitConfig.sdtActualInterval, tableIds, 0x42);
         TheckTimer(sdtOtherTimer, tranmitConfig.sdtOtherInterval, tableIds, 0x46);
-        //TheckTimer(eit4ETimer, tranmitConfig.eit4EInterval, tableIds, 0x4E);
-        //TheckTimer(eit4FTimer, tranmitConfig.eit4FInterval, tableIds, 0x4F);
-        //TheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
-        //TheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
+        TheckTimer(eit4ETimer, tranmitConfig.eit4EInterval, tableIds, 0x4E);
+        TheckTimer(eit4FTimer, tranmitConfig.eit4FInterval, tableIds, 0x4F);
+        TheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
+        TheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
 
         if (tableIds.any())
             SendUdp(socketFd, tableIds);
 
-        Sleep(1000);
+        SleepEx(1000, true);
     }
     closesocket(socketFd);
 }

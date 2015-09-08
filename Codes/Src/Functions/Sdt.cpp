@@ -69,7 +69,9 @@ void SdtService::Put(std::ostream& os) const
 /**********************class SdtServices**********************/
 size_t SdtServices::GetCodesSize() const
 {    
-    /* 2 bytes for reserved_future_use and transport_descriptors_length */
+    /* there is no reserved_future_use and xxx_xxx__length fields, so we
+       have to impliment GetCodesSize() and MakeCodes() myself.
+     */
     size_t size = 0;
     for (const auto iter: components)
     {
@@ -123,8 +125,9 @@ void SdtServices::Put(std::ostream& os) const
 }
 
 /**********************class Sdt**********************/
-Sdt::Sdt(): tableId(0), transportStreamId(0), versionNumber(0), 
-            sectionNumber(0), lastSectionNumber(0), originalNetworkId(0)
+Sdt::Sdt(const char *key)
+    : Section(key), tableId(0), transportStreamId(0), versionNumber(0), 
+        sectionNumber(0), lastSectionNumber(0), originalNetworkId(0)
 {
     services.reset(new SdtServices);
 }

@@ -10,7 +10,8 @@
 
 using namespace std;
 /**********************class Nit**********************/
-Nit::Nit(): tableId(0), networkId(0), versionNumber(0), sectionNumber(0), lastSectionNumber(0)
+Nit::Nit(const char *key)
+    : Section(key), tableId(0), networkId(0), versionNumber(0), sectionNumber(0), lastSectionNumber(0)
 {
     descriptors.reset(new Descriptors);
     transportStreams.reset(new TransportStreams);

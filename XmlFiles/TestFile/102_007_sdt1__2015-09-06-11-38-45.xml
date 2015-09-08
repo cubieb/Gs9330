@@ -1,0 +1,5 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="SDT" TableID="0x46">
+	<Transportstream TSID="1" ONID="102" Version="1"/>
+</Root>
+

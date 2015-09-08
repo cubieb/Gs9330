@@ -6,7 +6,7 @@
 using namespace std;
 
 #if defined(_WIN32)
-
+#include "io.h"
 /**********************class TransmitConfig**********************/
 TransmitConfig::TransmitConfig()
 {
@@ -15,6 +15,10 @@ TransmitConfig::TransmitConfig()
     assert(dword != 0);
 
     strcat(xmlPath, "\\Gospell\\Gs9330Transmit.xml");
+    if (_access(xmlPath, 0) == -1)
+    {
+        strcpy(xmlPath, "Gs9330Transmit.xml");
+    }
 
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
     assert(doc != nullptr);
@@ -69,6 +73,11 @@ XmlConfig::XmlConfig()
     assert(dword != 0);
 
     strcat(xmlPath, "\\Gospell\\Gs9330SoapClient.xml");
+
+    if (_access(xmlPath, 0) == -1)
+    {
+        strcpy(xmlPath, "Gs9330SoapClient.xml");
+    }
 
     shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
     assert(doc != nullptr);

@@ -117,7 +117,7 @@ class Sdt: public Section
 public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0011};
-    Sdt();
+    Sdt(const char *key);
     ~Sdt() {}
     
     uint16_t GetPid()  const; 
@@ -147,7 +147,8 @@ public:
     void Put(std::ostream& os) const;
 
 private:
-    uchar_t  tableId;    //protocol do not define network Id for this section, we use this networkId to
+    uchar_t  tableId;    
+    //protocol do not define network Id for this section, we use this networkId to
     //determine whether the current section should be send to a sub-network
     uint16_t networkId; 
     uint16_t transportStreamId;

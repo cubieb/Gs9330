@@ -10,11 +10,32 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
+std::pair<shared_ptr<char>, size_t> ConvertUtf8ToGb2312(const std::shared_ptr<xmlChar>& str)
+{
+    size_t wcharNum = MultiByteToWideChar(CP_UTF8, 0, 
+        (char*)str.get(),  /* lpMultiByteStr, Pointer to the character string to convert. */
+        -1,                /* cbMultiByte, can be -1, if the string is null-terminated.*/
+        NULL, 0);
+    if (wcharNum == 1)
+    {
+        /* just a '\0' */
+        shared_ptr<char> gb2312(new char[1], CharDeleter());
+        gb2312.get()[0] = '\0';
+        return make_pair(gb2312, 1);
+    }
+    size_t strBytes = sizeof(WCHAR) * wcharNum; /* 0x13 + gb2312-string + '\0' */
+    shared_ptr<char> gb2312(new char[strBytes], CharDeleter());
+    gb2312.get()[0] = 0x13;
+    ConvertUtf8ToGb2312(gb2312.get() + 1, strBytes - 1, (char*)str.get());
+
+    return make_pair(gb2312, strBytes);
+}
+
 /**********************class XmlDataWrapper**********************/
 template<typename Section>
-XmlDataWrapper<Section>::XmlDataWrapper(DbInsertHandler& handler, const char *xmlFileDir, const char *xmlFileRegularExp)
-    : MyBase(handler), xmlFileDir(xmlFileDir), xmlFileRegularExp(xmlFileRegularExp),
-      dirMonitor(xmlFileDir, bind(&XmlDataWrapper::FileIoCompletionRoutine, this, _1))
+XmlDataWrapper<Section>::XmlDataWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler,
+        const char *xmlFileDir, const char *xmlFileRegularExp)
+    : MyBase(insertHandler, deleteHandler), xmlFileDir(xmlFileDir), xmlFileRegularExp(xmlFileRegularExp)
 {}
 
 template<typename Section>
@@ -26,23 +47,43 @@ void XmlDataWrapper<Section>::Start()
 {
     /* linux api  : http://linux.die.net/man/7/inotify
         windows api: ReadDirectoryChangesW() or FileSystemWatcher component
-        */
-    dirMonitor.StartMonitoring();
+    */
+    DirMonitor& dirMonitor = DirMonitor::GetInstance();
+    dirMonitor.AddDir(xmlFileDir.c_str(), 
+        bind(&XmlDataWrapper::HandleDbInsert, this, _1),
+        bind(&XmlDataWrapper::HandleDbDelete, this, _1));
 }
 
+//DirMonitor -> XmlDataWrapper<Section>::HandleDbInsert()
 template<typename Section>
-void XmlDataWrapper<Section>::FileIoCompletionRoutine(const char *file)
+void XmlDataWrapper<Section>::HandleDbInsert(const char *file)
 {
     if (!regex_match(file, regex(xmlFileRegularExp)))
         return;
     
     string xmlPath = xmlFileDir + string("/") + string(file);
-    CreateSection(file); 
+    CreateSection(file);   //->NotifyDbInsert()
+}
 
-    remove(xmlPath.c_str());
+//DirMonitor -> XmlDataWrapper<Section>::HandleDbDelete()
+template<typename Section>
+void XmlDataWrapper<Section>::HandleDbDelete(const char *file)
+{
+    if (!regex_match(file, regex(xmlFileRegularExp)))
+        return;
+    
+    NotifyDbDelete(xmlFileRegularExp.substr(2,3).c_str(), file);
 }
 
 /**********************class NitXmlWrapper**********************/
+template<typename Section>
+NitXmlWrapper<Section>::NitXmlWrapper(DbInsertHandler& insertHandler, 
+                                      DbDeleteHandler& deleteHandler, 
+                                      const char *xmlFileDir)
+    : MyBase(insertHandler, deleteHandler, xmlFileDir, ".*nit.*\\.xml")
+{
+}
+
 template<typename Section>
 void NitXmlWrapper<Section>::AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const
 {
@@ -89,8 +130,14 @@ void NitXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
 
-    auto nit = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    auto nit = std::make_shared<Section>(file);
+    shared_ptr<xmlDoc> doc;
+    for (int i = 0; i < 10 && doc == nullptr; ++i)
+    {
+        if (i != 0)
+            SleepEx(10, true);
+        doc.reset(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    }
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -108,7 +155,8 @@ void NitXmlWrapper<Section>::CreateSection(const char *file) const
     nit->SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
     nit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    nit->AddDescriptor(NetworkNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
+    auto nameGb2312 = ConvertUtf8ToGb2312(name);
+    nit->AddDescriptor(NetworkNameDescriptor::Tag, (uchar_t*)nameGb2312.first.get(), nameGb2312.second);
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {
@@ -132,14 +180,17 @@ void NitXmlWrapper<Section>::CreateSection(const char *file) const
         }
     }
     xmlCleanupParser();
-
-    const char *ptr = find(file, file + strlen(file), '_') + 1;
-    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
-    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
-    HandleDbInsert(netId, nit, sn);
+    NotifyDbInsert(nit);
 }
 
 /**********************class SdtXmlWrapper**********************/
+template<typename Section>
+SdtXmlWrapper<Section>::SdtXmlWrapper(DbInsertHandler& insertHandler, 
+                                      DbDeleteHandler& deleteHandler, 
+                                      const char *xmlFileDir)
+    : MyBase(insertHandler, deleteHandler, xmlFileDir, ".*sdt.*\\.xml")
+{}
+
 template<typename Section>
 void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar* child) const
 {
@@ -157,8 +208,13 @@ void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar*
     
     shared_ptr<xmlChar> serviceName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
     shared_ptr<xmlChar> providerName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Provider_Name");
+    auto serviceNameGb2312 = ConvertUtf8ToGb2312(serviceName);
+    auto providerNameGb2312 = ConvertUtf8ToGb2312(providerName);
     uchar_t type = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Type");
-    sdt.AddServiceDescriptor0x48(serviceId, type, providerName.get(), serviceName.get());
+
+    sdt.AddServiceDescriptor0x48(serviceId, type, 
+        (uchar_t*)providerNameGb2312.first.get(), 
+        (uchar_t*)serviceNameGb2312.first.get());
 
     for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
         cur != nullptr; 
@@ -175,8 +231,14 @@ void SdtXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
 
-    auto sdt = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    auto sdt = std::make_shared<Section>(file);
+    shared_ptr<xmlDoc> doc;
+    for (int i = 0; i < 10 && doc == nullptr; ++i)
+    {
+        if (i != 0)
+            SleepEx(10, true);
+        doc.reset(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    }
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -203,12 +265,19 @@ void SdtXmlWrapper<Section>::CreateSection(const char *file) const
 
     const char *ptr = find(file, file + strlen(file), '_') + 1;
     uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
-    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
     sdt->SetNetworkId(netId);
-    HandleDbInsert(netId, sdt, sn);
+    NotifyDbInsert(sdt);
 }
 
 /**********************class BatXmlWrapper**********************/
+template<typename Section>
+BatXmlWrapper<Section>::BatXmlWrapper(DbInsertHandler& insertHandler, 
+                                      DbDeleteHandler& deleteHandler, 
+                                      const char *xmlFileDir)
+    : MyBase(insertHandler, deleteHandler, xmlFileDir, ".*bat.*\\.xml")
+{
+}
+
 template<typename Section>
 void BatXmlWrapper<Section>::AddDescriptor(Section& bat, xmlNodePtr& node, xmlChar* child) const
 {
@@ -276,8 +345,14 @@ void BatXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
 
-    auto bat = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    auto bat = std::make_shared<Section>(file);
+    shared_ptr<xmlDoc> doc;
+    for (int i = 0; i < 10 && doc == nullptr; ++i)
+    {
+        if (i != 0)
+            SleepEx(10, true);
+        doc.reset(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    }
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -294,8 +369,10 @@ void BatXmlWrapper<Section>::CreateSection(const char *file) const
     node = nodes->nodeTab[0];
     bat->SetBouquetId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"BouquetID"));
     bat->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    bat->AddDescriptor(BouquetNameDescriptor::Tag, name.get(), strlen((const char*)name.get()));
+    auto nameGb2312 = ConvertUtf8ToGb2312(name);
+    bat->AddDescriptor(BouquetNameDescriptor::Tag, (uchar_t*)nameGb2312.first.get(), nameGb2312.second);    
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {
@@ -316,27 +393,39 @@ void BatXmlWrapper<Section>::CreateSection(const char *file) const
         }
     }
 
-    xmlCleanupParser();
-    
+    xmlCleanupParser(); 
+
     const char *ptr = find(file, file + strlen(file), '_') + 1;
     uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
-    uint16_t sn = (uint16_t)strtol(ptr, nullptr, 10);
-    bat->SetNetworkId(netId);
-    HandleDbInsert(netId, bat, sn);
+    bat->SetNetworkId(netId);   
+    NotifyDbInsert(bat);
 }
 
 /**********************class EitXmlWrapper**********************/
 template<typename Section>
+EitXmlWrapper<Section>::EitXmlWrapper(DbInsertHandler& insertHandler, 
+                                      DbDeleteHandler& deleteHandler, 
+                                      const char *xmlFileDir)
+    : MyBase(insertHandler, deleteHandler, xmlFileDir, ".*eit.*\\.xml")
+{
+}
+
+template<typename Section>
 void EitXmlWrapper<Section>::CreateSection(const char *file) const
 {    
     string xmlPath = xmlFileDir + string("/") + string(file);
-
-    auto eit = std::make_shared<Section>();
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    
+    shared_ptr<xmlDoc> doc;
+    for (int i = 0; i < 10 && doc == nullptr; ++i)
+    {
+        if (i != 0)
+            SleepEx(10, true);
+        doc.reset(xmlParseFile(xmlPath.c_str()), XmlDocDeleter());
+    }
     assert(doc != nullptr);
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
-    bat->SetTableId(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID"));
+    uchar_t tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
@@ -345,25 +434,55 @@ void EitXmlWrapper<Section>::CreateSection(const char *file) const
     shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     
-    node = nodes->nodeTab[0];
-    eit->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
-    eit->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
-    eit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+    for (int i = 0; i < nodes->nodeNr; ++i)
+    {
+        auto eit = std::make_shared<Section>(file);
+        eit->SetTableId(tableId);
 
-    uint16_t serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
+        node = nodes->nodeTab[i];
+        eit->SetTsId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID"));
+        eit->SetOnId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID"));
+        eit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+        eit->SetServiceId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID"));
 
-    for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
-    {      
-
-        AddEvent(*sdt, node, (xmlChar*)"Service");      
+        for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+        {
+            AddEvent(*eit, node, (xmlChar*)"Event");
+        }
+    
+        const char *ptr = find(file, file + strlen(file), '_') + 1;
+        uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
+        eit->SetNetworkId(netId);
+        NotifyDbInsert(eit);
     }
 
     xmlCleanupParser();
-    
-    const char *ptr = find(file, file + strlen(file), '_') + 1;
-    uint16_t netId = (uint16_t)strtol(file, nullptr, 10);
-    uint16_t sectionSn = (uint16_t)strtol(ptr, nullptr, 10);
-    //HandleDbInsert(netId, sdt, sectionSn);
+}
+
+template<typename Section>
+void EitXmlWrapper<Section>::AddEvent(Section& eit, xmlNodePtr& node, xmlChar* child) const
+{
+    if (xmlStrcmp(node->name, child) != 0)
+    {
+        return;
+    }
+
+    uint16_t eventId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"EventID");
+    SharedXmlChar startTime = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"StartTime");
+    uint32_t duration = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Duration");
+    uint16_t  runningStatus = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"running_status");
+    uint16_t  freeCaMode = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"free_CA_mode");
+
+    eit.AddEvent(eventId, (char*)startTime.get(), (time_t)duration, runningStatus, freeCaMode);
+
+    for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
+         cur != nullptr; 
+         cur = xmlNextElementSibling(cur))
+    {
+        uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        eit.AddEventDescriptor(eventId, tag, data.get(), strlen((const char*)data.get()));
+    }
 }
 
 #endif

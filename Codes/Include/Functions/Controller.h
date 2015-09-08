@@ -6,15 +6,14 @@ class Sdt;
 class Bat;
 class Ts;
 class DataWrapper;
-struct Config;
 
-#define InvalidSerialNumber -1
-
+#include "Gs9330Config.h"
 class Controller
 {
 public:
     void Start();
-    void HandleDbInsert(uint16_t netId, std::shared_ptr<Section> section, uint16_t netPidSn);
+    void HandleDbInsert(std::shared_ptr<Section> section);
+    void HandleDbDelete(const char *tableName, const char *tableKey);
 
     static Controller& GetInstance()
     {

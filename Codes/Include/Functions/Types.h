@@ -3,10 +3,12 @@
 
 #define MaxNitSectionLength     1024
 #define MaxSdtSectionLength     1024
+#define MaxEitSectionLength     4096
 
 #define NitSectionSyntaxIndicator  0x1
 #define SdtSectionSyntaxIndicator  0x1
 #define BatSectionSyntaxIndicator  0x1
+#define EitSectionSyntaxIndicator  0x1
 
 #define Reserved1Bit               0x1
 #define Reserved2Bit               0x3

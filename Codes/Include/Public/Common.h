@@ -104,10 +104,12 @@ inline bool operator > (Mac const& left, Mac const& right)
 size_t Read8(uchar_t* buf, uchar_t&);
 size_t Read16(uchar_t* buf, uint16_t&);
 size_t Read32(uchar_t* buf, uint32_t&);
+size_t Read64(uchar_t* buf, uint32_t&);
 
 size_t Write8(uchar_t* buf, uchar_t);
 size_t Write16(uchar_t* buf, uint16_t);
 size_t Write32(uchar_t* buf, uint32_t);
+size_t Write64(uchar_t* buf, uint64_t value);
 
 size_t MemCopy(void *dest, size_t destSize, const void *src, size_t count);
 
@@ -168,5 +170,19 @@ inline uchar_t ConvertValueToBcd(uchar_t value)
 {
 	return( ( ( value / 10 ) << 4 ) | ( value % 10 ) );				/* Convert Value to BCD */
 }
+
+/* without icon lib, we can call windows function to do the same thing.
+int len = MultiByteToWideChar(CP_UTF8, 0, (char*)data, -1, NULL, 0);
+wchar_t* wstr = new wchar_t[len+1];
+
+MultiByteToWideChar(CP_UTF8, 0, (char*)data, -1, wstr, len);
+len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+char* str = new char[len+1];
+WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+ */
+void ConvertUtf8ToGb2312(char *to, size_t toSize, char *from);
+
+/******************convert string to time_t******************/
+time_t ConvertStrToTime(const char *str);
 
 #endif

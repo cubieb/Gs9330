@@ -29,10 +29,12 @@ public:
     Segment();
 
     void Init(std::shared_ptr<Section> section, size_t segmentSize);
+    void InitEitExt(std::shared_ptr<Section> section, size_t segmentSize);
     iterator begin();
     iterator end();
 
     uint_t GetSegmentNumber(std::shared_ptr<Section> section, size_t segmentSize);
+    uint_t GetEitExtSegmentNumber(std::shared_ptr<Section> section, size_t segmentSize);
 
 private:
     std::shared_ptr<uchar_t> buffer;
@@ -53,7 +55,13 @@ public:
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>& tableIds);
 
     void AddSection(std::shared_ptr<Section> section);
-    void Clear(uint16_t netId);
+    void RemoveSection(const char *key);
+
+    /* the following function is provided just for debug */
+    void Put(std::ostream& os) const;
+
+private:
+    size_t MakeCodeImpl(Segment& segment, uchar_t *buffer);
 
 private:
     struct transporPacket
@@ -65,5 +73,11 @@ private:
     std::list<std::shared_ptr<Section>> sections;
     uint16_t pid;
 };
+
+inline std::ostream& operator << (std::ostream& os, const Ts& value) 
+{ 
+    value.Put(os); 
+    return os; 
+}
 
 #endif
