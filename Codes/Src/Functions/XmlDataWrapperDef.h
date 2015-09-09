@@ -10,27 +10,6 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
-std::pair<shared_ptr<char>, size_t> ConvertUtf8ToGb2312(const std::shared_ptr<xmlChar>& str)
-{
-    size_t wcharNum = MultiByteToWideChar(CP_UTF8, 0, 
-        (char*)str.get(),  /* lpMultiByteStr, Pointer to the character string to convert. */
-        -1,                /* cbMultiByte, can be -1, if the string is null-terminated.*/
-        NULL, 0);
-    if (wcharNum == 1)
-    {
-        /* just a '\0' */
-        shared_ptr<char> gb2312(new char[1], CharDeleter());
-        gb2312.get()[0] = '\0';
-        return make_pair(gb2312, 1);
-    }
-    size_t strBytes = sizeof(WCHAR) * wcharNum; /* 0x13 + gb2312-string + '\0' */
-    shared_ptr<char> gb2312(new char[strBytes], CharDeleter());
-    gb2312.get()[0] = 0x13;
-    ConvertUtf8ToGb2312(gb2312.get() + 1, strBytes - 1, (char*)str.get());
-
-    return make_pair(gb2312, strBytes);
-}
-
 /**********************class XmlDataWrapper**********************/
 template<typename Section>
 XmlDataWrapper<Section>::XmlDataWrapper(DbInsertHandler& insertHandler, DbDeleteHandler& deleteHandler,
@@ -154,9 +133,10 @@ void NitXmlWrapper<Section>::CreateSection(const char *file) const
     node = nodes->nodeTab[0];
     nit->SetNetworkId(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID"));
     nit->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
+
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    auto nameGb2312 = ConvertUtf8ToGb2312(name);
-    nit->AddDescriptor(NetworkNameDescriptor::Tag, (uchar_t*)nameGb2312.first.get(), nameGb2312.second);
+    string nameGb2312 = ConvertUtf8ToString(name.get());
+    nit->AddDescriptor(NetworkNameDescriptor::Tag, (uchar_t*)nameGb2312.c_str(), nameGb2312.size() + 1);
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {
@@ -207,14 +187,26 @@ void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar*
     sdt.AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
     
     shared_ptr<xmlChar> serviceName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
+    string serviceGb2312 = ConvertUtf8ToString(serviceName.get());
     shared_ptr<xmlChar> providerName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Provider_Name");
-    auto serviceNameGb2312 = ConvertUtf8ToGb2312(serviceName);
-    auto providerNameGb2312 = ConvertUtf8ToGb2312(providerName);
+    string providerGb2312 = ConvertUtf8ToString(providerName.get());
     uchar_t type = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Type");
+    sdt.AddServiceDescriptor0x48(serviceId, type, (uchar_t*)providerGb2312.c_str(), (uchar_t*)serviceGb2312.c_str());
 
-    sdt.AddServiceDescriptor0x48(serviceId, type, 
-        (uchar_t*)providerNameGb2312.first.get(), 
-        (uchar_t*)serviceNameGb2312.first.get());
+    shared_ptr<xmlChar> str = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"LCN");
+    uint16_t lcnFlag = (strlen((char*)str.get()) == 0) ? 0 : 1;
+    uint16_t lcn = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"LCN");
+
+    str = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Volume");
+    uchar_t vcFlag = (strlen((char*)str.get()) == 0) ? 0 : 1;
+    uchar_t volumeCompensation = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Volume");
+    
+    if (lcnFlag != 0 || vcFlag != 0)
+    {
+        uchar_t descriptor0x83[3];
+        Write16(&descriptor0x83[0], (lcnFlag << 15) || (lcn));
+        Write8(&descriptor0x83[2], (lcnFlag << volumeCompensation) || (vcFlag));
+    }
 
     for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
         cur != nullptr; 
@@ -371,8 +363,8 @@ void BatXmlWrapper<Section>::CreateSection(const char *file) const
     bat->SetVersionNumber(GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version"));
 
     shared_ptr<xmlChar> name = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"Name");
-    auto nameGb2312 = ConvertUtf8ToGb2312(name);
-    bat->AddDescriptor(BouquetNameDescriptor::Tag, (uchar_t*)nameGb2312.first.get(), nameGb2312.second);    
+    string nameGb2312 = ConvertUtf8ToString(name.get());
+    bat->AddDescriptor(BouquetNameDescriptor::Tag, (uchar_t*)nameGb2312.c_str(), nameGb2312.size());    
 
     for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
     {

@@ -171,16 +171,7 @@ inline uchar_t ConvertValueToBcd(uchar_t value)
 	return( ( ( value / 10 ) << 4 ) | ( value % 10 ) );				/* Convert Value to BCD */
 }
 
-/* without icon lib, we can call windows function to do the same thing.
-int len = MultiByteToWideChar(CP_UTF8, 0, (char*)data, -1, NULL, 0);
-wchar_t* wstr = new wchar_t[len+1];
-
-MultiByteToWideChar(CP_UTF8, 0, (char*)data, -1, wstr, len);
-len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
-char* str = new char[len+1];
-WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
- */
-void ConvertUtf8ToGb2312(char *to, size_t toSize, char *from);
+std::string ConvertUtf8ToString(uchar_t *src);
 
 /******************convert string to time_t******************/
 time_t ConvertStrToTime(const char *str);

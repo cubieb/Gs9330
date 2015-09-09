@@ -233,7 +233,7 @@ public:
 };
 
 /**********************class UserdefinedDscriptor83**********************/
-/* user defined dscriptor  */
+/* user defined dscriptor, LCN ∫Õ“Ù¡ø≤π≥•  */
 class UserdefinedDscriptor83: public UcharDescriptor
 {
 public: 

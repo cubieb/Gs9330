@@ -34,7 +34,8 @@ int main(int argc, char **argv)
     controller.Start();
 #else
 
-#endif    
+#endif
+
     while(true)
     {
         SleepEx(2000, true);  //must be SleepEx(), Sleep will not work
