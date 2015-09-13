@@ -175,5 +175,7 @@ std::string ConvertUtf8ToString(uchar_t *src);
 
 /******************convert string to time_t******************/
 time_t ConvertStrToTime(const char *str);
+void ConvertUtcToGmt(struct tm& src, struct tm& dst);
+time_t CalculateUtcGmtDiff();
 
 #endif

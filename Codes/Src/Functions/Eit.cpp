@@ -52,13 +52,23 @@ size_t EitEvent::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     
     ptr = ptr + Write16(ptr, eventId);
 
-    uint32_t year, month, day, hour, minute, second;
-    sscanf(this->startTime.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second); 
+    tm localTime, gmtTime;  
+    std::istringstream ss(this->startTime);
+    ss >> std::get_time(&localTime, "%Y-%m-%d %H:%M:%S");
+    ConvertUtcToGmt(localTime, gmtTime);
 
-    uint64_t startDate = ConvertDateToMjd(year - 1900, month, day);
+    uint32_t year, month, day, hour, minute, second;
+    year = gmtTime.tm_year;
+    month = gmtTime.tm_mon + 1;
+    day = gmtTime.tm_mday;
+    hour = gmtTime.tm_hour;
+    minute = gmtTime.tm_min;
+    second = gmtTime.tm_sec;
+
+    uint64_t startDate = ConvertDateToMjd(year, month, day);
     uint64_t startTime = ((hour / 10) << 20) | ((hour % 10) << 16) 
                 | ((minute / 10) << 12) | ((minute % 10) << 8) 
-                | ((second / 10) << 4) | (second % 10) ;;
+                | ((second / 10) << 4) | (second % 10);
 
     chrono::seconds total(this->duration);
     chrono::hours hours = chrono::duration_cast<chrono::hours>(total);
@@ -126,11 +136,45 @@ void EitEvents::AddEvent(uint16_t eventId, const char *startTime,
     AddComponent(event);
 }
 
+void EitEvents::AddEvent(std::shared_ptr<EitEvent> event)
+{
+    AddComponent(event);
+}
+
 void EitEvents::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_t dataSize)
 {
     auto iter = find_if(components.begin(), components.end(), EqualEitEvents(eventId));
     EitEvent& event = dynamic_cast<EitEvent&>(**iter);
     event.AddDescriptor(tag, data, dataSize);
+}
+
+void EitEvents::RemoveIf(time_t time)
+{
+    components.remove_if(OutdatedEitEvents(time));
+}
+
+void EitEvents::Clear()
+{
+    components.clear();
+}
+
+shared_ptr<EitEvent> EitEvents::GetFirstEitEvent()
+{
+    if (components.empty())
+        return nullptr;
+
+    return dynamic_pointer_cast<EitEvent>(components.front());
+}
+
+shared_ptr<EitEvent> EitEvents::GetSecondEitEvent()
+{
+    if (components.size() < 2)
+        return nullptr;
+
+    auto iter = components.begin();
+    ++iter;
+
+    return dynamic_pointer_cast<EitEvent>(*iter);
 }
 
 /* the following function is provided just for debug */
@@ -218,19 +262,7 @@ void Eit::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_
 
 size_t Eit::GetCodesSize() const
 {
-    /* 1 remove out-of-date event */
-    events->components.remove_if(OutdatedEitEvents(time(nullptr)));
-
-    int i = 0;
-    size_t size = 0;
-    for (auto iter: events->components)
-    {
-        if (i++ == 2)
-            break;
-
-        size = size + iter->GetCodesSize();
-    }
-
+    size_t size = events->GetCodesSize();
     return size + sizeof(event_information_section);
 }
 
@@ -255,66 +287,76 @@ size_t Eit::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write8(ptr, lastSectionNumber);  //segment_last_section_number
     ptr = ptr + Write8(ptr, tableId);       //????
     
-    int i = 0;
-    for (auto iter: events->components)
-    {
-        if (i++ == 2)
-            break;
+    ptr = ptr + events->MakeCodes(ptr, bufferSize - (ptr - buffer));
 
-        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
+    Crc32 crc32;
+    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+    assert(ptr - buffer == size);
+    return size;
+}
+
+void Eit::PropagateSection()
+{
+    /* 1 Create sub-section */
+    if (subPresentSection == nullptr)
+    {
+        subPresentSection = make_shared<Eit>(key.c_str()); 
+        CloneTo(*subPresentSection);
+        subPresentSection->SetSectionNumber(0);
+        subPresentSection->SetLastSectionNumber(1);
+    }
+    
+    if (subFollwingtSection == nullptr)
+    {
+        subFollwingtSection = make_shared<Eit>(key.c_str()); 
+        CloneTo(*subFollwingtSection);
+        subFollwingtSection->SetSectionNumber(1);
+        subFollwingtSection->SetLastSectionNumber(1);
     }
 
-    Crc32 crc32;
-    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
-    assert(ptr - buffer == size);
-    return size;
+    /* 2 remove out-of-date event */
+    events->RemoveIf(time(nullptr));
+    subPresentSection->events->Clear();
+    subFollwingtSection->events->Clear();
+
+    shared_ptr<EitEvent> eitEvent;
+
+    /* 3 add event to sub-section */
+    eitEvent = events->GetFirstEitEvent();
+    if (eitEvent != nullptr)
+        subPresentSection->events->AddEvent(eitEvent);
+
+    eitEvent = events->GetSecondEitEvent();
+    if (eitEvent != nullptr)
+        subFollwingtSection->events->AddEvent(eitEvent);
 }
 
-size_t Eit::GetCodesSizeExt()
-{
-    /* 1 remove out-of-date event */
-    events->components.remove_if(OutdatedEitEvents(time(nullptr)));
-
-    size_t size = events->GetCodesSize();
-    return size + sizeof(event_information_section);
-}
-
-size_t Eit::MakeCodesExt(uchar_t *buffer, size_t bufferSize)
-{  
-    size_t  size = GetCodesSizeExt();
-    if (size == 0)
-        return 0;
-    
-    uchar_t *ptr = buffer;
-    uint16_t ui16Value; 
-
-    assert(size <= bufferSize && size <= (MaxEitSectionLength - 3));
-    uchar_t extTableId;
-    if (tableId == 0x4e)
-        extTableId = 0x50;
+void Eit::CloneTo(Eit& eit)
+{        
+    uchar_t  tableId;
+    if (this->tableId == 0x50)
+        tableId = 0x4E;
+    else if (this->tableId == 0x60)
+        tableId = 0x4F;
     else
-        extTableId = 0x60;
+        assert(false);
 
-    ptr = ptr + Write8(ptr, extTableId);
-    ui16Value = (EitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12) | (size - 3);
-    ptr = ptr + Write16(ptr, ui16Value);    //section_length
-    ptr = ptr + Write16(ptr, serviceId);    //service_id
+    eit.SetTableId(tableId);
+    eit.SetTsId(transportStreamId);
+    eit.SetOnId(originalNetworkId);
+    eit.SetVersionNumber(versionNumber);
+    eit.SetServiceId(serviceId);
+    eit.SetNetworkId(networkId);
+}
 
-    uchar_t currentNextIndicator = 1;
-    ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator); //version_number
-    ptr = ptr + Write8(ptr, sectionNumber);      //section_number
-    ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
-    ptr = ptr + Write16(ptr, transportStreamId); //transport_stream_id
-    ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
-    ptr = ptr + Write8(ptr, lastSectionNumber);  //segment_last_section_number
-    ptr = ptr + Write8(ptr, extTableId);       //????
+std::shared_ptr<Eit> Eit::GetSubPresentSection()
+{
+    return subPresentSection;
+}
 
-    ptr = ptr + events->MakeCodes(ptr, bufferSize - sizeof(event_information_section));
-
-    Crc32 crc32;
-    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
-    assert(ptr - buffer == size);
-    return size;
+std::shared_ptr<Eit> Eit::GetSubFollwingtSection()
+{
+    return subFollwingtSection;
 }
 
 void Eit::Put(std::ostream& os) const

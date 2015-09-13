@@ -232,6 +232,40 @@ public:
     uchar_t GetTag() const { return Tag; }
 };
 
+/**********************class ShortEventDescriptor**********************/
+/* short_event_descriptor */
+class ShortEventDescriptor: public UcharDescriptor
+{
+public:
+    enum: uchar_t {Tag  = 0x4D};
+    ShortEventDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
+    {}
+
+    static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
+    {
+        return new ShortEventDescriptor(data, dataSize);
+    }
+    uchar_t GetTag() const { return Tag; }
+};
+
+/**********************class ExtendedEventDescriptor**********************/
+/* extended_event_descriptor */
+class ExtendedEventDescriptor: public UcharDescriptor
+{
+public:
+    enum: uchar_t {Tag  = 0x4E};
+    ExtendedEventDescriptor(uchar_t *data, size_t dataSize)
+        : UcharDescriptor(data, dataSize)
+    {}
+
+    static Descriptor* CreateInstance(uchar_t *data, size_t dataSize)
+    {
+        return new ExtendedEventDescriptor(data, dataSize);
+    }
+    uchar_t GetTag() const { return Tag; }
+};
+
 /**********************class UserdefinedDscriptor83**********************/
 /* user defined dscriptor, LCN ∫Õ“Ù¡ø≤π≥•  */
 class UserdefinedDscriptor83: public UcharDescriptor

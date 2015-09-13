@@ -204,10 +204,11 @@ void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar*
     if (lcnFlag != 0 || vcFlag != 0)
     {
         uchar_t descriptor0x83[3];
-        Write16(&descriptor0x83[0], (lcnFlag << 15) || (lcn));
-        Write8(&descriptor0x83[2], (lcnFlag << volumeCompensation) || (vcFlag));
+        Write16(&descriptor0x83[0], (lcnFlag << 15) | lcn);
+        Write8(&descriptor0x83[2], (vcFlag << 7) | volumeCompensation);
+        sdt.AddServiceDescriptor(serviceId, UserdefinedDscriptor83::Tag, descriptor0x83, 3);
     }
-
+    
     for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
         cur != nullptr; 
         cur = xmlNextElementSibling(cur))
@@ -418,6 +419,10 @@ void EitXmlWrapper<Section>::CreateSection(const char *file) const
 
     xmlNodePtr node = xmlDocGetRootElement(doc.get());
     uchar_t tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
+    if (tableId == 0x4E)
+        tableId = 0x50;
+    else if (tableId == 0x4F)
+        tableId = 0x60;
 
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
@@ -467,6 +472,46 @@ void EitXmlWrapper<Section>::AddEvent(Section& eit, xmlNodePtr& node, xmlChar* c
 
     eit.AddEvent(eventId, (char*)startTime.get(), (time_t)duration, runningStatus, freeCaMode);
 
+    /* short_event_descriptor*/
+    shared_ptr<xmlChar> eventName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"EventName");
+    string eventNameGb2312 = ConvertUtf8ToString(eventName.get());
+    shared_ptr<xmlChar> briefDescriptionName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"briefDescription");
+    string briefDescriptionNameGb2312 = ConvertUtf8ToString(briefDescriptionName.get());
+    size_t bufferSize = 5 + eventNameGb2312.size() + briefDescriptionNameGb2312.size();
+    shared_ptr<uchar_t> buffer(new uchar_t[bufferSize], UcharDeleter());
+    uchar_t *ptr = buffer.get();
+    ptr = ptr + MemCopy(ptr, 3, "chs", 3);
+    ptr = ptr + Write8(ptr, eventNameGb2312.size());
+    ptr = ptr + MemCopy(ptr, eventNameGb2312.size(), eventNameGb2312.c_str(), eventNameGb2312.size());
+    ptr = ptr + Write8(ptr, briefDescriptionNameGb2312.size());
+    ptr = ptr + MemCopy(ptr, briefDescriptionNameGb2312.size(), 
+                        briefDescriptionNameGb2312.c_str(), briefDescriptionNameGb2312.size());
+    eit.AddEventDescriptor(eventId, ShortEventDescriptor::Tag, (uchar_t*)buffer.get(), bufferSize);
+
+    /* extended_event_descriptor*/
+    shared_ptr<xmlChar> fullDescriptionName = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"fullDescription");
+    string fullDescriptionGb2312 = ConvertUtf8ToString(fullDescriptionName.get());
+    const size_t paddingSize = 256 - 8;
+    bufferSize = fullDescriptionGb2312.size(); 
+    buffer.reset(new uchar_t[bufferSize], UcharDeleter());
+    memcpy(buffer.get(), fullDescriptionGb2312.c_str(), bufferSize);
+    uchar_t lastSectionNumber = (fullDescriptionGb2312.size() + paddingSize - 1) / paddingSize;
+    for (size_t i = 0; i < lastSectionNumber; ++i)
+    {
+        uchar_t cur[256];
+        ptr = cur;
+        ptr = ptr + Write8(ptr, (i << 4) | (lastSectionNumber - 1));
+        ptr = ptr + MemCopy(ptr, 3, "chs", 3);
+        ptr = ptr + Write8(ptr, 0);  //length_of_items
+        //text_length
+        size_t copySize = min(bufferSize - (paddingSize * i), paddingSize);
+        ptr = ptr + Write8(ptr, (uchar_t)copySize);
+        ptr = ptr + MemCopy(ptr, bufferSize - (paddingSize * i),
+            buffer.get() + paddingSize * i, copySize);
+        
+        eit.AddEventDescriptor(eventId, ExtendedEventDescriptor::Tag, cur, copySize + 6);
+    }
+    
     for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
          cur != nullptr; 
          cur = xmlNextElementSibling(cur))

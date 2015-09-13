@@ -42,7 +42,6 @@ public:
     uint16_t GetEventId() const;
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddServiceDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName);
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;   
@@ -79,8 +78,8 @@ private:
 class OutdatedEitEvents: std::unary_function<const std::shared_ptr<Component>&, bool>
 {
 public:
-    OutdatedEitEvents(time_t rawTime)
-        : rawTime(rawTime)
+    OutdatedEitEvents(time_t time)
+        : time(time)
     {}
 
     result_type operator()(argument_type component)
@@ -88,11 +87,11 @@ public:
         EitEvent& event = dynamic_cast<EitEvent&>(*component);
         time_t eventTime = ConvertStrToTime(event.startTime.c_str());
         
-        return eventTime < rawTime;
+        return eventTime < time;
     }
 
 private:
-    time_t rawTime;
+    time_t time;
 };
 
 
@@ -101,14 +100,20 @@ class EitEvents: public Components
 {
 public:
     typedef Components MyBase;
-    friend class Eit;
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
 
     void AddEvent(uint16_t eventId, const char *startTime, 
         time_t duration, uint16_t  runningStatus, uint16_t freeCaMode);
+    void AddEvent(std::shared_ptr<EitEvent> event);
     void AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_t dataSize);
+
+    void RemoveIf(time_t time);
+    void Clear();
+
+    std::shared_ptr<EitEvent> GetFirstEitEvent();
+    std::shared_ptr<EitEvent> GetSecondEitEvent();
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
@@ -147,7 +152,11 @@ public:
 
     size_t GetCodesSizeExt();
     size_t MakeCodesExt(uchar_t *buffer, size_t bufferSize);
+    void PropagateSection();
+    void CloneTo(Eit& eit);
 
+    std::shared_ptr<Eit> GetSubPresentSection();
+    std::shared_ptr<Eit> GetSubFollwingtSection();
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
 
@@ -168,6 +177,8 @@ private:
     std::chrono::seconds duration;
 
     std::shared_ptr<EitEvents> events;
+    std::shared_ptr<Eit> subPresentSection;
+    std::shared_ptr<Eit> subFollwingtSection;
 };
 
 #endif

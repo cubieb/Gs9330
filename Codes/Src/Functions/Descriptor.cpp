@@ -85,6 +85,8 @@ DescriptorCreatorRgistration(SatelliteDeliverySystemDescriptor::Tag,
 DescriptorCreatorRgistration(CableDeliverySystemDescriptor::Tag, 
                              (CableDeliverySystemDescriptor::Constructor1)CableDeliverySystemDescriptor::CreateInstance);
 DescriptorCreatorRgistration(BouquetNameDescriptor::Tag, BouquetNameDescriptor::CreateInstance);
+DescriptorCreatorRgistration(ShortEventDescriptor::Tag, ShortEventDescriptor::CreateInstance);
+DescriptorCreatorRgistration(ExtendedEventDescriptor::Tag, ExtendedEventDescriptor::CreateInstance);
 DescriptorCreatorRgistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83::CreateInstance);
 
 void DescriptorFactory::Register(uchar_t type, DescriptorCreator creator)

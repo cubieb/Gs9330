@@ -34,31 +34,6 @@ void Segment::Init(shared_ptr<Section> section, size_t segmentSize)
     memset(ptr + segmentSize - tail, 0xff, tail);
 }
 
-void Segment::InitEitExt(shared_ptr<Section> section, size_t segmentSize)
-{
-    shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(section); 
-
-    size_t size = 1; //1 byte for pointer_field
-    size = size + eit->GetCodesSizeExt();
-    size_t tail = (segmentSize - (size % segmentSize)) % segmentSize;
-    size = size + tail; /* size must be times of segmentSize */
-    buffer.reset(new uchar_t[size], UcharDeleter());
-
-    uchar_t *ptr = buffer.get();
-    ptr = ptr + Write8(ptr, 0x0); //pointer_field
-
-    ptr = ptr + eit->MakeCodesExt(ptr, size - (buffer.get() - ptr));
-
-    segments.clear();
-    for (ptr = buffer.get(); ptr < buffer.get() + size; ptr = ptr + segmentSize)
-    {
-        segments.push_back(ptr);
-    }
-
-    ptr = segments.back();
-    memset(ptr + segmentSize - tail, 0xff, tail);
-}
-
 Segment::iterator Segment::begin()
 {
     return segments.begin();
@@ -73,16 +48,6 @@ uint_t Segment::GetSegmentNumber(shared_ptr<Section> section, size_t segmentSize
 {
     size_t size = 1; //1 byte for pointer_field
     size = size + section->GetCodesSize();
-
-    return (size + segmentSize - 1) / segmentSize;
-}
-
-uint_t Segment::GetEitExtSegmentNumber(shared_ptr<Section> section, size_t segmentSize)
-{
-    shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(section); 
-
-    size_t size = 1; //1 byte for pointer_field
-    size = size + eit->GetCodesSizeExt();
 
     return (size + segmentSize - 1) / segmentSize;
 }
@@ -123,15 +88,19 @@ size_t Ts::GetCodesSize(const std::bitset<256>& tableIds) const
             segmentNumber = segmentNumber + segment.GetSegmentNumber(iter, segmentSize);
         }
 
-        if (iter->GetTableId() == 0x4E)
+        uchar_t tableId = iter->GetTableId();
+        if (tableId == 0x50)
+            tableId = 0x4e;
+        else if (tableId == 0x60)
+            tableId = 0x4f;
+        else
+            continue;
+
+        if (tableIds.test(tableId))
         {
-            if (tableIds.test(0x50))
-                segmentNumber = segmentNumber + segment.GetEitExtSegmentNumber(iter, segmentSize);
-        }
-        else if (iter->GetTableId() == 0x4F)
-        {
-            if (tableIds.test(0x60))
-                segmentNumber = segmentNumber + segment.GetEitExtSegmentNumber(iter, segmentSize);
+            shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(iter);
+            segmentNumber = segmentNumber + segment.GetSegmentNumber(eit->GetSubPresentSection(), segmentSize);
+            segmentNumber = segmentNumber + segment.GetSegmentNumber(eit->GetSubFollwingtSection(), segmentSize);
         }
     }
     
@@ -195,27 +164,36 @@ size_t Ts::MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>&
 
     for (auto iter: sections)
     {
-        uchar_t tableId = iter->GetTableId();
-        uchar_t extTableId;
-        if (tableId == 0x4e)
-            extTableId = 0x50;
-        else if (tableId == 0x4f)
-            extTableId = 0x60;
-        else
+        if (iter->GetPid() != 0x0012)
             continue;
 
-        if (!tableIds.test(extTableId))
-        {
-            continue;
-        }
-        
-        Segment segment;    
-        segment.InitEitExt(iter, segmentSize);       
-        ptr = ptr + MakeCodeImpl(segment, ptr);
+        Segment segment;  
+        shared_ptr<Eit> eit = dynamic_pointer_cast<Eit>(iter);
+        if (tableIds.test(eit->GetSubPresentSection()->GetTableId()))
+        {              
+            segment.Init(eit->GetSubPresentSection(), segmentSize);       
+            ptr = ptr + MakeCodeImpl(segment, ptr);
+        }  
+                
+        if (tableIds.test(eit->GetSubFollwingtSection()->GetTableId()))
+        {              
+            segment.Init(eit->GetSubFollwingtSection(), segmentSize);       
+            ptr = ptr + MakeCodeImpl(segment, ptr);
+        } 
     }
     
     assert (ptr - buffer == bufferSize);
     return (ptr - buffer);
+}
+
+void Ts::PropagateEitSection()
+{
+    assert(pid == 0x0012);
+    
+    for (auto iter: sections)
+    {
+        dynamic_cast<Eit&>(*iter).PropagateSection(); 
+    }
 }
 
 void Ts::AddSection(std::shared_ptr<Section> section)

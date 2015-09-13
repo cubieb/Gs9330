@@ -233,23 +233,39 @@ string ConvertUtf8ToString(uchar_t *src)
 }
 
 /******************convert string to time_t******************/
+/* to convert struct tm to string, use std::put_time().
+   consider use std::get_time, std::time_get::get_time, std::time_get_byname::get_time 
+   to impliment current function.
+   exsample:
+        std::tm t = {};
+        std::istringstream ss("2011-5-18 23:12:34");
+        ss >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
+
+    if use sscanf() to convert string to time:
+        sscanf(str,"%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);  
+ */
 time_t ConvertStrToTime(const char *str)  
 {  
     tm timeinfo;  
-    int year = 0, month = 0, day = 0, hour, minute, second;
-    if (strchr(str, '-') == nullptr)
-        sscanf(str,"%d:%d:%d", &hour, &minute, &second); 
-    else
-        sscanf(str,"%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);  
-
-    timeinfo.tm_year  = year-1900;  
-    timeinfo.tm_mon   = month-1;  
-    timeinfo.tm_mday  = day;  
-    timeinfo.tm_hour  = hour;  
-    timeinfo.tm_min   = minute;  
-    timeinfo.tm_sec   = second;  
-    timeinfo.tm_isdst = 0;  
+    std::istringstream ss(str);
+    ss >> std::get_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
   
     time_t ret = mktime(&timeinfo); 
     return ret; 
 } 
+
+void ConvertUtcToGmt(struct tm& src, struct tm& dst)
+{
+    time_t time = std::mktime(&src);
+    dst = *std::gmtime(&time);
+}
+
+time_t CalculateUtcGmtDiff()
+{    
+    time_t gmt = std::time(nullptr);
+    struct tm calendar ;
+    calendar  = *std::gmtime(&gmt);
+    time_t utc = std::mktime(&calendar);
+    time_t diff = (time_t)difftime(utc, gmt);
+    return diff;
+}

@@ -1,0 +1,38 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="BAT" TableID="0x4A">
+	<Bouquet BouquetID="1" Name="本地节目" Version="1">
+		<Descriptors Sum="0"/>
+		<Transportstream TSID="53" ONID="101">
+			<ServiceList>
+				<Service ID="623" Type="1"/>
+				<Service ID="624" Type="1"/>
+				<Service ID="625" Type="1"/>
+				<Service ID="626" Type="1"/>
+				<Service ID="627" Type="1"/>
+				<Service ID="628" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="54" ONID="101">
+			<ServiceList>
+				<Service ID="607" Type="1"/>
+				<Service ID="631" Type="1"/>
+				<Service ID="632" Type="1"/>
+				<Service ID="633" Type="1"/>
+				<Service ID="634" Type="1"/>
+				<Service ID="635" Type="1"/>
+				<Service ID="636" Type="1"/>
+				<Service ID="637" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+		<Transportstream TSID="62" ONID="101">
+			<ServiceList>
+				<Service ID="605" Type="1"/>
+				<Service ID="606" Type="1"/>
+			</ServiceList>
+			<Descriptors Sum="0"/>
+		</Transportstream>
+	</Bouquet>
+</Root>
+

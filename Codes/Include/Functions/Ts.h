@@ -29,12 +29,10 @@ public:
     Segment();
 
     void Init(std::shared_ptr<Section> section, size_t segmentSize);
-    void InitEitExt(std::shared_ptr<Section> section, size_t segmentSize);
     iterator begin();
     iterator end();
 
     uint_t GetSegmentNumber(std::shared_ptr<Section> section, size_t segmentSize);
-    uint_t GetEitExtSegmentNumber(std::shared_ptr<Section> section, size_t segmentSize);
 
 private:
     std::shared_ptr<uchar_t> buffer;
@@ -53,6 +51,7 @@ public:
 
     size_t GetCodesSize(const std::bitset<256>& tableIds) const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize, const std::bitset<256>& tableIds);
+    void PropagateEitSection();
 
     void AddSection(std::shared_ptr<Section> section);
     void RemoveSection(const char *key);

@@ -75,6 +75,9 @@ void Controller::HandleDbInsert(shared_ptr<Section> section)
         pidTsIter->second->AddSection(section);
         
 #if defined(_DEBUG)
+        if (pid == 0x0012)
+            pidTsIter->second->PropagateEitSection();
+
         bitset<256> tableIds;
         tableIds.set();
         size_t size = pidTsIter->second->GetCodesSize(tableIds);
@@ -98,6 +101,7 @@ void Controller::HandleDbDelete(const char *tableName, const char *tableKey)
 
     for (auto netPidTsIter: netPidTsInfors)
     {
+        lock_guard<mutex> lock(myMutext);
         //uint16_t tsDestNetId = netPidTsIter.first;
         //cout << "Ts Dest NetId = " << tsDestNetId << endl;
         for(auto pidTsIter: netPidTsIter.second)
@@ -121,6 +125,9 @@ void Controller::SendUdpToNetId(int socketFd,
     for(auto pidTsIter: pidTsInfors)
     {
         uint16_t pid = pidTsIter.first;
+        if (pid == 0x0012)
+            pidTsIter.second->PropagateEitSection();
+
         size_t size = pidTsIter.second->GetCodesSize(tableIds);
         if (size == 0)
             continue;
@@ -144,7 +151,7 @@ void Controller::SendUdp(int socketFd, bitset<256>& tableIds)
     for (auto netPidTsIter: netPidTsInfors)
     {
         uint16_t networkId = netPidTsIter.first;
-
+        
         list<shared_ptr<NetworkIdAddress>>::iterator iter;
         iter = find_if(tranmitConfig.netAddresses.begin(), 
                        tranmitConfig.netAddresses.end(),
