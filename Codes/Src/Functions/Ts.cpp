@@ -137,7 +137,7 @@ size_t Ts::MakeCodeImpl(Segment& segment, uchar_t *buffer)
                 SendUdp(ptr, 188);
                 SendUdp(ptr, 188);   //again
             }
-            */
+        */
         ptr = ptr + Write8(ptr, transporPacket.adaptationFieldControl << 4 | transporPacket.continuityCounter++);
         ptr = ptr + MemCopy(ptr, segmentSize, *iter, segmentSize);        
     }

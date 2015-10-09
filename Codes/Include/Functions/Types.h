@@ -1,6 +1,8 @@
 #ifndef _Types_h_
 #define _Types_h_
 
+#define TsPacketSize 188
+
 #define MaxNitSectionLength     1024
 #define MaxSdtSectionLength     1024
 #define MaxEitSectionLength     4096

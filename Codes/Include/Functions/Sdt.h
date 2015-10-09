@@ -118,6 +118,7 @@ public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0011};
     Sdt(const char *key);
+    Sdt(const char *key, uchar_t *buffer);
     ~Sdt() {}
     
     uint16_t GetPid()  const; 

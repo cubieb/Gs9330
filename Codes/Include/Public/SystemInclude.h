@@ -12,6 +12,21 @@
      * header files which may cause the security warning.
      */
 #   define _CRT_SECURE_NO_WARNINGS 
+    /* there are two macro "min, max" definition in minwindef.h,
+    they will cause troulbe when we call std::min() or std::max() template.
+    #ifndef NOMINMAX
+    #ifndef max
+    #define max(a,b)            (((a) > (b)) ? (a) : (b))
+    #endif
+
+    #ifndef min
+    #define min(a,b)            (((a) < (b)) ? (a) : (b))
+    #endif
+    #endif  // NOMINMAX 
+
+    to avoid trouble, we define NOMINMAX.
+    */
+#   define NOMINMAX 
 #   include <Winsock2.h>
 #   ifdef __MINGW32__
 #       include <unistd.h>
@@ -63,6 +78,7 @@
 #   include <vector>
 #   include <set>
 #   include <bitset>
+#   include <queue>
 #   include <typeinfo>
 #   include <functional>
 #   include <algorithm>
@@ -76,6 +92,7 @@
 #       include <thread>
 #       include <mutex>
 #       include <condition_variable>
+#       include <chrono>
 #   else
 #       if GCC_VERSION > 40600
 #           include <cstdint>
@@ -83,6 +100,7 @@
 #           include <thread>
 #           include <mutex>
 #           include <condition_variable>
+#       	include <chrono>
 #       else
 #           include <stdint.h>
 #           define nullptr NULL

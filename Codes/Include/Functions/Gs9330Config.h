@@ -45,8 +45,8 @@ public:
     uint32_t   eit4FInterval;
     uint32_t   eit50Interval;
     uint32_t   eit60Interval;
-    
-    std::list<std::shared_ptr<NetworkIdAddress>> netAddresses;
+    std::string tsFilesDir;
+    std::list<std::shared_ptr<NetworkIdAddress>> netAddresses;    
 };
 
 /**********************class XmlConfig**********************/

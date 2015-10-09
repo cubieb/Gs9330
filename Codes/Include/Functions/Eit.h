@@ -35,15 +35,16 @@ struct event_information_section
 class EitEvent: public Component
 {
     friend class OutdatedEitEvents;
+    friend class EitEvents;
 public:
     EitEvent(uint16_t eventId, const char *startTime, 
         time_t duration, uint16_t runningStatus, uint16_t freeCaMode);
-    
-    uint16_t GetEventId() const;
 
     void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-
+    
     size_t GetCodesSize() const;
+    uint16_t GetEventId() const;
+
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;   
 
     /* the following function is provided just for debug */
@@ -56,6 +57,11 @@ private:
     uint16_t runningStatus; 
     uint16_t freeCaMode;
     std::shared_ptr<Descriptors> descriptors;
+
+    /* when stat time is in 7 days, isActive is true, or else isActive is false.
+    * Eit call set the isActive flag whenever befor calling GetCodeSize() and MakeCodes().
+    */
+    bool isActive;
 };
 
 class EqualEitEvents: std::unary_function<const std::shared_ptr<Component>&, bool>
@@ -85,7 +91,7 @@ public:
     result_type operator()(argument_type component)
     {
         EitEvent& event = dynamic_cast<EitEvent&>(*component);
-        time_t eventTime = ConvertStrToTime(event.startTime.c_str());
+        time_t eventTime = ConvertStrToTime(event.startTime.c_str()) + event.duration;
         
         return eventTime < time;
     }
@@ -110,6 +116,7 @@ public:
     void AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_t dataSize);
 
     void RemoveIf(time_t time);
+    void SetActiveFlag(time_t time);
     void Clear();
 
     std::shared_ptr<EitEvent> GetFirstEitEvent();

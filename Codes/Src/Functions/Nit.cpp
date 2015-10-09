@@ -17,6 +17,55 @@ Nit::Nit(const char *key)
     transportStreams.reset(new TransportStreams);
 }
 
+Nit::Nit(const char *key, uchar_t *buffer)
+    : Section(key)
+{    
+    descriptors.reset(new Descriptors);
+    transportStreams.reset(new TransportStreams);
+
+    uchar_t *ptr = buffer;
+    uint16_t sectionLength;
+    ptr = ptr + Read8(ptr, tableId);
+    ptr = ptr + Read16(ptr, sectionLength);
+    sectionLength = sectionLength & 0xfff;
+    
+    ptr = ptr + Read16(ptr, networkId);
+    ptr = ptr + Read8(ptr, versionNumber);
+    versionNumber = (versionNumber & 0x2f) >> 1;
+
+    ptr = ptr + Read8(ptr, sectionNumber);
+    ptr = ptr + Read8(ptr, lastSectionNumber);
+
+    uint16_t networdDescriptorLen;
+    ptr = ptr + Read16(ptr, networdDescriptorLen);
+    networdDescriptorLen = networdDescriptorLen & 0xfff;
+    if (networdDescriptorLen != 0)
+    {
+        AddDescriptor(NetworkNameDescriptor::Tag, ptr, networdDescriptorLen);
+        ptr = ptr + networdDescriptorLen;
+    }
+    
+    uint16_t transportStreamLoopLength;
+    ptr = ptr + Read16(ptr, transportStreamLoopLength);
+    transportStreamLoopLength = transportStreamLoopLength & 0xfff;
+    uchar_t *endPtr = ptr + transportStreamLoopLength;
+    while (ptr < endPtr)
+    {
+        uint16_t tsId, onId, tsDesLength;
+        ptr = ptr + Read16(ptr, tsId);
+        ptr = ptr + Read16(ptr, onId);
+        AddTs(tsId, onId);
+
+        ptr = ptr + Read16(ptr, tsDesLength);
+        tsDesLength = tsDesLength & 0xfff;
+        if (tsDesLength != 0)
+        {
+            AddTsDescriptor(tsId, ptr[0], ptr+2, tsDesLength - 2);
+            ptr = ptr + tsDesLength;
+        }
+    }
+}
+
 uint16_t Nit::GetPid() const
 {
     return Pid;

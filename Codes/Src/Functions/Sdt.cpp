@@ -132,6 +132,50 @@ Sdt::Sdt(const char *key)
     services.reset(new SdtServices);
 }
 
+Sdt::Sdt(const char *key, uchar_t *buffer)
+    : Section(key)
+{
+    services.reset(new SdtServices);
+
+    uchar_t *ptr = buffer;
+    uint16_t sectionLength;
+    ptr = ptr + Read8(ptr, tableId);
+    ptr = ptr + Read16(ptr, sectionLength);
+    sectionLength = sectionLength & 0xfff;
+
+    ptr = ptr + Read16(ptr, transportStreamId);
+    ptr = ptr + Read8(ptr, versionNumber);
+    versionNumber = (versionNumber & 0x2f) >> 1;
+    
+    ptr = ptr + Read8(ptr, sectionNumber);
+    ptr = ptr + Read8(ptr, lastSectionNumber);
+    ptr = ptr + Read16(ptr, originalNetworkId);
+    SetNetworkId(originalNetworkId);
+    ptr = ptr + 1; //reserved_future_use
+
+    while (ptr < buffer + sectionLength - 1)
+    {
+        uint16_t value16, serviceId, desLength;
+        uchar_t  value8, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode;
+        ptr = ptr + Read16(ptr, serviceId);
+        ptr = ptr + Read8(ptr, value8);
+        eitScheduleFlag = (value8 >> 1) & 0x1;
+        eitPresentFollowingFlag = value8 & 0x1;
+        ptr = ptr + Read16(ptr, value16);
+        runningStatus = value16 >> 13;
+        freeCaMode = (value16 >> 12) & 0x1;
+
+        AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
+
+        desLength = value16 & 0xfff;
+        if (desLength != 0)
+        {
+            AddServiceDescriptor(serviceId, ptr[0], ptr+2, desLength - 2);
+            ptr = ptr + desLength;
+        }
+    }
+}
+
 uint16_t Sdt::GetPid() const
 {
     return Pid;

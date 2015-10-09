@@ -9,6 +9,7 @@
 #include "Bat.h"
 #include "Eit.h"
 #include "XmlDataWrapper.h"
+#include "TsDataWrapper.h"
 #include "Ts.h"
 #include "Gs9330Config.h"
 #include "Controller.h"
@@ -38,6 +39,9 @@ Controller::Controller()
     wrappers.push_back(make_shared<BatXmlWrapper<Bat>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
     wrappers.push_back(make_shared<EitXmlWrapper<Eit>>(insertHandler, deleteHandler, xmlConfig.xmlDir.c_str()));
 
+    wrappers.push_back(make_shared<NitTsWrapper<Nit>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
+    wrappers.push_back(make_shared<SdtTsWrapper<Sdt>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
+
     relationConfig = make_shared<NetworkRelationConfig>(); 
 }
 
@@ -53,6 +57,7 @@ void Controller::Start()
 
 void Controller::HandleDbInsert(shared_ptr<Section> section)
 {    
+    /* get network relation configuration */
     string xmlPath = xmlConfig.xmlDir + string("/") + string("NetWorkNode.xml");    
     if (_access(xmlPath.c_str(), 0) != -1)
     {
@@ -138,7 +143,7 @@ void Controller::SendUdpToNetId(int socketFd,
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;
         for (int i = 0; i < pktNumber; ++i)
         {
-            int udpSize = min(size - UdpPayloadSize * i, UdpPayloadSize);
+            int udpSize = std::min((int)(size - UdpPayloadSize * i), (int)(UdpPayloadSize));
             sendto(socketFd, (char*)buffer.get() + UdpPayloadSize * i, (int)udpSize, 0, 
                    (SOCKADDR *)&serverAddr, 
                    sizeof(struct sockaddr_in));
@@ -174,6 +179,10 @@ void Controller::SendUdp(int socketFd, bitset<256>& tableIds)
 
 void Controller::ThreadMain()
 {
+    /* flag file, if file "ok" not exist, do not send udp packet */
+    string fileOk    = xmlConfig.xmlDir.c_str() + string("/") + string("ok");
+    string filePause = xmlConfig.xmlDir.c_str() + string("/") + string("pause");
+
     nitActualTimer = tranmitConfig.nitActualInterval;
     nitOtherTimer = tranmitConfig.nitOtherInterval;
     batTimer = tranmitConfig.batInterval;
@@ -200,8 +209,12 @@ void Controller::ThreadMain()
         TheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
         TheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
 
-        if (tableIds.any())
+        if (tableIds.any() 
+            && _access(fileOk.c_str(), 0) == 0 
+            && _access(filePause.c_str(), 0) == -1)
+        {
             SendUdp(socketFd, tableIds);
+        }
 
         SleepEx(1000, true);
     }

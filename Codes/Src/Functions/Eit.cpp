@@ -27,6 +27,7 @@ EitEvent::EitEvent(uint16_t eventId, const char *startTime,
       runningStatus(runningStatus), freeCaMode(freeCaMode)
 {
     descriptors.reset(new Descriptors);
+    isActive = true;
 }
 
 uint16_t EitEvent::GetEventId() const
@@ -108,6 +109,10 @@ size_t EitEvents::GetCodesSize() const
     size_t size = 0;
     for (const auto iter: components)
     {
+        EitEvent& event = dynamic_cast<EitEvent&>(*iter);
+        if (!event.isActive)
+            break;
+
         size = size + iter->GetCodesSize();
     }
         
@@ -122,6 +127,10 @@ size_t EitEvents::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 
     for (const auto iter: components)
     {
+        EitEvent& event = dynamic_cast<EitEvent&>(*iter);
+        if (!event.isActive)
+            break;
+
         ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
     }
     assert(ptr - buffer == size);
@@ -151,6 +160,32 @@ void EitEvents::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data,
 void EitEvents::RemoveIf(time_t time)
 {
     components.remove_if(OutdatedEitEvents(time));
+}
+
+void EitEvents::SetActiveFlag(time_t time)
+{
+    bool hasGetTimePoint = false;
+    time = time + 3600 * 24 * 7;
+    list<std::shared_ptr<Component>>::iterator iter;
+    for (iter = components.begin(); iter != components.end(); ++iter)
+    {
+        /* do not send events of 7 day later. */
+        EitEvent& event = dynamic_cast<EitEvent&>(**iter);
+        if (hasGetTimePoint)
+        {
+            event.isActive = false;
+            continue;
+        }
+
+        time_t eventTime = ConvertStrToTime(event.startTime.c_str()) + event.duration;
+        if (time > eventTime)
+            event.isActive = true;
+        else
+        {
+            hasGetTimePoint = true;
+            event.isActive = false;
+        }
+    }
 }
 
 void EitEvents::Clear()
@@ -315,7 +350,9 @@ void Eit::PropagateSection()
     }
 
     /* 2 remove out-of-date event */
-    events->RemoveIf(time(nullptr));
+    time_t curTime = time(nullptr);
+    events->RemoveIf(curTime);
+    events->SetActiveFlag(curTime);
     subPresentSection->events->Clear();
     subFollwingtSection->events->Clear();
 

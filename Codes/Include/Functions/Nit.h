@@ -15,7 +15,8 @@ sub_table: collection of sections with the same value of table_id and:
     for a NIT: the same table_id_extension (network_id) and version_number;
     for a BAT: the same table_id_extension (bouquet_id) and version_number;
     for a SDT: the same table_id_extension (transport_stream_id), the same original_network_id and version_number;
-    for a EIT: the same table_id_extension (service_id), the same transport_stream_id, the same original_network_id and version_number.
+    for a EIT: the same table_id_extension (service_id), the same transport_stream_id, 
+               the same original_network_id and version_number.
 */
 struct network_information_section
 {
@@ -65,6 +66,7 @@ public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0010};
     Nit(const char *key);
+    Nit(const char *key, uchar_t *buffer);
     ~Nit() {}
     
     uint16_t GetPid() const; 

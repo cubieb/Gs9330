@@ -43,6 +43,9 @@ TransmitConfig::TransmitConfig()
     assert(eit50Interval != 0);
     assert(eit60Interval != 0);
 
+    shared_ptr<xmlChar> dir = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"TsFilesDir");
+    tsFilesDir = (char*)dir.get();
+
     shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
     assert(xpathCtx != nullptr);
 

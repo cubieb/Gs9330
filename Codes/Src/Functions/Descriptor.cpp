@@ -77,6 +77,8 @@ void Descriptors::Put(std::ostream& os) const
 
 /**********************class DescriptorFactory**********************/
 DescriptorCreatorRgistration(NetworkNameDescriptor::Tag, NetworkNameDescriptor::CreateInstance);
+DescriptorCreatorRgistration(ServiceDescriptor::Tag, 
+                             (ServiceDescriptor::Constructor1)ServiceDescriptor::CreateInstance);
 DescriptorCreatorRgistration(ServiceListDescriptor::Tag, 
                              (ServiceListDescriptor::Constructor1)ServiceListDescriptor::CreateInstance);
 DescriptorCreatorRgistration(StuffingDescriptor::Tag, StuffingDescriptor::CreateInstance);

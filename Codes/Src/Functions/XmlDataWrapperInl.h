@@ -1,5 +1,5 @@
-#ifndef _XmlDataWrapperDef_h_
-#define _XmlDataWrapperDef_h_
+#ifndef _XmlDataWrapperInl_h_
+#define _XmlDataWrapperInl_h_
 
 #include <regex>
 #include "DirMonitor.h"
@@ -40,7 +40,6 @@ void XmlDataWrapper<Section>::HandleDbInsert(const char *file)
     if (!regex_match(file, regex(xmlFileRegularExp)))
         return;
     
-    string xmlPath = xmlFileDir + string("/") + string(file);
     CreateSection(file);   //->NotifyDbInsert()
 }
 

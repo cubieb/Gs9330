@@ -8,7 +8,7 @@
 #include "Sdt.h"
 #include "Bat.h"
 #include "Eit.h"
-#include "XmlDataWrapperDef.h"
+#include "XmlDataWrapperInl.h"
 
 /* instanciate class NitXmlWrapper for Nit.
 */

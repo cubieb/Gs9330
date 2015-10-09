@@ -93,7 +93,8 @@
     <ClCompile Include="..\Codes\Src\Functions\Component.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\TransportStream.cpp" />
     <ClCompile Include="..\Codes\Src\Functions\Ts.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\TsDataWrapper.cpp" />
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Crc32.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="..\Codes\Include\Functions\Component.h" />
     <ClInclude Include="..\Codes\Include\Functions\TransportStream.h" />
     <ClInclude Include="..\Codes\Include\Functions\Ts.h" />
+    <ClInclude Include="..\Codes\Include\Functions\TsDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Functions\Types.h" />
     <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
     <ClInclude Include="..\Codes\Include\Public\Common.h" />
@@ -120,7 +122,8 @@
     <ClInclude Include="..\Codes\Include\Public\SystemError.h" />
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h" />
     <ClInclude Include="..\Codes\Main.h" />
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h" />
+    <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h" />
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />

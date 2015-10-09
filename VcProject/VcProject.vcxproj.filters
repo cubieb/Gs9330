@@ -54,9 +54,6 @@
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
-      <Filter>源文件\Functions</Filter>
-    </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
@@ -79,6 +76,12 @@
       <Filter>源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\Eit.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\TsDataWrapper.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,9 +122,6 @@
     <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
       <Filter>头文件\Functions</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
-      <Filter>源文件\Functions</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
       <Filter>头文件\Functions</Filter>
     </ClInclude>
@@ -145,6 +145,15 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\Eit.h">
       <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\TsDataWrapper.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h">
+      <Filter>源文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h">
+      <Filter>源文件\Functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
