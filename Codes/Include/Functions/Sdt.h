@@ -121,6 +121,7 @@ public:
     Sdt(const char *key, uchar_t *buffer);
     ~Sdt() {}
     
+    uint16_t GetSectionId() const;
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);

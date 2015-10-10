@@ -260,6 +260,14 @@ void ConvertUtcToGmt(struct tm& src, struct tm& dst)
     dst = *std::gmtime(&time);
 }
 
+/* refer to http://www.cplusplus.com/reference/ctime/gmtime/ */
+#define CCT (+8)
+void ConvertGmtToUtc(struct tm& src, struct tm& dst)
+{
+    dst = src;
+    dst.tm_hour = (src.tm_hour + CCT) % 24;
+}
+
 time_t CalculateUtcGmtDiff()
 {    
     time_t gmt = std::time(nullptr);

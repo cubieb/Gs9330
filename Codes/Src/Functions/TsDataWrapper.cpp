@@ -14,3 +14,5 @@
 */
 template NitTsWrapper<Nit>;
 template SdtTsWrapper<Sdt>;
+template BatTsWrapper<Bat>;
+template EitTsWrapper<Eit>;

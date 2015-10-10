@@ -66,6 +66,11 @@ Nit::Nit(const char *key, uchar_t *buffer)
     }
 }
 
+uint16_t Nit::GetSectionId() const
+{
+    return networkId;
+}
+
 uint16_t Nit::GetPid() const
 {
     return Pid;

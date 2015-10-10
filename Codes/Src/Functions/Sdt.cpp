@@ -135,7 +135,10 @@ Sdt::Sdt(const char *key)
 Sdt::Sdt(const char *key, uchar_t *buffer)
     : Section(key)
 {
-    services.reset(new SdtServices);
+    services.reset(new SdtServices);    
+
+    const char *p = find(key, key + strlen(key), '_') + 1;
+    networkId = (uint16_t)strtol(p, nullptr, 10);
 
     uchar_t *ptr = buffer;
     uint16_t sectionLength;
@@ -150,7 +153,6 @@ Sdt::Sdt(const char *key, uchar_t *buffer)
     ptr = ptr + Read8(ptr, sectionNumber);
     ptr = ptr + Read8(ptr, lastSectionNumber);
     ptr = ptr + Read16(ptr, originalNetworkId);
-    SetNetworkId(originalNetworkId);
     ptr = ptr + 1; //reserved_future_use
 
     while (ptr < buffer + sectionLength - 1)
@@ -174,6 +176,11 @@ Sdt::Sdt(const char *key, uchar_t *buffer)
             ptr = ptr + desLength;
         }
     }
+}
+
+uint16_t Sdt::GetSectionId() const
+{
+    return transportStreamId;
 }
 
 uint16_t Sdt::GetPid() const

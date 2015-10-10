@@ -41,6 +41,8 @@ Controller::Controller()
 
     wrappers.push_back(make_shared<NitTsWrapper<Nit>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
     wrappers.push_back(make_shared<SdtTsWrapper<Sdt>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
+    wrappers.push_back(make_shared<BatTsWrapper<Bat>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
+    wrappers.push_back(make_shared<EitTsWrapper<Eit>>(insertHandler, deleteHandler, tranmitConfig.tsFilesDir.c_str()));
 
     relationConfig = make_shared<NetworkRelationConfig>(); 
 }
@@ -193,22 +195,24 @@ void Controller::ThreadMain()
     eit50to5FTimer = tranmitConfig.eit50Interval;
     eit60to6FTimer = tranmitConfig.eit60Interval;
 
+    uint32_t ftpTimer = tranmitConfig.ftpInterval;
+
     int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     bitset<256> tableIds;
     while (true)
     {
         tableIds.reset();
 
-        TheckTimer(nitActualTimer, tranmitConfig.nitActualInterval, tableIds, 0x40);
-        TheckTimer(nitOtherTimer, tranmitConfig.nitOtherInterval, tableIds, 0x41);
-        TheckTimer(batTimer, tranmitConfig.batInterval, tableIds, 0x4A);
-        TheckTimer(sdtActualTimer, tranmitConfig.sdtActualInterval, tableIds, 0x42);
-        TheckTimer(sdtOtherTimer, tranmitConfig.sdtOtherInterval, tableIds, 0x46);
-        TheckTimer(eit4ETimer, tranmitConfig.eit4EInterval, tableIds, 0x4E);
-        TheckTimer(eit4FTimer, tranmitConfig.eit4FInterval, tableIds, 0x4F);
-        TheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
-        TheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
-
+        CheckTimer(nitActualTimer, tranmitConfig.nitActualInterval, tableIds, 0x40);
+        CheckTimer(nitOtherTimer, tranmitConfig.nitOtherInterval, tableIds, 0x41);
+        CheckTimer(batTimer, tranmitConfig.batInterval, tableIds, 0x4A);
+        CheckTimer(sdtActualTimer, tranmitConfig.sdtActualInterval, tableIds, 0x42);
+        CheckTimer(sdtOtherTimer, tranmitConfig.sdtOtherInterval, tableIds, 0x46);
+        CheckTimer(eit4ETimer, tranmitConfig.eit4EInterval, tableIds, 0x4E);
+        CheckTimer(eit4FTimer, tranmitConfig.eit4FInterval, tableIds, 0x4F);
+        CheckTimer(eit50to5FTimer, tranmitConfig.eit50Interval, tableIds, 0x50);
+        CheckTimer(eit60to6FTimer, tranmitConfig.eit60Interval, tableIds, 0x60);
+        
         if (tableIds.any() 
             && _access(fileOk.c_str(), 0) == 0 
             && _access(filePause.c_str(), 0) == -1)
@@ -216,12 +220,17 @@ void Controller::ThreadMain()
             SendUdp(socketFd, tableIds);
         }
 
+        if (--ftpTimer == 0)
+        {
+            ftpTimer = tranmitConfig.ftpInterval;
+        }
+
         SleepEx(1000, true);
     }
     closesocket(socketFd);
 }
 
-void Controller::TheckTimer(uint32_t& cur, uint32_t orignal, bitset<256>& bits, uchar_t indexInBits)
+void Controller::CheckTimer(uint32_t& cur, uint32_t orignal, bitset<256>& bits, uchar_t indexInBits)
 {
     if (--cur == 0)
     {

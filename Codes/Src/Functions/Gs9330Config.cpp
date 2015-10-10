@@ -65,6 +65,7 @@ TransmitConfig::TransmitConfig()
         netAddresses.push_back(make_shared<NetworkIdAddress>(networkId, (const char *)dstIp.get(), dstPort));
     }
 
+    ftpInterval = 60;
     xmlCleanupParser();
 }
 

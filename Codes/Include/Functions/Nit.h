@@ -69,6 +69,7 @@ public:
     Nit(const char *key, uchar_t *buffer);
     ~Nit() {}
     
+    uint16_t GetSectionId() const;
     uint16_t GetPid() const; 
 
     void SetTableId(uchar_t data);

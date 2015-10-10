@@ -80,11 +80,15 @@ class Section: public Component
 public:
     Section(const char *key): key(key) {}
     virtual ~Section() {}
-
+    
+    virtual std::string GetKey() { return key; }
+    /* for BAT return bouquet_id, for Eit return service_id, 
+       for Nit return network_id, for Sdt return transport_stream_id
+    */
+    virtual uint16_t GetSectionId() const = 0;
+    virtual uint16_t GetNetworkId() const = 0;
     virtual uint16_t GetPid()  const = 0; 
     virtual uchar_t GetTableId() const = 0;
-    virtual uint16_t GetNetworkId() const = 0;
-    virtual std::string GetKey() { return key; }
     
     virtual size_t GetCodesSize() const = 0;
     virtual size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const = 0;

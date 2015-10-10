@@ -133,8 +133,10 @@ public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0012};
     Eit(const char *key);
+    Eit(const char *key, uchar_t *buffer);
     ~Eit() {}
     
+    uint16_t GetSectionId() const;
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);
@@ -178,7 +180,6 @@ private:
     uchar_t  lastSectionNumber;
     uint16_t transportStreamId;
     uint16_t originalNetworkId;
-    //uchar_t  tableId;
 
     std::string startTime;
     std::chrono::seconds duration;

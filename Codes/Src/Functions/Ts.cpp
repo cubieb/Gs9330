@@ -199,6 +199,15 @@ void Ts::PropagateEitSection()
 void Ts::AddSection(std::shared_ptr<Section> section)
 {
     assert(pid == section->GetPid());
+    for (auto iter = sections.begin(); iter != sections.end(); ++iter)
+    {
+        if ((*iter)->GetNetworkId() == section->GetNetworkId()
+            && (*iter)->GetTableId() == section->GetTableId()
+            && (*iter)->GetSectionId() == section->GetSectionId())
+        {
+            return;
+        }
+    }
     sections.push_back(section);
 }
 

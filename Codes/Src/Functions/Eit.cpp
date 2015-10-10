@@ -14,11 +14,21 @@ uint32_t ConvertDateToMjd(uint32_t year, uint32_t month, uint32_t day)
     return (14956 + day + (uint32_t)((year - l) * 365.25) + (uint32_t)((month + 1 + l * 12) * 30.6001));
 }
 
-uint64_t ConvertDateToMjd(uint64_t year, uint64_t month, uint64_t day)
+void ConvertMjdToDate(uint32_t mjd, uint32_t &year, uint32_t &month, uint32_t &day)
 {
-    uint64_t l = (month == 1 || month == 2) ? 1 : 0;
-    return (14956 + day + (uint64_t)((year - l) * 365.25) + (uint64_t)((month + 1 + l * 12) * 30.6001));
+     year  = (uint32_t)((mjd - 15078.2) / 365.25);
+     month = (uint32_t)((mjd - 14956.1 - uint32_t(year * 365.25)) / 30.6001);
+     day   = mjd - 14956 - uint32_t(year * 365.25) - uint32_t(month * 30.6001);
+     uint_t k = (month == 14 || month == 15) ? 1 : 0;
+     year = year + k;
+     month = month - 1 - k * 12;
 }
+
+//uint64_t ConvertDateToMjd(uint64_t year, uint64_t month, uint64_t day)
+//{
+//    uint64_t l = (month == 1 || month == 2) ? 1 : 0;
+//    return (14956 + day + (uint64_t)((year - l) * 365.25) + (uint64_t)((month + 1 + l * 12) * 30.6001));
+//}
 
 /**********************class EitEvent**********************/
 EitEvent::EitEvent(uint16_t eventId, const char *startTime, 
@@ -225,6 +235,88 @@ Eit::Eit(const char *key)
             transportStreamId(0), originalNetworkId(0)
 {
     events.reset(new EitEvents);
+}
+
+Eit::Eit(const char *key, uchar_t *buffer)
+    : Section(key)
+{
+    events.reset(new EitEvents);    
+
+    const char *p = find(key, key + strlen(key), '_') + 1;
+    networkId = (uint16_t)strtol(p, nullptr, 10);
+    
+    uchar_t *ptr = buffer;
+    uint16_t sectionLength;
+    ptr = ptr + Read8(ptr, tableId);
+    ptr = ptr + Read16(ptr, sectionLength);
+    sectionLength = sectionLength & 0xfff;
+
+    ptr = ptr + Read16(ptr, serviceId);
+    ptr = ptr + Read8(ptr, versionNumber);
+    versionNumber = (versionNumber & 0x2f) >> 1;
+     
+    ptr = ptr + Read8(ptr, sectionNumber);
+    ptr = ptr + Read8(ptr, lastSectionNumber);
+    ptr = ptr + Read16(ptr, transportStreamId);
+    ptr = ptr + Read16(ptr, originalNetworkId);
+
+    uchar_t segmentLastSectionNumber, lastTableId;
+    ptr = ptr + Read8(ptr, segmentLastSectionNumber);
+    ptr = ptr + Read8(ptr, lastTableId);
+
+    while (ptr < buffer + sectionLength - 1)
+    {
+        uint16_t eventId, value16, runningStatus, freeCaMode, desLength;
+        ptr = ptr + Read16(ptr, eventId);
+
+        uint64_t value64;
+        ptr = ptr + Read64(ptr, value64);        
+        ptr = ptr + Read16(ptr, value16);
+        runningStatus = value16 >> 13;
+        freeCaMode = (value16 >> 12) & 0x1;
+        desLength = value16 & 0xfff;
+
+        time_t duration;
+        uint32_t year, month, day, hour, min, sec;
+
+        ConvertMjdToDate(value64 >> 48, year, month, day);
+        year = year + 1900;
+
+        uint32_t bcd;
+        bcd = (uint32_t)((value64 >> 24) & 0xffffff);
+        hour = (bcd >> 20) * 10 + ((bcd >> 16) & 0xf);
+        min  = ((bcd >> 12) & 0xf) * 10 + ((bcd >> 8) & 0xf);
+        sec  = ((bcd >> 4) & 0xf) * 10 + (bcd & 0xf);
+
+        char startTime[] = "0000-00-00 00:00:00";
+        sprintf(startTime, "%04d-%02d-%02d %2d:%02d:%02d", year, month, day, hour, min, sec);
+
+        tm localTime, gmtTime;  
+        std::istringstream ss(startTime);
+        ss >> std::get_time(&gmtTime, "%Y-%m-%d %H:%M:%S");
+
+        ConvertGmtToUtc(gmtTime, localTime);
+        /* refer to std::strftime(), std::put_time() and struct tm */
+        strftime(startTime, sizeof(startTime), "%Y-%m-%d %H:%M:%S", &localTime);
+
+        bcd = value64 & 0xffffff;
+        duration = ((bcd >> 20) * 10  + ((bcd >> 16) & 0xf)) * 3600 
+            + (((bcd >> 12) & 0xf) * 10 + ((bcd >> 8) & 0xf)) * 60
+            + ((bcd >> 4) & 0xf) * 10 + (bcd & 0xf);
+        events->AddEvent(eventId, startTime, duration, runningStatus, freeCaMode);
+        
+        uchar_t *endPtr = ptr + desLength;
+        while (ptr < endPtr)
+        {
+            events->AddEventDescriptor(eventId, ptr[0], ptr+2, *(ptr+1));
+            ptr = ptr + *(ptr+1) + 2;
+        }
+    }
+}
+
+uint16_t Eit::GetSectionId() const
+{
+    return serviceId;
 }
 
 uint16_t Eit::GetPid()  const

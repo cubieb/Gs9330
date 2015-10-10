@@ -29,7 +29,7 @@ private:
                         std::map<uint16_t, std::shared_ptr<Ts>>& pidTsInfors);
     void SendUdp(int socketFd, std::bitset<256>& tableIds);
     void ThreadMain();
-    void TheckTimer(uint32_t& cur, uint32_t orignal, std::bitset<256>& bits, uchar_t indexInBits);
+    void CheckTimer(uint32_t& cur, uint32_t orignal, std::bitset<256>& bits, uchar_t indexInBits);
 
     std::thread myThread;
     std::mutex  myMutext;

@@ -2,6 +2,8 @@
 #define _XmlDataWrapperInl_h_
 
 #include <regex>
+#include <io.h> 
+#include "Debug.h"
 #include "DirMonitor.h"
 #include "XmlDataWrapper.h"
 
@@ -24,6 +26,21 @@ XmlDataWrapper<Section>::~XmlDataWrapper()
 template<typename Section>
 void XmlDataWrapper<Section>::Start()
 {
+    string path = xmlFileDir + string("\\*.xml");
+    _finddata_t fileInfo;  
+    long handle = _findfirst(path.c_str(), &fileInfo); 
+    if (handle != -1) 
+    {
+        do 
+        {  
+            dbgstrm << fileInfo.name << endl; 
+            if (regex_match(fileInfo.name, regex(xmlFileRegularExp)))
+            {
+                CreateSection(fileInfo.name);   //->NotifyDbInsert()
+            }
+        } while (_findnext(handle, &fileInfo) == 0); 
+    } 
+
     /* linux api  : http://linux.die.net/man/7/inotify
         windows api: ReadDirectoryChangesW() or FileSystemWatcher component
     */

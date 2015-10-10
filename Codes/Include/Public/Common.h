@@ -104,7 +104,7 @@ inline bool operator > (Mac const& left, Mac const& right)
 size_t Read8(uchar_t* buf, uchar_t&);
 size_t Read16(uchar_t* buf, uint16_t&);
 size_t Read32(uchar_t* buf, uint32_t&);
-size_t Read64(uchar_t* buf, uint32_t&);
+size_t Read64(uchar_t* buf, uint64_t&);
 
 size_t Write8(uchar_t* buf, uchar_t);
 size_t Write16(uchar_t* buf, uint16_t);
@@ -176,6 +176,7 @@ std::string ConvertUtf8ToString(uchar_t *src);
 /******************convert string to time_t******************/
 time_t ConvertStrToTime(const char *str);
 void ConvertUtcToGmt(struct tm& src, struct tm& dst);
+void ConvertGmtToUtc(struct tm& src, struct tm& dst);
 time_t CalculateUtcGmtDiff();
 
 #endif

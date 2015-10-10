@@ -55,8 +55,10 @@ public:
     /* SI PID definition: <iso13818-1.pdf>, 5.1.3 Coding of PID and table_id fields */
     enum: uint16_t {Pid = 0x0011};
     Bat(const char *key);
+    Bat(const char *key, uchar_t *buffer);
     ~Bat() {}
     
+    uint16_t GetSectionId() const;
     uint16_t GetPid()  const; 
 
     void SetTableId(uchar_t data);

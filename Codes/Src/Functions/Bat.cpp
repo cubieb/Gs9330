@@ -17,6 +17,64 @@ Bat::Bat(const char *key)
     transportStreams.reset(new TransportStreams);
 }
 
+Bat::Bat(const char *key, uchar_t *buffer)
+    : Section(key)
+{
+    descriptors.reset(new Descriptors);
+    transportStreams.reset(new TransportStreams);
+
+    const char *p = find(key, key + strlen(key), '_') + 1;
+    networkId = (uint16_t)strtol(p, nullptr, 10);
+
+    uchar_t *ptr = buffer;
+    uint16_t sectionLength;
+    ptr = ptr + Read8(ptr, tableId);
+    ptr = ptr + Read16(ptr, sectionLength);
+    sectionLength = sectionLength & 0xfff;
+
+    ptr = ptr + Read16(ptr, bouquetId);
+    ptr = ptr + Read8(ptr, versionNumber);
+    versionNumber = (versionNumber & 0x2f) >> 1;
+    
+    ptr = ptr + Read8(ptr, sectionNumber);
+    ptr = ptr + Read8(ptr, lastSectionNumber);
+
+    uint16_t bouquetDescriptorLen;
+    ptr = ptr + Read16(ptr, bouquetDescriptorLen);
+    bouquetDescriptorLen = bouquetDescriptorLen & 0xfff;
+    if (bouquetDescriptorLen != 0)
+    {
+        AddDescriptor(BouquetNameDescriptor::Tag, ptr, bouquetDescriptorLen);
+        ptr = ptr + bouquetDescriptorLen;
+    }
+
+    uint16_t tsDesLen;
+    ptr = ptr + Read16(ptr, tsDesLen);
+    tsDesLen = tsDesLen & 0xfff;
+
+    uchar_t *endPtr = ptr + tsDesLen;
+    while (ptr < endPtr)
+    {        
+        uint16_t tsId, onId, tsDesLength;
+        ptr = ptr + Read16(ptr, tsId);
+        ptr = ptr + Read16(ptr, onId);
+        AddTs(tsId, onId);
+
+        ptr = ptr + Read16(ptr, tsDesLength);
+        tsDesLength = tsDesLength & 0xfff;
+        if (tsDesLength != 0)
+        {
+            AddTsDescriptor(tsId, ptr[0], ptr+2, tsDesLength - 2);
+            ptr = ptr + tsDesLength;
+        }
+    }
+}
+
+uint16_t Bat::GetSectionId() const
+{
+    return bouquetId;
+}
+
 uint16_t Bat::GetPid()  const
 {
     return Pid;

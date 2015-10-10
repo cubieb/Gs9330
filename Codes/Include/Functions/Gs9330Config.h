@@ -47,6 +47,8 @@ public:
     uint32_t   eit60Interval;
     std::string tsFilesDir;
     std::list<std::shared_ptr<NetworkIdAddress>> netAddresses;    
+
+    uint32_t   ftpInterval;
 };
 
 /**********************class XmlConfig**********************/
