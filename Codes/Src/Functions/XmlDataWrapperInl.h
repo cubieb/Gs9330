@@ -124,6 +124,7 @@ template<typename Section>
 void NitXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
+    cout << "Reading " << file << endl;
 
     auto nit = std::make_shared<Section>(file);
     shared_ptr<xmlDoc> doc;
@@ -239,6 +240,7 @@ template<typename Section>
 void SdtXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
+    cout << "Reading " << file << endl;
 
     auto sdt = std::make_shared<Section>(file);
     shared_ptr<xmlDoc> doc;
@@ -353,6 +355,7 @@ template<typename Section>
 void BatXmlWrapper<Section>::CreateSection(const char *file) const
 {
     string xmlPath = xmlFileDir + string("/") + string(file);
+    cout << "Reading " << file << endl;
 
     auto bat = std::make_shared<Section>(file);
     shared_ptr<xmlDoc> doc;
@@ -423,6 +426,7 @@ template<typename Section>
 void EitXmlWrapper<Section>::CreateSection(const char *file) const
 {    
     string xmlPath = xmlFileDir + string("/") + string(file);
+    cout << "Reading " << file << endl;
     
     shared_ptr<xmlDoc> doc;
     for (int i = 0; i < 10 && doc == nullptr; ++i)
