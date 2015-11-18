@@ -1,0 +1,27 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="SDT" TableID="0x46">
+	<Transportstream TSID="50" ONID="101" Version="10">
+		<Service ServiceID="2" Name="影视精品" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="3" Name="卡通天地" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="4" Name="音乐天地" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="5" Name="国际影院" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="6" Name="科技博览" Provider_Name="" Type="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="25" Name="音乐欣赏" Provider_Name="" Type="2" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+		<Service ServiceID="1" Name="沈阳数字指南" Provider_Name="" Type="2" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0" LCN="" Volume="">
+			<Descriptors Sum="0"/>
+		</Service>
+	</Transportstream>
+</Root>
+

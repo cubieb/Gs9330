@@ -1,0 +1,11 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="EIT" TableID="0x4F">
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="641"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="642"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="643"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="644"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="645"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="646"/>
+	<Transportstream TSID="55" ONID="101" Version="55" ServiceID="647"/>
+</Root>
+

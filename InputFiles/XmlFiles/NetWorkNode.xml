@@ -1,0 +1,8 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root>
+	<NetNode NetID="101" NetName="沈阳市网" FatherID=""/>
+	<NetNode NetID="104" NetName="法库县网" FatherID="101"/>
+	<NetNode NetID="103" NetName="康平县网" FatherID="101"/>
+	<NetNode NetID="102" NetName="新民市网" FatherID="101"/>
+</Root>
+
