@@ -45,9 +45,14 @@ uint16_t EitEvent::GetEventId() const
     return eventId;
 }
 
-void EitEvent::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+void EitEvent::AddDescriptor(uchar_t tag, uchar_t* data)
 {
-    descriptors->AddDescriptor(tag, data, dataSize);
+    descriptors->AddDescriptor(tag, data);
+}
+
+void EitEvent::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
+{
+    descriptors->AddDescriptor(discriptor);
 }
 
 size_t EitEvent::GetCodesSize() const
@@ -160,11 +165,18 @@ void EitEvents::AddEvent(std::shared_ptr<EitEvent> event)
     AddComponent(event);
 }
 
-void EitEvents::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_t dataSize)
+void EitEvents::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data)
 {
     auto iter = find_if(components.begin(), components.end(), EqualEitEvents(eventId));
     EitEvent& event = dynamic_cast<EitEvent&>(**iter);
-    event.AddDescriptor(tag, data, dataSize);
+    event.AddDescriptor(tag, data);
+}
+
+void EitEvents::AddEventDescriptor(uint16_t eventId, std::shared_ptr<Descriptor> discriptor)
+{
+    auto iter = find_if(components.begin(), components.end(), EqualEitEvents(eventId));
+    EitEvent& event = dynamic_cast<EitEvent&>(**iter);
+    event.AddDescriptor(discriptor);
 }
 
 void EitEvents::RemoveIf(time_t time)
@@ -304,12 +316,17 @@ Eit::Eit(const char *key, uchar_t *buffer)
             + (((bcd >> 12) & 0xf) * 10 + ((bcd >> 8) & 0xf)) * 60
             + ((bcd >> 4) & 0xf) * 10 + (bcd & 0xf);
         events->AddEvent(eventId, startTime, duration, runningStatus, freeCaMode);
-        
+
         uchar_t *endPtr = ptr + desLength;
         while (ptr < endPtr)
         {
-            events->AddEventDescriptor(eventId, ptr[0], ptr+2, *(ptr+1));
-            ptr = ptr + *(ptr+1) + 2;
+            uchar_t tag, len;
+            ptr = ptr + ReadBuffer(ptr, tag);
+            ptr = ptr + ReadBuffer(ptr, len);
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+            ptr = ptr + len;
+
+            events->AddEventDescriptor(eventId, descriptor);
         }
     }
 }
@@ -382,9 +399,9 @@ void Eit::AddEvent(uint16_t eventId, const char *startTime, time_t duration,
     events->AddEvent(eventId, startTime, duration, runningStatus, freeCaMode);
 }
 
-void Eit::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data, size_t dataSize)
+void Eit::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data)
 {
-    events->AddEventDescriptor(eventId, tag, data, dataSize);
+    events->AddEventDescriptor(eventId, tag, data);
 }
 
 size_t Eit::GetCodesSize() const

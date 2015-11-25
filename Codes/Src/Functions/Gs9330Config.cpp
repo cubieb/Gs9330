@@ -72,7 +72,7 @@ TransmitConfig::TransmitConfig()
 /**********************class XmlConfig**********************/
 XmlConfig::XmlConfig()
 {    
-    char xmlPath[MAX_PATH];
+    char xmlPath[MAX_PATH] = {'\0'};
     DWORD dword = ExpandEnvironmentStrings("%APPDATA%", xmlPath, MAX_PATH);
     assert(dword != 0);
 

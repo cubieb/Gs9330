@@ -1,106 +1,34 @@
 #ifndef _Common_h_
 #define _Common_h_
 
-/*
-Example:
-    uchar_t* mem;
-    cout << MemStream(mem) << endl;
-*/
-
-template<class T>
-class MemStream
-{
-public:
-    MemStream(const T* const theMem, size_t theLen):mem(theMem), len(theLen){}
-
-    void Put(std::ostream& os) const
-    {
-        size_t i;
-        std::ios::fmtflags flags = os.setf(std::ios::hex, std::ios::basefield);
-        for (i = 0; i < len; ++i)
-        {
-            if (i != 0)
-            {
-                if (i % 16 == 0)
-                {
-                    os << std::endl;
-                }
-                else if (i % 8 == 0)
-                {
-                    os << "  ";
-                }
-            }
-            os << std::setw(2) << std::setfill('0') << (uint_t)(uchar_t)mem[i];
-        }
-        os.setf(flags, std::ios::basefield);
-    }
-private:
-    const T* const mem;
-    size_t   len;
-};
-
-inline std::ostream& operator << (std::ostream& os, MemStream<uint_t> const& mem)
-{
-    mem.Put(os);
-    return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, MemStream<uchar_t> const& mem)
-{
-    mem.Put(os);
-    return os;
-}
-
-#define MacBroadcast (uchar_t*)"\xFF\xFF\xFF\xFF\xFF\xFF"
-#define MacZero      (uchar_t*)"\x00\x00\x00\x00\x00\x00"
- 
-class Mac
-{
-public:    
-    Mac();
-    Mac(const uchar_t*);
-    Mac(Mac const&);
-    Mac const& operator =(Mac const&);
-    bool IsBroadcast() const;
-    bool IsZero() const;
-    uchar_t* GetPtr() const;
-
-    int Compare(Mac const&) const;
-    int Compare(const uchar_t*) const;
-    
-    void Put(std::ostream&) const;
-
-private:    
-    std::shared_ptr<uchar_t> mac;
-};
-
-inline std::ostream& operator << (std::ostream& os, Mac const& mac)
-{
-    mac.Put(os);
-    return os;
-}
-
-inline bool operator == (Mac const& left, Mac const& right)
-{
-    return (left.Compare(right) == 0);
-}
-
-inline bool operator != (Mac const& left, Mac const& right)
-{
-    return !(left == right);
-}
-
-inline bool operator < (Mac const& left, Mac const& right)
-{
-    return (left.Compare(right) < 0);
-}
-
-inline bool operator > (Mac const& left, Mac const& right)
-{
-    return (left.Compare(right) > 0);
-}
-
 /******************Read from / Write to packet buffer******************/
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, size_t>::type
+ReadBuffer(uchar_t *buf, T &value)
+{
+    value = 0;
+    size_t size = sizeof(T);
+    for (size_t i = 0; i < size; ++i)
+    {
+        value = (value << 8) | buf[i];
+    }
+
+    return size;
+}
+
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, size_t>::type
+WriteBuffer(uchar_t *buf, T value)
+{
+    size_t size = sizeof(T);
+    for (size_t i = 0; i < size; ++i)
+    {
+        buf[size - i - 1] = value & 0xff;
+        value = (value >> 4) >> 4;  // value >> 8 will cause C4333 warning in VC 2012.
+    }
+    return size;
+}
+
 size_t Read8(uchar_t* buf, uchar_t&);
 size_t Read16(uchar_t* buf, uint16_t&);
 size_t Read32(uchar_t* buf, uint32_t&);
@@ -109,7 +37,7 @@ size_t Read64(uchar_t* buf, uint64_t&);
 size_t Write8(uchar_t* buf, uchar_t);
 size_t Write16(uchar_t* buf, uint16_t);
 size_t Write32(uchar_t* buf, uint32_t);
-size_t Write64(uchar_t* buf, uint64_t value);
+size_t Write64(uchar_t* buf, uint64_t);
 
 size_t MemCopy(void *dest, size_t destSize, const void *src, size_t count);
 
@@ -145,33 +73,32 @@ public:
     }
 };
 
-/******************function ConvertChar2Asc******************/
-inline uchar_t ConvertChar2Asc(uchar_t input)
+/******************function ConvertCharToInt******************/
+uchar_t ConvertCharToInt(uchar_t input);
+
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, size_t>::type
+ConvertHexStrToInt(uchar_t *src, T &value)
 {
-    if(input >= '0' && input <= '9')
-        return input - '0';
-    if(input >= 'A' && input <= 'F')
-        return input - 'A' + 10;
+    value = 0;
     
-    assert(input >= 'a' && input <= 'f');
-    return input - 'a' + 10;
+    for (uchar_t *ptr = src; ptr < src + sizeof(T) * 2; ptr = ptr + 2)
+    {
+        value = (value << 8) + (ConvertCharToInt(ptr[0]) << 4) + ConvertCharToInt(ptr[1]);
+    }
+
+    return sizeof(T) * 2;
 }
 
-inline void ConvertStr2AscStr(const uchar_t* src, size_t size, uchar_t* dst)
-{
-    assert((size & 1) == 0);
-    for(const uchar_t *ptr = src; ptr < src + size; ptr = ptr + 2)
-    {
-        *(dst++) = (ConvertChar2Asc(*ptr) << 4) | ConvertChar2Asc(ptr[1]);
-    }
-}
+size_t ConvertStrToIntStr(const uchar_t* src, size_t size, uchar_t* dst);
 
 inline uchar_t ConvertValueToBcd(uchar_t value)
 {
 	return( ( ( value / 10 ) << 4 ) | ( value % 10 ) );				/* Convert Value to BCD */
 }
 
-std::string ConvertUtf8ToString(uchar_t *src);
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber);
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst);
 
 /******************convert string to time_t******************/
 time_t ConvertStrToTime(const char *str);

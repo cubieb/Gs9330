@@ -8,55 +8,6 @@
 
 using namespace std;
 
-Mac::Mac(): mac(new uchar_t[6])
-{
-    memcpy(this->mac.get(), MacZero, 6);
-}
-
-Mac::Mac(const uchar_t* mac): mac(new uchar_t[6])
-{
-    memcpy(this->mac.get(), mac, 6);
-}
-
-Mac::Mac(Mac const& right): mac(right.mac)
-{}
-
-Mac const& Mac::operator =(Mac const& right)
-{
-    mac = right.mac;
-    return *this;
-}
-
-bool Mac::IsBroadcast() const
-{
-    return (memcmp(MacBroadcast, mac.get(), 6) == 0);
-}
-
-bool Mac::IsZero() const
-{
-    return (memcmp(MacZero, mac.get(), 6) == 0);    
-}
-
-uchar_t* Mac::GetPtr() const
-{
-    return mac.get();
-}
-
-int Mac::Compare(Mac const& right) const
-{
-    return memcmp(mac.get(), right.mac.get(), 6);
-}
-
-int Mac::Compare(const uchar_t* right) const
-{
-    return memcmp(mac.get(), right, 6);
-}
-
-void Mac::Put(ostream& os) const
-{
-    os << MemStream<uchar_t>(mac.get(),  6);
-}
-
 /******************Read from / Write to packet buffer******************/
 size_t Read8(uchar_t* buf, uchar_t& value)
 {
@@ -146,8 +97,31 @@ size_t MemCopy(void *dest, size_t destSize, const void *src, size_t count)
     return count;
 }
 
-/******************function ConvertChar2Asc******************/
-/* 
+/******************function ConvertCharToInt******************/
+uchar_t ConvertCharToInt(uchar_t input)
+{
+    if(input >= '0' && input <= '9')
+        return input - '0';
+    if(input >= 'A' && input <= 'F')
+        return input - 'A' + 10;
+    
+    assert(input >= 'a' && input <= 'f');
+    return input - 'a' + 10;
+}
+
+size_t ConvertStrToIntStr(const uchar_t* src, size_t size, uchar_t* dst)
+{
+    assert((size & 1) == 0);
+    for(const uchar_t *ptr = src; ptr < src + size; ptr = ptr + 2)
+    {
+        *(dst++) = (ConvertCharToInt(ptr[0]) << 4) | ConvertCharToInt(ptr[1]);
+    }
+    return size;
+}
+
+
+/* Convert Utf8 sting to Gb2312 string.
+
 proposal 1: without icon lib, we can call windows function to do the same thing.
 int len = MultiByteToWideChar(CP_UTF8, 0, (char*)data, -1, NULL, 0);
 wchar_t* wstr = new wchar_t[len+1];
@@ -193,19 +167,40 @@ proposal 3:
 Example:
     std::string str  = ConvertUtf8ToString(str("\xe6\xb2\x88\xe9\x98\xb3\xe5\xb8\x82\xe7\xbd\x91\0");
  */
-string ConvertUtf8ToString(uchar_t *src)
+static size_t GetUtfMemSize(uchar_t *src, size_t charNumber)
+{
+    size_t chars = 0, memSize = 0;
+    while(true)
+    {
+        if ((src[0] & 0xC0) != 0x80)
+        {
+            chars++;
+        }
+
+        if (chars == charNumber + 1)
+            break;
+
+        src++;
+        memSize++;
+    }
+    return memSize;
+}
+
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
-    wstring wStr = conv.from_bytes(string((char *)src));
+    wstring wStr = conv.from_bytes(string((char *)src));   
+
+    size_t charNumber = std::min(wStr.size(), maxCharNumber);
 
     std::locale sysLocale("");
 	const wchar_t* dataFrom = wStr.c_str();
-	const wchar_t* dataFromEnd = wStr.c_str() + wStr.size();
+	const wchar_t* dataFromEnd = wStr.c_str() + charNumber;
 	const wchar_t* dataFromNext = 0;
 
     int wcharSize = 4;
 	char* dataTo = new char[(wStr.size() + 1) * wcharSize];
-	char* dataToNnd = dataTo + (wStr.size() + 1) * wcharSize;
+	char* dataToEnd = dataTo + (wStr.size() + 1) * wcharSize;
 	char* dataToNext = 0;
 
     memset(dataTo, 0, (wStr.size() + 1) * wcharSize);
@@ -215,21 +210,26 @@ string ConvertUtf8ToString(uchar_t *src)
 	mbstate_t outState = 0;
 	auto result = std::use_facet<convertFacet>(sysLocale).out(
 		outState, dataFrom, dataFromEnd, dataFromNext,
-		dataTo + 1, dataToNnd, dataToNext);
+		dataTo + 1, dataToEnd, dataToNext);
 	if( result == convertFacet::ok)
 	{
         if (strlen(dataTo) == 1)
             dataTo[0] = 0;
-		std::string dst = dataTo;
-		delete[] dataTo;
-		return dst;
+		dst = dataTo;
 	}
 	else
 	{
-		printf( "convert error!\n" );
-		delete[] dataTo;
-		return std::string("");
+		cerr << "convert error!" << endl;
+        dst = "";
 	}
+
+    delete[] dataTo;
+    return GetUtfMemSize(src, charNumber);
+}
+
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst)
+{
+    return ConvertUtf8ToString(src, dst, std::numeric_limits<size_t>::max() );
 }
 
 /******************convert string to time_t******************/

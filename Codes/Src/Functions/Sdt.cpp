@@ -25,14 +25,14 @@ uint16_t SdtService::GetServiceId()
     return serviceId;
 }
 
-void SdtService::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+void SdtService::AddDescriptor(uchar_t tag, uchar_t* data)
 {
-    descriptors->AddDescriptor(tag, data, dataSize);
+    descriptors->AddDescriptor(tag, data);
 }
 
-void SdtService::AddServiceDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
+void SdtService::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
 {
-    descriptors->AddDescriptor0x48(serviceType, providerName, serviceName);
+    descriptors->AddDescriptor(discriptor);
 }
 
 size_t SdtService::GetCodesSize() const
@@ -104,19 +104,18 @@ void SdtServices::AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag,
     AddComponent(service);
 }
 
-void SdtServices::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize)
+void SdtServices::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data)
 {
     auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
     SdtService& service = dynamic_cast<SdtService&>(**iter);
-    service.AddDescriptor(tag, data, dataSize);
+    service.AddDescriptor(tag, data);
 }
 
-void SdtServices::AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, 
-                                           uchar_t *providerName, uchar_t *serviceName)
+void SdtServices::AddServiceDescriptor(uint16_t serviceId, std::shared_ptr<Descriptor> discriptor)
 {
     auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
     SdtService& service = dynamic_cast<SdtService&>(**iter);
-    service.AddServiceDescriptor0x48(serviceType, providerName, serviceName);
+    service.AddDescriptor(discriptor);
 }
 
 void SdtServices::Put(std::ostream& os) const
@@ -157,7 +156,7 @@ Sdt::Sdt(const char *key, uchar_t *buffer)
 
     while (ptr < buffer + sectionLength - 1)
     {
-        uint16_t value16, serviceId, desLength;
+        uint16_t value16, serviceId;
         uchar_t  value8, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode;
         ptr = ptr + Read16(ptr, serviceId);
         ptr = ptr + Read8(ptr, value8);
@@ -168,12 +167,18 @@ Sdt::Sdt(const char *key, uchar_t *buffer)
         freeCaMode = (value16 >> 12) & 0x1;
 
         AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
-
-        desLength = value16 & 0xfff;
-        if (desLength != 0)
+        
+        uchar_t *endPtr;
+        endPtr = ptr + (value16 & 0xfff);
+        while (ptr < endPtr)
         {
-            AddServiceDescriptor(serviceId, ptr[0], ptr+2, desLength - 2);
-            ptr = ptr + desLength;
+            uchar_t tag, len;
+            ptr = ptr + ReadBuffer(ptr, tag);
+            ptr = ptr + ReadBuffer(ptr, len);
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+            ptr = ptr + len;
+
+            services->AddServiceDescriptor(serviceId, descriptor);
         }
     }
 }
@@ -243,14 +248,9 @@ void Sdt::AddService(uint16_t serviceId, uchar_t eitScheduleFlag,
                             runningStatus, freeCaMode);
 }
 
-void Sdt::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize)
+void Sdt::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data)
 {
-    services->AddServiceDescriptor(serviceId, tag, data, dataSize);
-}
-
-void Sdt::AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName)
-{
-    services->AddServiceDescriptor0x48(serviceId, serviceType, providerName, serviceName);
+    services->AddServiceDescriptor(serviceId, tag, data);
 }
 
 size_t Sdt::GetCodesSize() const

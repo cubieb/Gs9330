@@ -125,8 +125,8 @@ public:
     void CreateSection(const char *file) const;
 
 private:
-    void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;    
+    void AddDescriptor(Section& nit, xmlNodePtr& node) const;
+    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node) const;    
 };
 
 /**********************class SdtXmlWrapper**********************/
@@ -156,10 +156,8 @@ public:
     void CreateSection(const char* file) const;
 
 private:
-    void AddDescriptor(Section& nit, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node, xmlChar* child) const;
-    void AddTsDescriptor0x41(Section& bat, uint16_t tsId,
-                             xmlNodePtr& node, xmlChar* child) const;
+    void AddDescriptor(Section& nit, xmlNodePtr& node) const;
+    void AddTsDescriptor(Section& nit, uint16_t onId, xmlNodePtr& node) const;
 };
 
 /**********************class EitXmlWrapper**********************/
@@ -174,7 +172,7 @@ public:
     void CreateSection(const char *file) const;
 
 private:
-    void AddEvent(Section& eit, xmlNodePtr& node, xmlChar* child) const;
+    void AddEvent(Section& eit, xmlNodePtr& node) const;
 };
 
 #endif

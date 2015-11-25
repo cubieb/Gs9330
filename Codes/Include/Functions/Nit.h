@@ -82,18 +82,10 @@ public:
     void SetSectionNumber(uchar_t data);
     void SetLastSectionNumber(uchar_t data);
 
-    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
-    void AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
-                           uint32_t symbolRate, uint32_t fecInner);
+    void AddDescriptor(uchar_t tag, uchar_t* data);
 
     void AddTs(uint16_t tsId, uint16_t onId);
-    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize);    
-    void AddTsDescriptor0x41(uint16_t tsId,
-                             const std::list<std::pair<uint16_t, uchar_t>>& serviceList);
-    void AddTsDescriptor0x44(uint16_t tsId,
-                             uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
-                             uint32_t symbolRate, uint32_t fecInner);
+    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data);  
     
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;

@@ -27,6 +27,7 @@ Bat::Bat(const char *key, uchar_t *buffer)
     networkId = (uint16_t)strtol(p, nullptr, 10);
 
     uchar_t *ptr = buffer;
+    uchar_t *endPtr1, *endPtr2;
     uint16_t sectionLength;
     ptr = ptr + Read8(ptr, tableId);
     ptr = ptr + Read16(ptr, sectionLength);
@@ -42,18 +43,24 @@ Bat::Bat(const char *key, uchar_t *buffer)
     uint16_t bouquetDescriptorLen;
     ptr = ptr + Read16(ptr, bouquetDescriptorLen);
     bouquetDescriptorLen = bouquetDescriptorLen & 0xfff;
-    if (bouquetDescriptorLen != 0)
+    endPtr1 = ptr + bouquetDescriptorLen;
+    while (ptr < endPtr1)
     {
-        AddDescriptor(BouquetNameDescriptor::Tag, ptr, bouquetDescriptorLen);
-        ptr = ptr + bouquetDescriptorLen;
+        uchar_t tag, len;
+        ptr = ptr + ReadBuffer(ptr, tag);
+        ptr = ptr + ReadBuffer(ptr, len);
+        shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+        ptr = ptr + len;
+
+        descriptors->AddDescriptor(descriptor);
     }
 
     uint16_t tsDesLen;
     ptr = ptr + Read16(ptr, tsDesLen);
     tsDesLen = tsDesLen & 0xfff;
 
-    uchar_t *endPtr = ptr + tsDesLen;
-    while (ptr < endPtr)
+    endPtr1 = ptr + tsDesLen;
+    while (ptr < endPtr1)
     {        
         uint16_t tsId, onId, tsDesLength;
         ptr = ptr + Read16(ptr, tsId);
@@ -62,10 +69,16 @@ Bat::Bat(const char *key, uchar_t *buffer)
 
         ptr = ptr + Read16(ptr, tsDesLength);
         tsDesLength = tsDesLength & 0xfff;
-        if (tsDesLength != 0)
+        endPtr2 = ptr + tsDesLength;
+        while (ptr < endPtr2)
         {
-            AddTsDescriptor(tsId, ptr[0], ptr+2, tsDesLength - 2);
-            ptr = ptr + tsDesLength;
+            uchar_t tag, len;
+            ptr = ptr + ReadBuffer(ptr, tag);
+            ptr = ptr + ReadBuffer(ptr, len);
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+            ptr = ptr + len;
+
+            transportStreams->AddTsDescriptor(tsId, descriptor);
         }
     }
 }
@@ -112,9 +125,9 @@ void Bat::SetVersionNumber(uchar_t data)
     versionNumber = data;
 }
 
-void Bat::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+void Bat::AddDescriptor(uchar_t tag, uchar_t* data)
 {
-    descriptors->AddDescriptor(tag, data, dataSize);
+    descriptors->AddDescriptor(tag, data);
 }
 
 void Bat::AddTs(uint16_t tsId, uint16_t onId)
@@ -122,15 +135,9 @@ void Bat::AddTs(uint16_t tsId, uint16_t onId)
     transportStreams->AddTransportStream(tsId, onId);
 }
 
-void Bat::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
+void Bat::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data)
 {
-    transportStreams->AddTsDescriptor(tsId, tag, data, dataSize);
-}
-
-void Bat::AddTsDescriptor0x41(uint16_t tsId,
-                              const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
-{
-    transportStreams->AddTsDescriptor0x41(tsId, serviceList);
+    transportStreams->AddTsDescriptor(tsId, tag, data);
 }
 
 size_t Bat::GetCodesSize() const

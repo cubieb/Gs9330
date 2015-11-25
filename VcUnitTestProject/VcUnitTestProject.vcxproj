@@ -81,40 +81,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Component.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\TransportStream.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp" />
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp" />
-    <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
-    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp" />
-    <ClCompile Include="..\Codes\Src\Public\Debug.cpp" />
-    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
     <ClCompile Include="..\UnitTestCodes\Main.cpp" />
     <ClCompile Include="..\UnitTestCodes\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Include\Functions\Bat.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Component.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
-    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Nit.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Sdt.h" />
-    <ClInclude Include="..\Codes\Include\Functions\TransportStream.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Ts.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Types.h" />
-    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h" />
-    <ClInclude Include="..\Codes\Include\Public\Common.h" />
-    <ClInclude Include="..\Codes\Include\Public\Crc32.h" />
-    <ClInclude Include="..\Codes\Include\Public\Debug.h" />
-    <ClInclude Include="..\Codes\Include\Public\SystemError.h" />
-    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h" />
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h" />
     <ClInclude Include="..\UnitTestCodes\Main.h" />
     <ClInclude Include="..\UnitTestCodes\UnitTest.h" />
   </ItemGroup>

@@ -8,24 +8,6 @@
     <Filter Include="CodesUnderTest">
       <UniqueIdentifier>{ffdd75c0-f6f4-4a7b-999e-52f17e5daf60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CodesUnderTest\头文件">
-      <UniqueIdentifier>{027c2268-2eef-4e89-9490-548ad3f5e342}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\头文件\Functions">
-      <UniqueIdentifier>{dfb57a45-4f5e-4c06-8298-b0b9cdc16bc6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\头文件\Public">
-      <UniqueIdentifier>{df8b130b-e00f-4587-95b1-1e03243bf3d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\源文件">
-      <UniqueIdentifier>{aee886ec-5854-4b2d-8c9a-e361b4e00aa3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\源文件\Functions">
-      <UniqueIdentifier>{660e71c1-347e-4d14-8d3c-6ef32f385491}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodesUnderTest\源文件\Public">
-      <UniqueIdentifier>{f230c13f-b217-41fa-af8b-1266a21ef786}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\UnitTestCodes\Main.cpp">
@@ -34,45 +16,6 @@
     <ClCompile Include="..\UnitTestCodes\UnitTest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Component.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\TransportStream.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapperInst.cpp">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Common.cpp">
-      <Filter>CodesUnderTest\源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
-      <Filter>CodesUnderTest\源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
-      <Filter>CodesUnderTest\源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
-      <Filter>CodesUnderTest\源文件\Public</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\Main.h">
@@ -80,57 +23,6 @@
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\UnitTest.h">
       <Filter>源文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Bat.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Controller.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Nit.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Component.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\TransportStream.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Ts.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Types.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
-      <Filter>CodesUnderTest\头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\Common.h">
-      <Filter>CodesUnderTest\头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\Crc32.h">
-      <Filter>CodesUnderTest\头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\Debug.h">
-      <Filter>CodesUnderTest\头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\SystemError.h">
-      <Filter>CodesUnderTest\头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
-      <Filter>CodesUnderTest\头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperDef.h">
-      <Filter>CodesUnderTest\源文件\Functions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

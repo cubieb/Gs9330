@@ -39,17 +39,25 @@ Nit::Nit(const char *key, uchar_t *buffer)
     uint16_t networdDescriptorLen;
     ptr = ptr + Read16(ptr, networdDescriptorLen);
     networdDescriptorLen = networdDescriptorLen & 0xfff;
-    if (networdDescriptorLen != 0)
+
+    uchar_t *endPtr1, *endPtr2;
+    endPtr1 = ptr + networdDescriptorLen;
+    if (ptr < endPtr1)
     {
-        AddDescriptor(NetworkNameDescriptor::Tag, ptr, networdDescriptorLen);
-        ptr = ptr + networdDescriptorLen;
+        uchar_t tag, len;
+        ptr = ptr + ReadBuffer(ptr, tag);
+        ptr = ptr + ReadBuffer(ptr, len);
+        shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+        ptr = ptr + len;
+
+        descriptors->AddDescriptor(descriptor);
     }
     
     uint16_t transportStreamLoopLength;
     ptr = ptr + Read16(ptr, transportStreamLoopLength);
     transportStreamLoopLength = transportStreamLoopLength & 0xfff;
-    uchar_t *endPtr = ptr + transportStreamLoopLength;
-    while (ptr < endPtr)
+    endPtr1 = ptr + transportStreamLoopLength;
+    while (ptr < endPtr1)
     {
         uint16_t tsId, onId, tsDesLength;
         ptr = ptr + Read16(ptr, tsId);
@@ -58,10 +66,16 @@ Nit::Nit(const char *key, uchar_t *buffer)
 
         ptr = ptr + Read16(ptr, tsDesLength);
         tsDesLength = tsDesLength & 0xfff;
-        if (tsDesLength != 0)
+        endPtr2 = ptr + tsDesLength;
+        while (ptr < endPtr2)
         {
-            AddTsDescriptor(tsId, ptr[0], ptr+2, tsDesLength - 2);
-            ptr = ptr + tsDesLength;
+            uchar_t tag, len;
+            ptr = ptr + ReadBuffer(ptr, tag);
+            ptr = ptr + ReadBuffer(ptr, len);
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
+            ptr = ptr + len;
+
+            transportStreams->AddTsDescriptor(tsId, descriptor);
         }
     }
 }
@@ -113,20 +127,9 @@ void Nit::SetLastSectionNumber(uchar_t data)
     lastSectionNumber = data;
 }
 
-void Nit::AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize)
+void Nit::AddDescriptor(uchar_t tag, uchar_t* data)
 {
-    descriptors->AddDescriptor(tag, data, dataSize);
-}
-
-void Nit::AddDescriptor0x41(const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
-{
-    descriptors->AddDescriptor0x41(serviceList);
-}
-
-void Nit::AddDescriptor0x44(uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
-                            uint32_t symbolRate, uint32_t fecInner)
-{
-    descriptors->AddDescriptor0x44(frequency, fecOuter, modulation, symbolRate, fecInner);
+    descriptors->AddDescriptor(tag, data);
 }
 
 void Nit::AddTs(uint16_t tsId, uint16_t onId)
@@ -134,22 +137,9 @@ void Nit::AddTs(uint16_t tsId, uint16_t onId)
     transportStreams->AddTransportStream(tsId, onId);
 }
 
-void Nit::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data, size_t dataSize)
+void Nit::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data)
 {
-    transportStreams->AddTsDescriptor(tsId, tag, data, dataSize);
-}
-
-void Nit::AddTsDescriptor0x41(uint16_t tsId,
-                              const std::list<std::pair<uint16_t, uchar_t>>& serviceList)
-{
-    transportStreams->AddTsDescriptor0x41(tsId, serviceList);
-}
-
-void Nit::AddTsDescriptor0x44(uint16_t tsId,
-                              uint32_t frequency, uint16_t fecOuter, uchar_t modulation,
-                              uint32_t symbolRate, uint32_t fecInner)
-{
-    transportStreams->AddTsDescriptor0x44(tsId, frequency, fecOuter, modulation, symbolRate, fecInner);
+    transportStreams->AddTsDescriptor(tsId, tag, data);
 }
 
 size_t Nit::GetCodesSize() const

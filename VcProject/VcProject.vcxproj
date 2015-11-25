@@ -106,7 +106,10 @@
     <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h" />
     <ClInclude Include="..\Codes\Include\Functions\Controller.h" />
     <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h" />
-    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h" />
+    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </DeploymentContent>
+    </ClInclude>
     <ClInclude Include="..\Codes\Include\Functions\DirMonitor.h" />
     <ClInclude Include="..\Codes\Include\Functions\Nit.h" />
     <ClInclude Include="..\Codes\Include\Functions\Sdt.h" />
@@ -123,7 +126,10 @@
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h" />
     <ClInclude Include="..\Codes\Main.h" />
     <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h" />
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h" />
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />

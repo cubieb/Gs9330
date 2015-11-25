@@ -55,8 +55,8 @@ public:
     
     uint16_t GetServiceId();
 
-    void AddDescriptor(uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddServiceDescriptor0x48(uchar_t serviceType, uchar_t *providerName, uchar_t *serviceName);
+    void AddDescriptor(uchar_t tag, uchar_t* data);    
+    void AddDescriptor(std::shared_ptr<Descriptor> discriptor);
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;   
@@ -102,9 +102,8 @@ public:
     void AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag, 
         uchar_t eitPresentFollowingFlag, uint16_t runningStatus, 
         uint16_t freeCaMode);
-    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType, 
-                                  uchar_t *providerName, uchar_t *serviceName);
+    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data);
+    void AddServiceDescriptor(uint16_t serviceId, std::shared_ptr<Descriptor> discriptor);
 
     /* the following function is provided just for debug */
     void Put(std::ostream& os) const;
@@ -138,9 +137,7 @@ public:
 
     void AddService(uint16_t serviceId, uchar_t eitScheduleFlag, 
         uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
-    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data, size_t dataSize);
-    void AddServiceDescriptor0x48(uint16_t serviceId, uchar_t serviceType,
-                                  uchar_t *providerName, uchar_t *serviceName);
+    void AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data);
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
