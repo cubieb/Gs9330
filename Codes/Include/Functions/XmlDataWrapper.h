@@ -90,6 +90,14 @@ inline SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlCh
     return attrValue;
 }   
 
+template<>
+inline std::string GetXmlAttrValue<std::string>(xmlNodePtr node, const xmlChar *attrName)
+{
+    std::string attrValue((char*)xmlGetProp(node, attrName));
+
+    return attrValue;
+} 
+
 /**********************class XmlDataWrapper**********************/
 template<typename Section>
 class XmlDataWrapper: public DataWrapper

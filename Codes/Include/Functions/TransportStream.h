@@ -12,7 +12,6 @@ class TransportStream: public Component
 public:
     TransportStream(uint16_t theTransportStreamId, uint16_t theOriginalNetworkId);
 
-    void AddDescriptor(uchar_t tag, uchar_t* data);
     void AddDescriptor(std::shared_ptr<Descriptor> discriptor);
 
     uint16_t GetTsId() const { return transportStreamId; }
@@ -54,7 +53,6 @@ public:
     typedef Components MyBase;
 
     void AddTransportStream(uint16_t transportStreamId, uint16_t originalNetworkId);
-    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data);
     void AddTsDescriptor(uint16_t tsId, std::shared_ptr<Descriptor> discriptor);
 
     /* the following function is provided just for debug */

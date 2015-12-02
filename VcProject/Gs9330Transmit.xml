@@ -2,5 +2,5 @@
 <Root NitActualInterval="2" NitOtherInterval="2" BatInterval="2"
       SdtActualInterval="2" SdtOtherInterval="2" Eit4EInterval="2" Eit4FInterval="2"
       Eit50Interval="10" Eit60Interval="10" TsFilesDir="D:/Temp/TsFiles">
-    <Network ID="101" DstIP="192.168.101.3" DstPort="5001"/>
+    <Network ID="101" DstIP="10.0.0.10" DstPort="5001"/>
 </Root>

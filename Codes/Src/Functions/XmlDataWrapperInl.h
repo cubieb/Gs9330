@@ -93,10 +93,10 @@ void NitXmlWrapper<Section>::AddDescriptor(Section& nit, xmlNodePtr& node) const
         cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
 
-        //ToDo:
-        nit.AddDescriptor(tag, data.get());
+        nit.AddDescriptor(data);
     }   
 }
 
@@ -115,9 +115,10 @@ void NitXmlWrapper<Section>::AddTsDescriptor(Section& nit, uint16_t tsId, xmlNod
         cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
 
-        nit.AddTsDescriptor(tsId, tag, data.get());
+        nit.AddTsDescriptor(tsId, data);
     }
 }
 
@@ -217,8 +218,10 @@ void SdtXmlWrapper<Section>::AddService(Section& sdt, xmlNodePtr& node, xmlChar*
         cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-        sdt.AddServiceDescriptor(serviceId, tag, data.get());
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+        sdt.AddServiceDescriptor(serviceId, data);
     }
 }
 
@@ -283,8 +286,10 @@ void BatXmlWrapper<Section>::AddDescriptor(Section& bat, xmlNodePtr& node) const
         cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
-        bat.AddDescriptor(tag, data.get());
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+        bat.AddDescriptor(data);
     }   
 }
 
@@ -297,9 +302,10 @@ void BatXmlWrapper<Section>::AddTsDescriptor(Section& bat, uint16_t tsId,
         cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
         
-        bat.AddTsDescriptor(tsId, tag, data.get());
+        bat.AddTsDescriptor(tsId, data);
     }
 }
 
@@ -438,9 +444,10 @@ void EitXmlWrapper<Section>::AddEvent(Section& eit, xmlNodePtr& node) const
          cur = xmlNextElementSibling(cur))
     {
         uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
-        SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+        std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
 
-        eit.AddEventDescriptor(eventId, tag, data.get());
+        eit.AddEventDescriptor(eventId, data);
     }
 }
 

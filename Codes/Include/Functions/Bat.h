@@ -70,9 +70,9 @@ public:
     void SetBouquetId(uint16_t data);
     void SetVersionNumber(uchar_t data);
 
-    void AddDescriptor(uchar_t tag, uchar_t* data);
+    void AddDescriptor(std::string &data);
     void AddTs(uint16_t tsId, uint16_t onId);
-    void AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data);  
+    void AddTsDescriptor(uint16_t tsId, std::string &data);  
 
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;

@@ -39,8 +39,7 @@ class EitEvent: public Component
 public:
     EitEvent(uint16_t eventId, const char *startTime, 
         time_t duration, uint16_t runningStatus, uint16_t freeCaMode);
-
-    void AddDescriptor(uchar_t tag, uchar_t* data);    
+   
     void AddDescriptor(std::shared_ptr<Descriptor> discriptor);
 
     size_t GetCodesSize() const;
@@ -114,7 +113,6 @@ public:
     void AddEvent(uint16_t eventId, const char *startTime, 
         time_t duration, uint16_t  runningStatus, uint16_t freeCaMode);
     void AddEvent(std::shared_ptr<EitEvent> event);
-    void AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data);
     void AddEventDescriptor(uint16_t eventId, std::shared_ptr<Descriptor> discriptor);
 
     void RemoveIf(time_t time);
@@ -156,7 +154,7 @@ public:
 
     void AddEvent(uint16_t eventId, const char *startTime, time_t duration,
                   uint16_t  runningStatus, uint16_t freeCaMode);
-    void AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data);
+    void AddEventDescriptor(uint16_t eventId, std::string &data);
     
     size_t GetCodesSize() const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;

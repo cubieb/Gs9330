@@ -37,10 +37,7 @@ private:
     TransmitConfig        tranmitConfig;
     XmlConfig             xmlConfig;
     std::shared_ptr<NetworkRelationConfig> relationConfig;
-
-    /* NetwordId, PID => Section Serial Number */
-    std::map<uint16_t, std::map<uint16_t, uint16_t>> netPidSnInfors;
-
+    
     /* NetwordId, PID => TsSnInfo */
     std::map<uint16_t, std::map<uint16_t, std::shared_ptr<Ts>>> netPidTsInfors;
     std::list<std::shared_ptr<DataWrapper>> wrappers;

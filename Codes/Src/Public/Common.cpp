@@ -116,7 +116,7 @@ size_t ConvertStrToIntStr(const uchar_t* src, size_t size, uchar_t* dst)
     {
         *(dst++) = (ConvertCharToInt(ptr[0]) << 4) | ConvertCharToInt(ptr[1]);
     }
-    return size;
+    return size / 2;
 }
 
 

@@ -25,11 +25,6 @@ uint16_t SdtService::GetServiceId()
     return serviceId;
 }
 
-void SdtService::AddDescriptor(uchar_t tag, uchar_t* data)
-{
-    descriptors->AddDescriptor(tag, data);
-}
-
 void SdtService::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
 {
     descriptors->AddDescriptor(discriptor);
@@ -104,13 +99,6 @@ void SdtServices::AddSdtService(uint16_t serviceId, uchar_t eitScheduleFlag,
     AddComponent(service);
 }
 
-void SdtServices::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data)
-{
-    auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
-    SdtService& service = dynamic_cast<SdtService&>(**iter);
-    service.AddDescriptor(tag, data);
-}
-
 void SdtServices::AddServiceDescriptor(uint16_t serviceId, std::shared_ptr<Descriptor> discriptor)
 {
     auto iter = find_if(components.begin(), components.end(), EqualSdtService(serviceId));
@@ -172,13 +160,12 @@ Sdt::Sdt(const char *key, uchar_t *buffer)
         endPtr = ptr + (value16 & 0xfff);
         while (ptr < endPtr)
         {
-            uchar_t tag, len;
-            ptr = ptr + ReadBuffer(ptr, tag);
-            ptr = ptr + ReadBuffer(ptr, len);
-            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
-            ptr = ptr + len;
-
-            services->AddServiceDescriptor(serviceId, descriptor);
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(ptr));
+            if (descriptor != nullptr)
+            {
+                ptr = ptr + descriptor->GetCodesSize();
+                services->AddServiceDescriptor(serviceId, descriptor);
+            }
         }
     }
 }
@@ -248,9 +235,18 @@ void Sdt::AddService(uint16_t serviceId, uchar_t eitScheduleFlag,
                             runningStatus, freeCaMode);
 }
 
-void Sdt::AddServiceDescriptor(uint16_t serviceId, uchar_t tag, uchar_t* data)
+void Sdt::AddServiceDescriptor(uint16_t serviceId, std::string &data)
 {
-    services->AddServiceDescriptor(serviceId, tag, data);
+    Descriptor* ptr = CreateDescriptor(data);
+    if (ptr == nullptr)
+    {
+        errstrm << "we do not support descriptor whose tag = " 
+            << hex << data[0] << data[1] << endl;
+        return;
+    }
+
+    shared_ptr<Descriptor> discriptor(ptr);
+    services->AddServiceDescriptor(serviceId, discriptor);
 }
 
 size_t Sdt::GetCodesSize() const

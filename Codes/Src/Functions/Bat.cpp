@@ -45,14 +45,13 @@ Bat::Bat(const char *key, uchar_t *buffer)
     bouquetDescriptorLen = bouquetDescriptorLen & 0xfff;
     endPtr1 = ptr + bouquetDescriptorLen;
     while (ptr < endPtr1)
-    {
-        uchar_t tag, len;
-        ptr = ptr + ReadBuffer(ptr, tag);
-        ptr = ptr + ReadBuffer(ptr, len);
-        shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
-        ptr = ptr + len;
-
-        descriptors->AddDescriptor(descriptor);
+    {                
+        shared_ptr<Descriptor> descriptor(CreateDescriptor(ptr));
+        if (descriptor != nullptr)
+        {
+            ptr = ptr + descriptor->GetCodesSize();
+            descriptors->AddDescriptor(descriptor);
+        }
     }
 
     uint16_t tsDesLen;
@@ -71,14 +70,13 @@ Bat::Bat(const char *key, uchar_t *buffer)
         tsDesLength = tsDesLength & 0xfff;
         endPtr2 = ptr + tsDesLength;
         while (ptr < endPtr2)
-        {
-            uchar_t tag, len;
-            ptr = ptr + ReadBuffer(ptr, tag);
-            ptr = ptr + ReadBuffer(ptr, len);
-            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
-            ptr = ptr + len;
-
-            transportStreams->AddTsDescriptor(tsId, descriptor);
+        {                
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(ptr));
+            if (descriptor != nullptr)
+            {
+                ptr = ptr + descriptor->GetCodesSize();
+                transportStreams->AddTsDescriptor(tsId, descriptor);
+            }
         }
     }
 }
@@ -125,9 +123,18 @@ void Bat::SetVersionNumber(uchar_t data)
     versionNumber = data;
 }
 
-void Bat::AddDescriptor(uchar_t tag, uchar_t* data)
+void Bat::AddDescriptor(std::string &data)
 {
-    descriptors->AddDescriptor(tag, data);
+    Descriptor* ptr = CreateDescriptor(data);
+    if (ptr == nullptr)
+    {
+        errstrm << "we do not support descriptor whose tag = " 
+            << hex << data[0] << data[1] << endl;
+        return;
+    }
+
+    shared_ptr<Descriptor> discriptor(ptr);
+    descriptors->AddDescriptor(discriptor);
 }
 
 void Bat::AddTs(uint16_t tsId, uint16_t onId)
@@ -135,9 +142,18 @@ void Bat::AddTs(uint16_t tsId, uint16_t onId)
     transportStreams->AddTransportStream(tsId, onId);
 }
 
-void Bat::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data)
+void Bat::AddTsDescriptor(uint16_t tsId, std::string &data)
 {
-    transportStreams->AddTsDescriptor(tsId, tag, data);
+    Descriptor* ptr = CreateDescriptor(data);
+    if (ptr == nullptr)
+    {
+        errstrm << "we do not support descriptor whose tag = " 
+            << hex << data[0] << data[1] << endl;
+        return;
+    }
+
+    shared_ptr<Descriptor> discriptor(ptr);
+    transportStreams->AddTsDescriptor(tsId, discriptor);
 }
 
 size_t Bat::GetCodesSize() const

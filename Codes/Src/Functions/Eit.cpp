@@ -45,11 +45,6 @@ uint16_t EitEvent::GetEventId() const
     return eventId;
 }
 
-void EitEvent::AddDescriptor(uchar_t tag, uchar_t* data)
-{
-    descriptors->AddDescriptor(tag, data);
-}
-
 void EitEvent::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
 {
     descriptors->AddDescriptor(discriptor);
@@ -163,13 +158,6 @@ void EitEvents::AddEvent(uint16_t eventId, const char *startTime,
 void EitEvents::AddEvent(std::shared_ptr<EitEvent> event)
 {
     AddComponent(event);
-}
-
-void EitEvents::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data)
-{
-    auto iter = find_if(components.begin(), components.end(), EqualEitEvents(eventId));
-    EitEvent& event = dynamic_cast<EitEvent&>(**iter);
-    event.AddDescriptor(tag, data);
 }
 
 void EitEvents::AddEventDescriptor(uint16_t eventId, std::shared_ptr<Descriptor> discriptor)
@@ -319,14 +307,13 @@ Eit::Eit(const char *key, uchar_t *buffer)
 
         uchar_t *endPtr = ptr + desLength;
         while (ptr < endPtr)
-        {
-            uchar_t tag, len;
-            ptr = ptr + ReadBuffer(ptr, tag);
-            ptr = ptr + ReadBuffer(ptr, len);
-            shared_ptr<Descriptor> descriptor(CreateDescriptor(tag, ptr, len));
-            ptr = ptr + len;
-
-            events->AddEventDescriptor(eventId, descriptor);
+        {                 
+            shared_ptr<Descriptor> descriptor(CreateDescriptor(ptr));
+            if (descriptor != nullptr)
+            {
+                ptr = ptr + descriptor->GetCodesSize();
+                events->AddEventDescriptor(eventId, descriptor);
+            }
         }
     }
 }
@@ -399,9 +386,18 @@ void Eit::AddEvent(uint16_t eventId, const char *startTime, time_t duration,
     events->AddEvent(eventId, startTime, duration, runningStatus, freeCaMode);
 }
 
-void Eit::AddEventDescriptor(uint16_t eventId, uchar_t tag, uchar_t* data)
+void Eit::AddEventDescriptor(uint16_t eventId, std::string &data)
 {
-    events->AddEventDescriptor(eventId, tag, data);
+    Descriptor* ptr = CreateDescriptor(data);
+    if (ptr == nullptr)
+    {
+        errstrm << "we do not support descriptor whose tag = " 
+            << hex << data[0] << data[1] << endl;
+        return;
+    }
+
+    shared_ptr<Descriptor> discriptor(ptr);
+    events->AddEventDescriptor(eventId, discriptor);
 }
 
 size_t Eit::GetCodesSize() const

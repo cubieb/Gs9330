@@ -29,6 +29,16 @@ WriteBuffer(uchar_t *buf, T value)
     return size;
 }
 
+template <typename T>
+typename std::enable_if<std::is_same<T, std::string>::value, size_t>::type
+WriteBuffer(uchar_t *buf, T value)
+{
+    size_t size = value.size();
+    memcpy(buf, value.c_str(), value.size());
+
+    return size;
+}
+
 size_t Read8(uchar_t* buf, uchar_t&);
 size_t Read16(uchar_t* buf, uint16_t&);
 size_t Read32(uchar_t* buf, uint32_t&);
@@ -90,6 +100,7 @@ ConvertHexStrToInt(uchar_t *src, T &value)
     return sizeof(T) * 2;
 }
 
+/* size:  char number, must be multiple of 2 */
 size_t ConvertStrToIntStr(const uchar_t* src, size_t size, uchar_t* dst);
 
 inline uchar_t ConvertValueToBcd(uchar_t value)

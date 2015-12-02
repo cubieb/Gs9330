@@ -135,17 +135,8 @@
     <Text Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\Configuration\Gs9330Transmit.xml" />
-    <Xml Include="..\Configuration\Gs9330SoapClient.xml" />
-    <Xml Include="..\XmlFiles\BAT.xml" />
-    <Xml Include="..\XmlFiles\EIT.xml" />
-    <Xml Include="..\XmlFiles\Nit.101.Actual.xml" />
-    <Xml Include="..\XmlFiles\Nit.101.Other.xml" />
-    <Xml Include="..\XmlFiles\Nit.102.Other.xml" />
-    <Xml Include="..\XmlFiles\Nit.UnitTest1.xml" />
-    <Xml Include="..\XmlFiles\SDT.xml">
-      <SubType>Designer</SubType>
-    </Xml>
+    <Xml Include="Gs9330SoapClient.xml" />
+    <Xml Include="Gs9330Transmit.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

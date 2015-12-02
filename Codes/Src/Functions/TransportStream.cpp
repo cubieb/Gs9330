@@ -14,11 +14,6 @@ TransportStream::TransportStream(uint16_t theTransportStreamId, uint16_t theOrig
     descriptors.reset(new Descriptors);
 }
 
-void TransportStream::AddDescriptor(uchar_t tag, uchar_t* data)
-{
-    descriptors->AddDescriptor(tag, data);
-}
-
 void TransportStream::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
 {
     descriptors->AddDescriptor(discriptor);
@@ -55,13 +50,6 @@ void TransportStreams::AddTransportStream(uint16_t transportStreamId, uint16_t o
 {
     auto ts = make_shared<TransportStream>(transportStreamId, originalNetworkId);
     AddComponent(ts);
-}
-
-void TransportStreams::AddTsDescriptor(uint16_t tsId, uchar_t tag, uchar_t* data)
-{
-    auto iter = find_if(components.begin(), components.end(), EqualTs(tsId));
-    TransportStream& ts = dynamic_cast<TransportStream&>(**iter);
-    ts.AddDescriptor(tag, data);
 }
 
 void TransportStreams::AddTsDescriptor(uint16_t tsId, std::shared_ptr<Descriptor> discriptor)

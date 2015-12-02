@@ -7,44 +7,37 @@
 using namespace std;
 
 /**********************class UcharDescriptor**********************/
+size_t UcharDescriptor::GetCodesSize() const
+{
+    return data.get()[1] + 2;
+}
+
+uchar_t UcharDescriptor::GetTag() const
+{
+    return data.get()[0];
+}
+
 size_t UcharDescriptor::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     assert(GetCodesSize() <= bufferSize);
-    uchar_t *ptr = buffer;
-    ptr = ptr + Write8(ptr, GetTag());
-    ptr = ptr + Write8(ptr, dataSize);
-    ptr = ptr + MemCopy(ptr, bufferSize - 2, data.get(), dataSize);
+    MemCopy(buffer, bufferSize, data.get(), GetCodesSize());
     return GetCodesSize();
-}
-
-size_t UcharDescriptor::GetCodesSize() const
-{
-    return dataSize + 2;
 }
 
 void UcharDescriptor::Put(std::ostream& os) const
 {
     ios::fmtflags flags = cout.flags( );
-    os << "Descriptor: tag = " << showbase << hex << (uint_t)GetTag() 
-        << ", data = " << (char*)data.get()
-        << endl;
+    os << "Descriptor hex code: ";
+    for (uchar_t i = 0; i < GetCodesSize(); ++i)
+    {
+        os << hex << setw(2) << setfill('0') << (int)data.get()[i];
+    }
+    os << endl;
+
     cout.flags(flags);
 }
 
 /**********************class Descriptors**********************/
-void Descriptors::AddDescriptor(uchar_t tag, uchar_t* data)
-{
-    Descriptor* ptr = CreateDescriptor(tag, data);
-    if (ptr == nullptr)
-    {
-        cout << "we do not support descriptor whose tag = " << hex << (int)tag << endl;
-        return;
-    }
-
-    shared_ptr<Descriptor> discriptor(ptr);
-    AddComponent(discriptor);
-}
-
 void Descriptors::AddDescriptor(std::shared_ptr<Descriptor> discriptor)
 {
     AddComponent(discriptor);
@@ -57,7 +50,7 @@ void Descriptors::Put(std::ostream& os) const
         << ", network_descriptors_length = " << dec << GetCodesSize() - 2 << endl;
     cout.flags(flags);
     MyBase::Put(os);
-}
+} 
 
 /**********************class DescriptorFactory**********************/
 DescriptorCreatorRegistration(NetworkNameDescriptor::Tag, NetworkNameDescriptorCreator);
@@ -67,20 +60,32 @@ DescriptorCreatorRegistration(SatelliteDeliverySystemDescriptor::Tag, SatelliteD
 DescriptorCreatorRegistration(CableDeliverySystemDescriptor::Tag, CableDeliverySystemDescriptorCreator);
 DescriptorCreatorRegistration(BouquetNameDescriptor::Tag, BouquetNameDescriptorCreator);
 DescriptorCreatorRegistration(ServiceDescriptor::Tag, ServiceDescriptorCreator);
+DescriptorCreatorRegistration(LinkageDescriptor::Tag, LinkageDescriptorCreator);
 DescriptorCreatorRegistration(ShortEventDescriptor::Tag, ShortEventDescriptorCreator);
 DescriptorCreatorRegistration(ExtendedEventDescriptor::Tag, ExtendedEventDescriptorCreator);
+DescriptorCreatorRegistration(TimeShiftedEventDescriptor::Tag, TimeShiftedEventDescriptorCreator);
+DescriptorCreatorRegistration(ComponentDescriptor::Tag, ComponentDescriptorCreator);
+DescriptorCreatorRegistration(CaIdentifierDescriptor::Tag, CaIdentifierDescriptorCreator);
+DescriptorCreatorRegistration(ContentDescriptor::Tag, ContentDescriptorCreator);
+DescriptorCreatorRegistration(ParentalRatingDescriptor::Tag, ParentalRatingDescriptorCreator);
+DescriptorCreatorRegistration(MultilingualNetworkNameDescriptor::Tag, MultilingualNetworkNameDescriptorCreator);
+DescriptorCreatorRegistration(MultilingualComponentDescriptor::Tag, MultilingualComponentDescriptorCreator);
+DescriptorCreatorRegistration(PrivateDataSpecifierDescriptor::Tag, PrivateDataSpecifierDescriptorCreator);
+DescriptorCreatorRegistration(FrequencyListDescriptor::Tag, FrequencyListDescriptorCreator);
+DescriptorCreatorRegistration(DataBroadcastDescriptor::Tag, DataBroadcastDescriptorCreator);
 DescriptorCreatorRegistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83Creator);
 
 /* Create descriptor from string */
-Descriptor* CreateDescriptor(uchar_t tag, uchar_t *data)
+Descriptor* CreateDescriptor(std::string &data)
 {
     DescriptorFactory& instance = DescriptorFactory::GetInstance();
-    return instance.Create(tag, data);
+    return instance.Create(data);
 }
 
-Descriptor* CreateDescriptor(uchar_t tag, uchar_t *data, size_t dataSize)
+/* Create descriptor from binary (for example .ts file). */
+Descriptor* CreateDescriptor(uchar_t *data)
 {
     DescriptorFactory& instance = DescriptorFactory::GetInstance();
-    return instance.Create(tag, data, dataSize);
+    return instance.Create(data);
 }
 
