@@ -6,7 +6,7 @@ import time
 from ftplib import FTP
 
 host = "192.168.3.251"
-path  = "101"
+path = "101"
 
 for file in glob.glob("10*.xml"):
     os.remove(file)
