@@ -1,6 +1,6 @@
 <?xml version='1.0'  encoding='gb2312' ?>
 <Root NitActualInterval="2" NitOtherInterval="2" BatInterval="2"
       SdtActualInterval="2" SdtOtherInterval="2" Eit4EInterval="2" Eit4FInterval="2"
-      Eit50Interval="10" Eit60Interval="10" TsFilesDir="D:/Temp/TsFiles">
+      Eit50Interval="10" Eit60Interval="10" TsFilesDir="D:\Project.VC\Gs9330\InputFiles\TsFiles">
     <Network ID="101" DstIP="10.0.0.10" DstPort="5001"/>
 </Root>

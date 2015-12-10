@@ -1,6 +1,5 @@
 <?xml version='1.0'  encoding='gb2312' ?>
 <Root TableType="EIT" TableID="0x4F">
-	<Transportstream TSID="61" ONID="101" Version="61" ServiceID="701"/>
 	<Transportstream TSID="61" ONID="101" Version="61" ServiceID="703"/>
 	<Transportstream TSID="61" ONID="101" Version="61" ServiceID="704"/>
 	<Transportstream TSID="61" ONID="101" Version="61" ServiceID="705"/>

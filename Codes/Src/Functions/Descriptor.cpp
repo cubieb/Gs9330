@@ -68,11 +68,13 @@ DescriptorCreatorRegistration(ComponentDescriptor::Tag, ComponentDescriptorCreat
 DescriptorCreatorRegistration(CaIdentifierDescriptor::Tag, CaIdentifierDescriptorCreator);
 DescriptorCreatorRegistration(ContentDescriptor::Tag, ContentDescriptorCreator);
 DescriptorCreatorRegistration(ParentalRatingDescriptor::Tag, ParentalRatingDescriptorCreator);
+DescriptorCreatorRegistration(TerrestrialDeliverySystemDescriptor::Tag, TerrestrialDeliverySystemDescriptorCreator);
 DescriptorCreatorRegistration(MultilingualNetworkNameDescriptor::Tag, MultilingualNetworkNameDescriptorCreator);
 DescriptorCreatorRegistration(MultilingualComponentDescriptor::Tag, MultilingualComponentDescriptorCreator);
 DescriptorCreatorRegistration(PrivateDataSpecifierDescriptor::Tag, PrivateDataSpecifierDescriptorCreator);
 DescriptorCreatorRegistration(FrequencyListDescriptor::Tag, FrequencyListDescriptorCreator);
 DescriptorCreatorRegistration(DataBroadcastDescriptor::Tag, DataBroadcastDescriptorCreator);
+DescriptorCreatorRegistration(ExtensionDescriptor::Tag, ExtensionDescriptorCreator);
 DescriptorCreatorRegistration(UserdefinedDscriptor83::Tag, UserdefinedDscriptor83Creator);
 
 /* Create descriptor from string */
