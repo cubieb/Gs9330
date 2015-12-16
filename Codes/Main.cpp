@@ -1,7 +1,6 @@
 /*  history:
 2015-07-06 Created by LiuHao.
 */
-
 #include "SystemInclude.h"
 #include "Common.h"
 #include "Debug.h"
@@ -15,8 +14,6 @@
 #include "Bat.h"
 #include "Ts.h"
 #include "DirMonitor.h"
-
-#include "Main.h"
 
 using namespace std;
 

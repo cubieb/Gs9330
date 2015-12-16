@@ -60,7 +60,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);iconv.lib;libxml2.lib;zlib.lib;Ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -98,6 +98,7 @@
     <ClCompile Include="..\Codes\Src\Public\Common.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Crc32.cpp" />
     <ClCompile Include="..\Codes\Src\Public\Debug.cpp" />
+    <ClCompile Include="..\Codes\Src\Public\LibLinking.cpp" />
     <ClCompile Include="..\Codes\Src\Public\SystemError.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -124,7 +125,6 @@
     <ClInclude Include="..\Codes\Include\Public\Debug.h" />
     <ClInclude Include="..\Codes\Include\Public\SystemError.h" />
     <ClInclude Include="..\Codes\Include\Public\SystemInclude.h" />
-    <ClInclude Include="..\Codes\Main.h" />
     <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h" />
     <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

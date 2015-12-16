@@ -10,7 +10,7 @@ using namespace std;
 MonitorState::MonitorState(const char *dir)
     : buffer(new char[BufferSize], CharDeleter()), dir(dir), 
       completionKey(1)
-{ 
+{
     dirHandle = CreateFile(dir, 
         FILE_LIST_DIRECTORY, 
         FILE_SHARE_READ | FILE_SHARE_WRITE ,

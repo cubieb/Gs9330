@@ -84,11 +84,11 @@
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\LibLinking.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Main.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\Public\Common.h">
       <Filter>头文件\Public</Filter>
     </ClInclude>

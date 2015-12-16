@@ -189,6 +189,7 @@ static size_t GetUtfMemSize(uchar_t *src, size_t charNumber)
 size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
+    //utf-8 -> unicode
     wstring wStr = conv.from_bytes(string((char *)src));   
 
     size_t charNumber = std::min(wStr.size(), maxCharNumber);
@@ -208,6 +209,7 @@ size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
 
     typedef std::codecvt<wchar_t, char, mbstate_t> convertFacet;
 	mbstate_t outState = 0;
+    //unicode -> GB2312
 	auto result = std::use_facet<convertFacet>(sysLocale).out(
 		outState, dataFrom, dataFromEnd, dataFromNext,
 		dataTo + 1, dataToEnd, dataToNext);
