@@ -13,48 +13,110 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Main">
-      <UniqueIdentifier>{87e2fc5c-641e-4568-a668-07bb54bed678}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Functions">
-      <UniqueIdentifier>{ed01281b-1ab8-4ad3-9c44-6753ff78c6dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Functions">
-      <UniqueIdentifier>{383708fd-1089-4407-ba35-e16320d334e3}</UniqueIdentifier>
+      <UniqueIdentifier>{822f25cd-42d1-4b85-bc2a-43dd50b259d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Public">
-      <UniqueIdentifier>{bafe29fa-fd56-4729-86f1-38f661efb515}</UniqueIdentifier>
+      <UniqueIdentifier>{0f1276c4-a212-4aeb-8617-a5273344d032}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\Public">
-      <UniqueIdentifier>{4f631711-3452-46d2-892b-af07f893a9ac}</UniqueIdentifier>
+      <UniqueIdentifier>{34d77663-9fb2-4d4d-915d-18a46e5c5cf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Functions">
+      <UniqueIdentifier>{2fb2e752-475d-4782-9c3c-711cb10d263a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Codes\Main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Common.cpp">
-      <Filter>源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
-      <Filter>源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
-      <Filter>源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
-      <Filter>源文件\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp">
+    <ClInclude Include="..\Codes\Include\Functions\Bat.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Component.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Controller.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\DirMonitor.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Eit.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Nit.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\TransportStream.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Ts.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\TsDataWrapper.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\Types.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
+      <Filter>头文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Common.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Crc32.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\Debug.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\SystemError.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
+      <Filter>头文件\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h">
+      <Filter>源文件\Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h">
+      <Filter>源文件\Functions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
+    <ClCompile Include="..\Codes\Src\Functions\Component.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Controller.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\Descriptor.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
+    <ClCompile Include="..\Codes\Src\Functions\DirMonitor.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Eit.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp">
+      <Filter>源文件\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Functions\Nit.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\Sdt.cpp">
@@ -63,19 +125,7 @@
     <ClCompile Include="..\Codes\Src\Functions\TransportStream.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Component.cpp">
-      <Filter>源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Bat.cpp">
-      <Filter>源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\DirMonitor.cpp">
-      <Filter>源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Gs9330Config.cpp">
-      <Filter>源文件\Functions</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Codes\Src\Functions\Eit.cpp">
+    <ClCompile Include="..\Codes\Src\Functions\Ts.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Functions\TsDataWrapper.cpp">
@@ -84,87 +134,26 @@
     <ClCompile Include="..\Codes\Src\Functions\XmlDataWrapper.cpp">
       <Filter>源文件\Functions</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Common.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Crc32.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Public\Debug.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
     <ClCompile Include="..\Codes\Src\Public\LibLinking.cpp">
       <Filter>源文件\Public</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Codes\Include\Public\Common.h">
-      <Filter>头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\Debug.h">
-      <Filter>头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\SystemInclude.h">
-      <Filter>头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\SystemError.h">
-      <Filter>头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\DataWrapper.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\XmlDataWrapper.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Public\Crc32.h">
-      <Filter>头文件\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Ts.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Controller.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Nit.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Descriptor.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Sdt.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Types.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\TransportStream.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Component.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Bat.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\DirMonitor.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Gs9330Config.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\Eit.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Functions\TsDataWrapper.h">
-      <Filter>头文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Functions\XmlDataWrapperInl.h">
-      <Filter>源文件\Functions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Functions\TsDataWrapperInl.h">
-      <Filter>源文件\Functions</Filter>
-    </ClInclude>
+    <ClCompile Include="..\Codes\Src\Public\SystemError.cpp">
+      <Filter>源文件\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="Gs9330SoapClient.xml">
-      <Filter>资源文件</Filter>
-    </Xml>
-    <Xml Include="Gs9330Transmit.xml">
-      <Filter>资源文件</Filter>
-    </Xml>
   </ItemGroup>
 </Project>

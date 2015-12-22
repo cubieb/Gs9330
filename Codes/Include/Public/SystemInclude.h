@@ -7,6 +7,8 @@
 
 /*** OS header. ***/
 #ifdef _WIN32
+    #include <SDKDDKVer.h>
+
     /* Disables fopen(), strcpy(), ... security warning on Microsoft compilers.
      * The _CRT_SECURE_NO_WARNINGS must be defined before including any system 
      * header files which may cause the security warning.
