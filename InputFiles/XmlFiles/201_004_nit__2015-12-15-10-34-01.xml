@@ -1,0 +1,30 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="NIT" TableID="0x41">
+	<Network ID="201" Version="12">
+		<Descriptors Sum="5">
+			<Item1 Tag="0x40" Data="4003金牛区"/>
+			<Item2 Tag="0x4A" Data="4A0C000100C80001011234567809"/>
+			<Item3 Tag="0x5B" Data="5B0Fara011srp013dan012"/>
+			<Item4 Tag="0x5F" Data="5F0412345678"/>
+			<Item5 Tag="0x80" Data="800D12300000000000000000000122"/>
+		</Descriptors>
+		<Transportstream TSID="1" ONID="201">
+			<Descriptors Sum="7">
+				<Item1 Tag="0x44" Data="440B002EB120FFF0030010FB80"/>
+				<Item2 Tag="0x41" Data="410C001401000201000101001201"/>
+				<Item3 Tag="0x43" Data="430B0000000000000000000000"/>
+				<Item4 Tag="0x5A" Data="5A0B000000011F0000FFFFFFFF"/>
+				<Item5 Tag="0x5F" Data="5F0400123456"/>
+				<Item6 Tag="0x62" Data="6205FD00000000"/>
+				<Item7 Tag="0x7F" Data="7F06040000000300"/>
+			</Descriptors>
+		</Transportstream>
+		<Transportstream TSID="2" ONID="201">
+			<Descriptors Sum="2">
+				<Item1 Tag="0x44" Data="440B002FE9A0FFF0030010FB80"/>
+				<Item2 Tag="0x41" Data="4112000A01000701000901000801000B01000C01"/>
+			</Descriptors>
+		</Transportstream>
+	</Network>
+</Root>
+
