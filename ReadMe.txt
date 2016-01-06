@@ -11,5 +11,4 @@
 3 提交策略
  为了避免浪费过多的时间和项目组其他成员讨论代码和Project的层次结构。以下目录/文件不提交到项目的的svn server:
  3.1) Gs9330.sln
- 3.2) VcProject, VcUnitTestProject
- 3.3) Documents
+ 3.2) VcProject
