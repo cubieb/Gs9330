@@ -232,7 +232,10 @@ public:
              assert(false);
         }
 #endif
-        return (MyContainer::GetValue(this->ptr));
+        //Liuhao, 2016.1.14, try to get away the dependence of std::list
+        //return (MyContainer::GetValue(this->ptr));        
+        MyContainer *container = (MyContainer *)this->GetContainer();
+        return (container->GetValue(this->ptr));
     }
     
     pointer operator->() const
@@ -251,7 +254,10 @@ public:
              assert(false);
          }
 #endif
-        ptr = MyContainer::GetNextNodePtr(this->ptr);
+        //Liuhao, 2016.1.14, try to get away the dependence of std::list
+        //ptr = MyContainer::GetNextNodePtr(this->ptr);
+        MyContainer *container = (MyContainer *)this->GetContainer();
+        ptr = container->GetNextNodePtr(this->ptr);
         return (*this);
     }
 

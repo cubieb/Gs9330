@@ -22,10 +22,10 @@ private:
     TsId transportStreamId;
 };
 
-class EqualTransportStream: public std::unary_function<TransportStream, bool>
+class CompareTransportStreamId: public std::unary_function<TransportStream, bool>
 {
 public:
-    EqualTransportStream(TsId tsId)
+    CompareTransportStreamId(TsId tsId)
         : tsId(tsId)
     {}
 
@@ -53,7 +53,7 @@ public:
     void AddTransportStream(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, Descriptor *discriptor);
     
-    size_t GetCodesSize(std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(const std::list<TsId>& tsIds) const;
     size_t MakeCodes(std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */

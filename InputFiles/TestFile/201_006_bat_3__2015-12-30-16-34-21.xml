@@ -1,0 +1,13 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="BAT" TableID="0x4A">
+	<Bouquet BouquetID="3" Name="电影频道" Version="3">
+		<Descriptors Sum="2">
+			<Item1 Tag="0x41" Data="4103006501"/>
+			<Item2 Tag="0x47" Data="4704电影频道"/>
+		</Descriptors>
+		<Transportstream TSID="3" ONID="201">
+			<Descriptors Sum="0">
+			</Descriptors>
+		</Transportstream>
+	</Bouquet>
+</Root>

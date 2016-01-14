@@ -19,8 +19,8 @@ NitTableInterface * NitTableInterface::CreateInstance(TableId tableId, NetId net
 
 /**********************class NitTable**********************/
 NitTable::NitTable(TableId tableId, NetId networkId, Version versionNumber)
-    : lastSectionNumber(0), networkId(networkId), sectionNumber(0), 
-      tableId(tableId), versionNumber(versionNumber)
+    : tableId(tableId), networkId(networkId), versionNumber(versionNumber), 
+      sectionNumber(0), lastSectionNumber(0)
 {
 }
 
@@ -59,7 +59,7 @@ void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
     transportStreams.AddTsDescriptor(tsId, descriptor);
 }
 
-size_t NitTable::GetCodesSize(TableId tableId, std::list<TsId>& tsIds) const
+size_t NitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
 {    
     if (this->tableId != tableId)
         return 0;
@@ -83,12 +83,11 @@ TableId NitTable::GetTableId() const
 size_t NitTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
                            uchar_t *buffer, size_t bufferSize) const
 {
-    if (this->tableId != tableId)
-        return 0;
-
     uchar_t *ptr = buffer;
     uint16_t ui16Value; 
     size_t  size = GetCodesSize(tableId, tsIds);
+    if (size == 0)
+        return 0;
     
     assert(size <= bufferSize && size <= (MaxNitSectionLength - 3));
 
@@ -114,6 +113,6 @@ size_t NitTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds,
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 
-    assert(ptr - buffer == GetCodesSize(tableId, tsIds));
+    assert(ptr - buffer == size);
     return (ptr - buffer);
 }

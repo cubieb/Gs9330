@@ -26,10 +26,10 @@ public:
     virtual ~TsPacket();
 
     void AddSiTable(SiTableInterface *siTable);
-    void AddXmlTable(char *xmlFileName, TableId &tableId);
-    void DelXmlTable(char *xmlFileName);
+    void DelSiTable(TableId tableId, uint16_t key);
+
     SiTableInterface * FindSiTable(TableId tableId, uint16_t key);
-    size_t GetCodesSize(TableId tableId, std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;
     size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize);

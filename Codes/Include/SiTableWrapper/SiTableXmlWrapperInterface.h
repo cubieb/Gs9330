@@ -7,162 +7,38 @@
 #include "Include/Foundation/Type.h"
 #include "Include/Foundation/Debug.h"
 #include "Include/Foundation/Deleter.h"
-
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-
-/*
-XmlDocDeleter, auxiliary class used by shared_ptr<xmlDoc>.  Example:
-{
-    const char* xmlFile = "../XmlFiles/AddressListXml.xml";
-    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile), XmlDocDeleter());
-}
-*/
-class XmlDocDeleter
-{
-public:
-    XmlDocDeleter()
-    {}
-
-    void operator()(xmlDoc* ptr) const
-    {
-        xmlFreeDoc(ptr);
-    }
-};
-
-class XmlCharDeleter
-{
-public:
-    XmlCharDeleter()
-    {}
-
-    void operator()(xmlChar *ptr) const
-    {
-        xmlFree(ptr);
-    }
-};
-
-class xmlXPathContextDeleter
-{
-public:
-    xmlXPathContextDeleter()
-    {}
-
-    void operator()(xmlXPathContext *ptr) const
-    {
-        xmlXPathFreeContext(ptr);
-    }
-};
-
-class xmlXPathObjectDeleter
-{
-public:
-    xmlXPathObjectDeleter()
-    {}
-
-    void operator()(xmlXPathObject *ptr) const
-    {
-        xmlXPathFreeObject(ptr);
-    }
-};
-
-
-typedef std::shared_ptr<xmlChar> SharedXmlChar;
-
-template<typename T>
-inline T  GetXmlAttrValue(xmlNodePtr node, const xmlChar *attrName)
-{
-    SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
-    char *ptr = (char *)attrValue.get();
-    if (ptr == nullptr || strlen(ptr) == 0)
-    {
-        return 0;
-    }
-
-    if (ptr[0] == '0' && (ptr[1] == 'x' || ptr[1] == 'X'))
-        return (T)strtol(ptr, nullptr, 16);
-
-    return (T)strtol(ptr, nullptr, 10);
-}
-    
-template<>
-inline SharedXmlChar GetXmlAttrValue<SharedXmlChar>(xmlNodePtr node, const xmlChar *attrName)
-{
-    SharedXmlChar attrValue(xmlGetProp(node, attrName), XmlCharDeleter());
-
-    return attrValue;
-}   
-
-template<>
-inline std::string GetXmlAttrValue<std::string>(xmlNodePtr node, const xmlChar *attrName)
-{
-    std::string attrValue((char*)xmlGetProp(node, attrName));
-
-    return attrValue;
-} 
-
-template<typename T>
-inline T  GetXmlContent(xmlNodePtr node)
-{
-    SharedXmlChar content(xmlNodeGetContent(node), XmlCharDeleter());
-    char *ptr = (char *)content.get();
-    if (ptr == nullptr || strlen(ptr) == 0)
-    {
-        return 0;
-    }
-
-    if (ptr[0] == '0' && (ptr[1] == 'x' || ptr[1] == 'X'))
-        return (T)strtol(ptr, nullptr, 16);
-
-    return (T)strtol(ptr, nullptr, 10);
-}
-    
-template<>
-inline SharedXmlChar GetXmlContent<SharedXmlChar>(xmlNodePtr node)
-{
-    SharedXmlChar content(xmlNodeGetContent(node), XmlCharDeleter());
-
-    return content;
-}   
-
-template<>
-inline std::string GetXmlContent<std::string>(xmlNodePtr node)
-{
-    std::string content((char*)xmlNodeGetContent(node));
-
-    return content;
-} 
+#include "Include/Foundation/XmlHelper.h"
 
 /**********************class SiTableXmlWrapperInterface**********************/
-template<typename TsPacket, typename SiTable>
+template<typename TsPacket>
 class SiTableXmlWrapperInterface
 {
 public:
     SiTableXmlWrapperInterface() {};
     virtual ~SiTableXmlWrapperInterface() {};
 
-    virtual void Select(TsPacket &tsPacket, char *xmlFilename, TableId &tableId) = 0;
+    //tableId and keys are used to record operation history */
+    virtual void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys) = 0;
 };
 
 /**********************class NitXmlWrapper**********************/
 template<typename TsPacket, typename SiTable>
-class NitXmlWrapper: public SiTableXmlWrapperInterface<TsPacket, SiTable>
+class BatXmlWrapper: public SiTableXmlWrapperInterface<TsPacket>
 {
 public:
-    NitXmlWrapper() {};
-    virtual ~NitXmlWrapper() {};
+    BatXmlWrapper() {};
+    virtual ~BatXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, char *xmlFilename, TableId &tableId)
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
     {
-        cout << "Reading " << xmlFilename << endl;
+        cout << "Reading " << xmlPath << endl;
 
         shared_ptr<xmlDoc> doc;
         for (int i = 0; i < 10 && doc == nullptr; ++i)
         {
             if (i != 0)
                 SleepEx(10, true);
-            doc.reset(xmlParseFile(xmlFilename), XmlDocDeleter());
+            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
         }
         assert(doc != nullptr);
 
@@ -172,17 +48,18 @@ public:
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
         assert(xpathCtx != nullptr);
 
-        xmlChar *xpathExpr = (xmlChar*)"/Root/Network[*]";
+        xmlChar *xpathExpr = (xmlChar*)"/Root/Bouquet[*]";
         shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr && nodes->nodeNr == 1);
-        
+        assert(nodes != nullptr);
+
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
             node = nodes->nodeTab[i];
-            NetId networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
-            Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
-            SiTable *siTable = SiTable::CreateInstance(tableId, networkId, versionNumber);
+            BouquetId bouquetId = GetXmlAttrValue<BouquetId>(node, (const xmlChar*)"BouquetID");
+            Version versionNumber = GetXmlAttrValue<Version>(node, (const xmlChar*)"Version");
+            SiTable *siTable = SiTable::CreateInstance(tableId, bouquetId, versionNumber);
+            keys.push_back(bouquetId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
@@ -196,14 +73,15 @@ public:
                     uint16_t onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
 
                     siTable->AddTs(tsId, onId);
-            
                     xmlNodePtr child = xmlFirstElementChild(node);
                     AddTsDescriptor(*siTable, tsId, child);
                 }
             }
-        
+
             tsPacket.AddSiTable(siTable);
         }
+
+        xmlCleanupParser(); 
     }
 
 private:
@@ -236,6 +114,312 @@ private:
 
             siTable.AddTsDescriptor(tsId, data);
         }
+    }
+};
+
+/**********************class EitXmlWrapper**********************/
+template<typename TsPacket, typename SiTable>
+class EitXmlWrapper: public SiTableXmlWrapperInterface<TsPacket>
+{
+public:
+    EitXmlWrapper() {};
+    virtual ~EitXmlWrapper() {};
+
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    {
+        cout << "Reading " << xmlPath << endl;
+        shared_ptr<xmlDoc> doc;
+        for (int i = 0; i < 10 && doc == nullptr; ++i)
+        {
+            if (i != 0)
+                SleepEx(10, true);
+            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
+        }
+        assert(doc != nullptr);
+
+        xmlNodePtr node = xmlDocGetRootElement(doc.get());
+        tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
+        if (tableId == 0x4E)
+            tableId = 0x50;
+        else if (tableId == 0x4F)
+            tableId = 0x60;
+
+        shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+        assert(xpathCtx != nullptr);
+
+        xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        assert(nodes != nullptr);
+    
+        for (int i = 0; i < nodes->nodeNr; ++i)
+        {
+            node = nodes->nodeTab[i];
+
+            TsId tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
+            NetId onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
+            Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
+            ServiceId serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
+
+            SiTable *siTable = SiTable::CreateInstance(tableId, serviceId, versionNumber, tsId, onId);
+            keys.push_back(serviceId);
+
+            for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+            {
+                AddEvent(*siTable, node);
+            }
+            tsPacket.AddSiTable(siTable);
+        }
+
+        xmlCleanupParser();
+    }
+
+    void AddEvent(SiTable& siTable, xmlNodePtr& node) const
+    {
+        uint16_t eventId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"EventID");
+        SharedXmlChar startTime = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"StartTime");
+        uint32_t duration = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Duration");
+        uint16_t  runningStatus = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"running_status");
+        uint16_t  freeCaMode = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"free_CA_mode");
+
+        siTable.AddEvent(eventId, (char*)startTime.get(), (time_t)duration, runningStatus, freeCaMode);
+    
+        for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
+             cur != nullptr; 
+             cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+            siTable.AddEventDescriptor(eventId, data);
+        }
+    }
+};
+
+/**********************class NitXmlWrapper**********************/
+template<typename TsPacket, typename SiTable>
+class NitXmlWrapper: public SiTableXmlWrapperInterface<TsPacket>
+{
+public:
+    NitXmlWrapper() {};
+    virtual ~NitXmlWrapper() {};
+
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    {
+        cout << "Reading " << xmlPath << endl;
+
+        shared_ptr<xmlDoc> doc;
+        for (int i = 0; i < 10 && doc == nullptr; ++i)
+        {
+            if (i != 0)
+                SleepEx(10, true);
+            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
+        }
+        assert(doc != nullptr);
+
+        xmlNodePtr node = xmlDocGetRootElement(doc.get());
+        tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
+
+        shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+        assert(xpathCtx != nullptr);
+
+        xmlChar *xpathExpr = (xmlChar*)"/Root/Network[*]";
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        assert(nodes != nullptr);
+        
+        for (int i = 0; i < nodes->nodeNr; ++i)
+        {
+            node = nodes->nodeTab[i];
+            NetId networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
+            Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
+            SiTable *siTable = SiTable::CreateInstance(tableId, networkId, versionNumber);
+            keys.push_back(networkId);
+
+            for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+            {
+                if (xmlStrcmp(node->name, (xmlChar*)"Descriptors") == 0)
+                {
+                    AddDescriptor(*siTable, node);
+                }
+                else if (xmlStrcmp(node->name, (xmlChar*)"Transportstream") == 0)
+                {
+                    uint16_t tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
+                    uint16_t onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
+
+                    siTable->AddTs(tsId, onId);
+            
+                    xmlNodePtr child = xmlFirstElementChild(node);
+                    AddTsDescriptor(*siTable, tsId, child);
+                }
+            }
+        
+            tsPacket.AddSiTable(siTable);
+        }
+
+        xmlCleanupParser(); 
+    }
+
+private:
+    void AddDescriptor(SiTable &siTable, xmlNodePtr& node) const
+    {
+        assert(xmlStrcmp(node->name, (const xmlChar*)"Descriptors") == 0);
+        for (xmlNodePtr cur = xmlFirstElementChild(node); 
+            cur != nullptr; 
+            cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+            siTable.AddDescriptor(data);
+        }   
+    }
+
+    void AddTsDescriptor(SiTable &siTable, uint16_t tsId, xmlNodePtr& node) const
+    {
+        assert(xmlStrcmp(node->name, (const xmlChar*)"Descriptors") == 0);
+
+        for (xmlNodePtr cur = xmlFirstElementChild(node); 
+            cur != nullptr; 
+            cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+            siTable.AddTsDescriptor(tsId, data);
+        }
+    }
+};
+
+/**********************class SdtXmlWrapper**********************/
+template<typename TsPacket, typename SiTable>
+class SdtXmlWrapper: public SiTableXmlWrapperInterface<TsPacket>
+{
+public:
+    SdtXmlWrapper() {};
+    virtual ~SdtXmlWrapper() {};
+
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    {
+        cout << "Reading " << xmlPath << endl;
+
+        shared_ptr<xmlDoc> doc;
+        for (int i = 0; i < 10 && doc == nullptr; ++i)
+        {
+            if (i != 0)
+                SleepEx(10, true);
+            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
+        }
+        assert(doc != nullptr);
+
+        xmlNodePtr node = xmlDocGetRootElement(doc.get());
+        tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
+
+        shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
+        assert(xpathCtx != nullptr);
+
+        xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        assert(nodes != nullptr);
+        
+        for (int i = 0; i < nodes->nodeNr; ++i)
+        {
+            node = nodes->nodeTab[i];
+            TsId tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
+            NetId onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
+            Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
+            SiTable *siTable = SiTable::CreateInstance(tableId, tsId, versionNumber, onId);
+            keys.push_back(tsId);
+
+            for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
+            {
+                AddService(*siTable, node, (xmlChar*)"Service");      
+            }
+
+            tsPacket.AddSiTable(siTable);
+        }
+
+        xmlCleanupParser();
+    }
+
+    void AddService(SiTable& siTable, xmlNodePtr& node, xmlChar* child) const
+    {
+        if (xmlStrcmp(node->name, child) != 0)
+        {
+            return;
+        }
+
+        uint16_t serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
+        uchar_t  eitScheduleFlag = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"EIT_schedule_flag");
+        uchar_t  eitPresentFollowingFlag = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"EIT_present_following_flag");
+        uchar_t  runningStatus = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"running_status");
+        uchar_t  freeCaMode = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"free_CA_mode");
+        siTable.AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
+
+        for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
+            cur != nullptr; 
+            cur = xmlNextElementSibling(cur))
+        {
+            uchar_t tag = GetXmlAttrValue<uchar_t>(cur, (const xmlChar*)"Tag");
+            //SharedXmlChar data = GetXmlAttrValue<SharedXmlChar>(cur, (const xmlChar*)"Data");
+            std::string data = GetXmlAttrValue<std::string>(cur, (const xmlChar*)"Data");
+
+            siTable.AddServiceDescriptor(serviceId, data);
+        }
+    }
+};
+
+/**********************class SiTableXmlWrapperRepository**********************/
+template<typename TsPacket>
+class SiTableXmlWrapperRepository
+{
+public:
+    SiTableXmlWrapperRepository() {}
+    ~SiTableXmlWrapperRepository() 
+    {
+        std::map<std::string, SiTableXmlWrapperInterface<TsPacket> *>::iterator iter;
+        for (iter = wrappers.begin(); iter != wrappers.end(); ++iter)
+        {
+            delete iter->second;
+        }
+    }
+
+    SiTableXmlWrapperInterface<TsPacket>& GetWrapperInstance(std::string &type)
+    {
+        std::map<std::string, SiTableXmlWrapperInterface<TsPacket> *>::iterator iter;
+        iter = wrappers.find(type);
+        assert(iter != wrappers.end());
+        return *iter->second;
+    }
+
+    static SiTableXmlWrapperRepository& GetInstance()
+    {
+        static SiTableXmlWrapperRepository instance;
+        return instance;
+    }
+
+    void Register(std::string &type, SiTableXmlWrapperInterface<TsPacket> * wrapper)
+    {
+        wrappers.insert(make_pair(type, wrapper));
+    }
+
+private:
+    std::map<std::string, SiTableXmlWrapperInterface<TsPacket> *> wrappers;
+};
+
+template<typename TsPacket>
+class SiTableXmlWrapperAutoRegisterSuite
+{
+public:
+    SiTableXmlWrapperAutoRegisterSuite(std::string &type,  
+                                       SiTableXmlWrapperInterface<TsPacket> * wrapper)
+    {
+        SiTableXmlWrapperRepository<TsPacket>& repository = SiTableXmlWrapperRepository<TsPacket>::GetInstance();
+        repository.Register(type, wrapper);
     }
 };
 

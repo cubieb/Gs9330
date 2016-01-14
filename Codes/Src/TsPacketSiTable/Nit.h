@@ -67,20 +67,20 @@ public:
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     uint16_t GetKey() const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
                      uchar_t *buffer, size_t bufferSize) const;
 
 private:
-    Descriptors descriptors;
-    SectionNumber lastSectionNumber;
-    NetId networkId;
-    SectionNumber sectionNumber;
     TableId tableId;
-    TransportStreams transportStreams;
+    NetId networkId;
     Version versionNumber;
+    SectionNumber sectionNumber;
+    SectionNumber lastSectionNumber;
+    TransportStreams transportStreams;
+    Descriptors descriptors;
 };
 
 #endif

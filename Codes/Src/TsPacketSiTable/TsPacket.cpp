@@ -7,9 +7,6 @@
 #include "Include/Foundation/Crc32.h"
 #include "Include/Foundation/Deleter.h"
 
-/* SiTableWrapper */
-#include "Include/SiTableWrapper/SiTableXmlWrapperInterface.h"
-
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
 #include "Include/TsPacketSiTable/TsPacketInterface.h"
@@ -34,7 +31,7 @@ TsPacket::TsPacket(NetId netId, Pid pid)
 
 TsPacket::~TsPacket()
 {
-    for_each(siTables.begin(), siTables.end(), ScalarDeleter<SiTableInterface>());
+    for_each(siTables.begin(), siTables.end(), ScalarDeleter());
 }
 
 void TsPacket::AddSiTable(SiTableInterface *siTable)
@@ -42,24 +39,25 @@ void TsPacket::AddSiTable(SiTableInterface *siTable)
     siTables.push_back(siTable);
 }
 
-void TsPacket::AddXmlTable(char *xmlFileName, TableId &tableId)
+void TsPacket::DelSiTable(TableId tableId, uint16_t key)
 {
-    NitXmlWrapper<TsPacketInterface, NitTableInterface> wrapper;
-    wrapper.Select(*this, xmlFileName, tableId);
-}
-
-void TsPacket::DelXmlTable(char *xmlFileName)
-{
+    list<SiTableInterface *>::iterator iter;
+    iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
+    if (iter != siTables.end())
+    {        
+        delete *iter;
+        siTables.erase(iter);
+    }
 }
 
 SiTableInterface * TsPacket::FindSiTable(TableId tableId, uint16_t key)
 {
     list<SiTableInterface *>::iterator iter;
-    iter = find_if(siTables.begin(), siTables.end(), EqualSiTableInterface(tableId, key));
+    iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
     return iter == siTables.end()? nullptr: *iter;
 }
 
-size_t TsPacket::GetCodesSize(TableId tableId, std::list<TsId>& tsIds) const
+size_t TsPacket::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
 {
     uint_t segmentNumber = 0; 
 
@@ -99,6 +97,7 @@ size_t TsPacket::MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buf
     size_t segmentPayloadSize = TsPacketSize - sizeof(transport_packet);
     uchar_t *ptr = buffer;
 
+    continuityCounter = 0;
     for (auto iter: siTables)
     {
         size_t tablePlainSize = iter->GetCodesSize(tableId, tsIds);
@@ -110,7 +109,7 @@ size_t TsPacket::MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buf
         uint_t segmentNumber = GetSegmentNumber(tablePlainSize + 1); //+1 for pointer_field
         size_t tableExtSize = segmentPayloadSize * segmentNumber;  //pointer_field and 0xff tail included
 
-        shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter<uchar_t>());
+        shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
         Write8(tableCodes.get(), 0x0); //pointer_field
         iter->MakeCodes(tableId, tsIds, tableCodes.get() + 1, tablePlainSize);
         memset(tableCodes.get() + 1 + tablePlainSize, 0xff, tableExtSize - 1 - tablePlainSize);
@@ -142,7 +141,8 @@ size_t TsPacket::MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buf
                     SendUdp(ptr, 188);   //again
                 }
             */
-            ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | continuityCounter++);
+            //The continuity_counter is a 4-bit field incrementing with each Transport Stream packet with the same PID.
+            ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | (continuityCounter++ & 0xF)); 
             ptr = ptr + Write(ptr, segmentPayloadSize, tableCodes.get() + segmentPayloadSize * i, segmentPayloadSize);
         }
     }
@@ -158,7 +158,7 @@ TsPackets::TsPackets()
 TsPackets::~TsPackets()
 {
     FreeProxy();
-    for_each(tsPackets.begin(), tsPackets.end(), ScalarDeleter<TsPacketInterface>());
+    for_each(tsPackets.begin(), tsPackets.end(), ScalarDeleter());
 }
 
 void TsPackets::Add(TsPacketInterface *tsPacket)
@@ -174,7 +174,7 @@ TsPackets::iterator TsPackets::Begin()
 void TsPackets::Delete(NetId netId, Pid pid)
 {
     list<TsPacketInterface *>::iterator iter;
-    iter = find_if(tsPackets.begin(), tsPackets.end(), EqualTsPacketInterface(netId, pid));
+    iter = find_if(tsPackets.begin(), tsPackets.end(), CompareTsPacketNetIdAndPid(netId, pid));
     if (iter != tsPackets.end())
     {
         tsPackets.erase(iter);
@@ -190,7 +190,7 @@ TsPackets::iterator TsPackets::End()
 TsPackets::iterator TsPackets::Find(NetId netId, Pid pid)
 {
     list<TsPacketInterface *>::iterator iter;
-    iter = find_if(tsPackets.begin(), tsPackets.end(), EqualTsPacketInterface(netId, pid));
+    iter = find_if(tsPackets.begin(), tsPackets.end(), CompareTsPacketNetIdAndPid(netId, pid));
     return iterator(this, iter);
 }
 

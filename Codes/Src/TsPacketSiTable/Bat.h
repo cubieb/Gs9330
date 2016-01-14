@@ -1,6 +1,9 @@
 #ifndef _Bat_h_
 #define _Bat_h_
 
+#include "Descriptor.h"       //Descriptor 
+#include "TransportStream.h"  //TransportStream
+
 #pragma pack(push, 1)
 struct bouquet_association_section
 {
@@ -43,6 +46,33 @@ struct bouquet_association_section
     //    }
     //}
     uint32_t CRC_32:32;
+};
+
+/**********************class BatTable**********************/
+class BatTable: public BatTableInterface
+{
+public:
+    BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber);
+    ~BatTable();
+
+    void AddDescriptor(std::string &data);
+    void AddTs(TsId tsId, OnId onId);
+    void AddTsDescriptor(TsId tsId, std::string &data);
+
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint16_t GetKey() const;
+    TableId GetTableId() const;
+    size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
+                     uchar_t *buffer, size_t bufferSize) const;
+
+private:
+    TableId tableId;
+    BouquetId bouquetId;
+    Version versionNumber;
+    SectionNumber sectionNumber;
+    SectionNumber lastSectionNumber;
+    Descriptors descriptors;
+    TransportStreams transportStreams;
 };
 
 #pragma pack(pop)

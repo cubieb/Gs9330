@@ -1,6 +1,9 @@
 #ifndef _Sdt_h_
 #define _Sdt_h_
 
+#include "Descriptor.h"       //Descriptor 
+#include "TransportStream.h"  //TransportStream
+
 /*
 uimsbf:  unsigned integer most significant bit first
 bslbf :  bit string, left bit first
@@ -41,5 +44,95 @@ struct service_description_section
     //}
     uint32_t CRC_32:                  32;       //rpchof ----
 };
+
+/**********************class SdtService**********************/
+class SdtService
+{
+public:
+    SdtService(ServiceId serviceId, uchar_t eitScheduleFlag, uchar_t eitPresentFollowingFlag,
+               uint16_t runningStatus, uint16_t freeCaMode);
+    ~SdtService();
+
+    void AddDescriptor(Descriptor *descriptor);
+
+    size_t GetCodesSize() const;
+    ServiceId GetServiceId() const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+
+private:    
+    ServiceId serviceId; 
+    uchar_t  eitScheduleFlag;
+    uchar_t  eitPresentFollowingFlag; 
+    uint16_t runningStatus; 
+    uint16_t freeCaMode;
+    Descriptors descriptors;
+};
+
+class CompareSdtServiceId: std::unary_function<SdtService, bool>
+{
+public:
+    CompareSdtServiceId(ServiceId serviceId)
+        : serviceId(serviceId)
+    {}
+
+    result_type operator()(const argument_type &sdtService)
+    {
+        return (result_type)(sdtService.GetServiceId() == serviceId);
+    }
+
+    result_type operator()(const argument_type *sdtService)
+    {
+        return this->operator()(*sdtService);
+    }
+
+private:
+    uint16_t serviceId;
+};
+
+/**********************class SdtServices**********************/
+class SdtServices
+{
+public:
+    SdtServices();
+    ~SdtServices();
+
+    size_t GetCodesSize() const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
+
+    void AddSdtService(SdtService* service);
+    void AddServiceDescriptor(ServiceId serviceId, Descriptor *descriptor);
+
+private:
+    std::list<SdtService*> sdtServices;
+};
+
+/**********************class SdtTable**********************/
+class SdtTable: public SdtTableInterface
+{
+public:
+    SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);
+    ~SdtTable();    
+
+    void AddService(ServiceId serviceId, uchar_t eitScheduleFlag, 
+                    uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
+    void AddServiceDescriptor(ServiceId serviceId, std::string &data);
+
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint16_t GetKey() const;
+    TableId GetTableId() const;
+    size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
+                     uchar_t *buffer, size_t bufferSize) const;
+
+private:
+    TableId  tableId;    
+    TsId transportStreamId;
+    Version  versionNumber;
+    uchar_t  sectionNumber;
+    uchar_t  lastSectionNumber;
+    NetId originalNetworkId;
+
+    SdtServices sdtServices;
+};
+
 #pragma pack(pop)
 #endif

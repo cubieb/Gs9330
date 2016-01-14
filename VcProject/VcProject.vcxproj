@@ -11,7 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Include\Configuration\NetworksInterface.h" />
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\DirCfgWrapperInterface.h" />
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h" />
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkRelationWrapperInterface.h" />
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h" />
+    <ClInclude Include="..\Codes\Include\Configuration\DirCfgInterface.h" />
+    <ClInclude Include="..\Codes\Include\Configuration\NetworkCfgInterface.h" />
+    <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h" />
     <ClInclude Include="..\Codes\Include\Controller\ControllerInterface.h" />
     <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h" />
     <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h" />
@@ -22,10 +28,15 @@
     <ClInclude Include="..\Codes\Include\Foundation\SystemInclude.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Time.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Type.h" />
+    <ClInclude Include="..\Codes\Include\Foundation\XmlHelper.h" />
     <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h" />
     <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h" />
     <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h" />
+    <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h" />
+    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h" />
+    <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h" />
     <ClInclude Include="..\Codes\Src\Controller\Controller.h" />
+    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Bat.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Descriptor.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Eit.h" />
@@ -35,7 +46,11 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Codes\Src\Configuration\DirCfg.cpp" />
+    <ClCompile Include="..\Codes\Src\Configuration\NetworksCfg.cpp" />
+    <ClCompile Include="..\Codes\Src\Configuration\TimerCfg.cpp" />
     <ClCompile Include="..\Codes\Src\Controller\Controller.cpp" />
+    <ClCompile Include="..\Codes\Src\Controller\TimerRepository.cpp" />
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp" />
     <ClCompile Include="..\Codes\Src\Foundation\PacketHelper.cpp" />
     <ClCompile Include="..\Codes\Src\Foundation\Converter.cpp" />
@@ -61,7 +76,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v110_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -85,6 +100,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)\Tools\ACE_wrappers;$(SolutionDir)\Tools\zlib-1.2.5\include;$(SolutionDir)\Tools\iconv-1.9.2.win32\include;$(SolutionDir)\Tools\libxml2-2.7.8.win32\include;$(SolutionDir)\Codes;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)\Tools\ACE_wrappers\lib;$(SolutionDir)\Tools\zlib-1.2.5\lib;$(SolutionDir)\Tools\iconv-1.9.2.win32\lib;$(SolutionDir)\Tools\libxml2-2.7.8.win32\lib;$(VCInstallDir)lib;$(VCInstallDir)lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <TargetName>EpgSender</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -96,6 +112,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

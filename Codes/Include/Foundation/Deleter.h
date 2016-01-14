@@ -1,6 +1,10 @@
 #ifndef _Deleter_h_
 #define _Deleter_h_
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+
 /* Foundation */
 #include "Include/Foundation/Type.h"
 
@@ -9,17 +13,17 @@
 ArrayDeleter, auxiliary class used by shared_ptr<char>.  
 Example:
 {
-    shared_ptr<char> buffer(new char[128], ArrayDeleter<char>());
+    shared_ptr<char> buffer(new char[128], ArrayDeleter());
 }
 */
-template<typename T>
-class ArrayDeleter: public std::unary_function<T, void>
+class ArrayDeleter
 {
 public:
     ArrayDeleter()
     {}
 
-    result_type operator()(argument_type *ptr) const
+    template<typename T>
+    void operator()(const T *ptr) const
     {
         delete[] ptr;
     }
@@ -31,16 +35,71 @@ Example:
     for_each(xxx.begin(), xxx.end(), ScalarDeleter<Xxx>());
 }
 */
-template<typename T>
-class ScalarDeleter: public std::unary_function<T, void>
+class ScalarDeleter
 {
 public:
     ScalarDeleter()
     {}
 
-    result_type operator()(argument_type *ptr) const
+    template<typename T>
+    void operator()(const T *ptr) const
     {
         delete ptr;
+    }
+};
+
+/*
+XmlDocDeleter, auxiliary class used by shared_ptr<xmlDoc>.  Example:
+{
+    const char* xmlFile = "../XmlFiles/AddressListXml.xml";
+    shared_ptr<xmlDoc> doc(xmlParseFile(xmlFile), XmlDocDeleter());
+}
+*/
+class XmlDocDeleter
+{
+public:
+    XmlDocDeleter()
+    {}
+
+    void operator()(xmlDoc* ptr) const
+    {
+        xmlFreeDoc(ptr);
+    }
+};
+
+class XmlCharDeleter
+{
+public:
+    XmlCharDeleter()
+    {}
+
+    void operator()(xmlChar *ptr) const
+    {
+        xmlFree(ptr);
+    }
+};
+
+class xmlXPathContextDeleter
+{
+public:
+    xmlXPathContextDeleter()
+    {}
+
+    void operator()(xmlXPathContext *ptr) const
+    {
+        xmlXPathFreeContext(ptr);
+    }
+};
+
+class xmlXPathObjectDeleter
+{
+public:
+    xmlXPathObjectDeleter()
+    {}
+
+    void operator()(xmlXPathObject *ptr) const
+    {
+        xmlXPathFreeObject(ptr);
     }
 };
 

@@ -1179,7 +1179,7 @@ Descriptors::Descriptors()
 
 Descriptors::~Descriptors()
 {
-    for_each(descriptors.begin(), descriptors.end(), ScalarDeleter<Descriptor>());
+    for_each(descriptors.begin(), descriptors.end(), ScalarDeleter());
 }
 
 void Descriptors::AddDescriptor(Descriptor *discriptor)
@@ -1189,7 +1189,7 @@ void Descriptors::AddDescriptor(Descriptor *discriptor)
 
 size_t Descriptors::GetCodesSize() const
 {
-    /* 2 bytes for reserved_future_use and transport_descriptors_length */
+    /* 2 bytes for reserved_future_use and descriptors_loop_length */
     size_t size = 2;
 
     for (const auto iter: descriptors)
@@ -1203,6 +1203,16 @@ size_t Descriptors::GetCodesSize() const
 size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;    
+    
+    ptr = ptr + this->MakeCodes(buffer, bufferSize, Reserved4Bit);
+
+    assert(ptr - buffer == GetCodesSize());
+    return (ptr - buffer);
+}
+
+size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize, uint16_t reserved4Bit) const
+{
+    uchar_t *ptr = buffer;    
     assert(GetCodesSize() <= bufferSize);
 
     ptr = ptr + Write16(ptr, 0);
@@ -1212,7 +1222,7 @@ size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
         ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
         size = size + iter->GetCodesSize();
     }
-    uint16_t ui16Value = (Reserved4Bit << 12) | size;
+    uint16_t ui16Value = (reserved4Bit << 12) | size;
     Write16(buffer, ui16Value);
 
     assert(ptr - buffer == GetCodesSize());

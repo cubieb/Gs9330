@@ -62,7 +62,7 @@ TransportStreams::TransportStreams()
 
 TransportStreams::~TransportStreams()
 {
-    for_each(transportStreams.begin(), transportStreams.end(), ScalarDeleter<TransportStream>());
+    for_each(transportStreams.begin(), transportStreams.end(), ScalarDeleter());
 }
 
 void TransportStreams::AddTransportStream(TsId tsId, OnId onId)
@@ -75,17 +75,17 @@ void TransportStreams::AddTsDescriptor(TsId tsId, Descriptor *descriptor)
 {
     list<TransportStream*>::iterator iter;
 
-    iter = find_if(transportStreams.begin(), transportStreams.end(), EqualTransportStream(tsId));
+    iter = find_if(transportStreams.begin(), transportStreams.end(), CompareTransportStreamId(tsId));
     assert(iter != transportStreams.end());
     (*iter)->AddDescriptor(descriptor);
 }
     
-size_t TransportStreams::GetCodesSize(list<TsId>& tsIds) const
+size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds) const
 {
     size_t size = 2;  //reserved_future_use + transport_stream_loop_length
     for (auto iter: transportStreams)
     {
-        list<TsId>::iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
+        list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
         if (tsIdIter != tsIds.end())
         {
             size = size + iter->GetCodesSize();
@@ -97,21 +97,24 @@ size_t TransportStreams::GetCodesSize(list<TsId>& tsIds) const
 
 size_t TransportStreams::MakeCodes(std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const
 {
-    size_t size = GetCodesSize(tsIds);
-    //reserved_future_use + transport_stream_loop_length
-    uint16_t reservedFutureUse = (Reserved4Bit << 12) | size;  
-
     uchar_t *ptr = buffer;
-    ptr = ptr + WriteBuffer(ptr, reservedFutureUse);
+    assert(GetCodesSize(tsIds) <= bufferSize);
+
+    ptr = ptr + Write16(ptr, 0);
+    size_t size = 0;  
     for (auto iter: transportStreams)
     {
         list<TsId>::iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
         if (tsIdIter != tsIds.end())
         {
             ptr = ptr + iter->MakeCodes(ptr, buffer + bufferSize - ptr);
+            size = size + iter->GetCodesSize();
         }
     }
+    //reserved_future_use + transport_stream_loop_length
+    uint16_t ui16Value = (Reserved4Bit << 12) | size;
+    Write16(buffer, ui16Value);
 
-    assert(ptr - buffer == size);
+    assert(ptr - buffer == GetCodesSize(tsIds));
     return (ptr - buffer);
 }

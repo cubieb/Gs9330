@@ -1,36 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
     <network id="200">
-        <receiver ip="10.0.0.9" port="5001">
-            <tsid>0x50</tsid>
-            <tsid>0x53</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.9" port="5002">
-            <tsid>0x51</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.9" port="5003">
-            <tsid>0x52</tsid>
-        </receiver>
-    </network>
-    <network id="201">
         <receiver ip="10.0.0.10" port="5001">
-            <tsid>0x50</tsid>
+            <tsid>1</tsid>
         </receiver>	
         <receiver ip="10.0.0.10" port="5002">
-            <tsid>0x51</tsid>
+            <tsid>2</tsid>
         </receiver>	
-        <receiver ip="10.0.0.10" port="5003">
-            <tsid>0x52</tsid>
-            <tsid>0x53</tsid>
-            <tsid>0x54</tsid>
-            <tsid>0x55</tsid>
-            <tsid>0x56</tsid>
-            <tsid>0x57</tsid>
-            <tsid>0x58</tsid>
-            <tsid>0x59</tsid>
-            <tsid>0x60</tsid>
-            <tsid>0x61</tsid>
-            <tsid>0x62</tsid>
-        </receiver>
+    </network>
+    <network id="201">
+        <receiver ip="20.0.0.11" port="5001">
+            <tsid>1</tsid>
+            <tsid>2</tsid>
+        </receiver>	
+        <receiver ip="20.0.0.11" port="5002">
+            <tsid>3</tsid>
+        </receiver>	
     </network>    
 </root>

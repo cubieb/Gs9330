@@ -37,6 +37,12 @@
     <Filter Include="头文件\Configuration">
       <UniqueIdentifier>{af54440f-71e7-4c14-beba-04b3faa80ebc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Configuration">
+      <UniqueIdentifier>{3a18e094-19f9-46ad-a87f-a9ea86702690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ConfigurationWrapper">
+      <UniqueIdentifier>{4df4d9a2-929a-41be-a760-ff0b60436344}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Codes\Include\Foundation\Converter.h">
@@ -102,8 +108,41 @@
     <ClInclude Include="..\Codes\Src\Controller\Controller.h">
       <Filter>源文件\Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Configuration\NetworksInterface.h">
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h">
+      <Filter>头文件\ConfigurationWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\NetworkCfgInterface.h">
       <Filter>头文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\XmlHelper.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\DirCfgInterface.h">
+      <Filter>头文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h">
+      <Filter>源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h">
+      <Filter>头文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
+      <Filter>源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\DirCfgWrapperInterface.h">
+      <Filter>头文件\ConfigurationWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
+      <Filter>头文件\ConfigurationWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h">
+      <Filter>源文件\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkRelationWrapperInterface.h">
+      <Filter>头文件\ConfigurationWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h">
+      <Filter>源文件\Configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +193,18 @@
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Controller\Controller.cpp">
       <Filter>源文件\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Configuration\DirCfg.cpp">
+      <Filter>源文件\Configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Configuration\TimerCfg.cpp">
+      <Filter>源文件\Configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Controller\TimerRepository.cpp">
+      <Filter>源文件\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Configuration\NetworksCfg.cpp">
+      <Filter>源文件\Configuration</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
