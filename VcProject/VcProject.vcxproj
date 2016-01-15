@@ -20,11 +20,11 @@
     <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h" />
     <ClInclude Include="..\Codes\Include\Controller\ControllerInterface.h" />
     <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h" />
-    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Converter.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Crc32.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Debug.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Deleter.h" />
+    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h" />
     <ClInclude Include="..\Codes\Include\Foundation\SystemInclude.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Time.h" />
     <ClInclude Include="..\Codes\Include\Foundation\Type.h" />

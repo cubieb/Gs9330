@@ -87,6 +87,7 @@ public:
         return ptr;
     }
     
+    virtual uint_t GetReceiverId() const = 0;
     virtual struct sockaddr_in GetSocketAddr() const = 0;
 
     // ContainerBase function.
@@ -98,7 +99,7 @@ public:
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 };
-ReceiverInterface * CreateReceiverInterface(const struct sockaddr_in &socketAddr);
+ReceiverInterface * CreateReceiverInterface(uint_t receiverId, const struct sockaddr_in &socketAddr);
 
 inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& value) 
 { 

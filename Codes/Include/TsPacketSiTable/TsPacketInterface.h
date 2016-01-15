@@ -23,7 +23,8 @@ public:
     virtual size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const = 0;
     virtual NetId  GetNetId() const = 0;
     virtual Pid    GetPid() const = 0;
-    virtual size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) = 0;
+    virtual size_t MakeCodes(uint_t ccId, TableId tableId, std::list<TsId>& tsIds, 
+                             uchar_t *buffer, size_t bufferSize) = 0;
 };
 TsPacketInterface * CreateTsPacketInterface(NetId netId, Pid pid);
 

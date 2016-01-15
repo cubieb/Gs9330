@@ -5,19 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="头文件\Foundation">
-      <UniqueIdentifier>{551711ee-a98d-4710-8010-928bbd8962a0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\TsPacketSiTable">
-      <UniqueIdentifier>{fe397bff-65c5-4156-9d88-64bc35003182}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\Foundation">
       <UniqueIdentifier>{242a9307-7f6d-4a21-a74e-eae0b29fb80e}</UniqueIdentifier>
@@ -25,53 +15,38 @@
     <Filter Include="源文件\TsPacketSiTable">
       <UniqueIdentifier>{51c09b66-b8d3-4018-ae0c-017ae9cbf33b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\SiTableWrapper">
-      <UniqueIdentifier>{b94c492a-9bed-48c0-9a0e-2b484031684a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Controller">
-      <UniqueIdentifier>{d5b57c49-3dbb-4ed6-8598-5b9b547ff6b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\Controller">
       <UniqueIdentifier>{f8dbe94b-d9c3-4d70-84f4-ce9d3f487db4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Configuration">
-      <UniqueIdentifier>{af54440f-71e7-4c14-beba-04b3faa80ebc}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\Configuration">
       <UniqueIdentifier>{3a18e094-19f9-46ad-a87f-a9ea86702690}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{3cfcb02d-1aa3-4035-ae4a-c7b6f2c454e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Foundation">
+      <UniqueIdentifier>{0423fab4-f640-4dc3-bf64-b93fb5a524ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\TsPacketSiTable">
+      <UniqueIdentifier>{27f626a9-0041-4e7e-8e4c-6b496813ada4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\SiTableWrapper">
+      <UniqueIdentifier>{5cfdbc2f-8343-462f-ae26-acab91e47abb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Controller">
+      <UniqueIdentifier>{f78b89ed-c980-4abe-83c2-654494f851a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Configuration">
+      <UniqueIdentifier>{9a7cee89-f658-45ba-89d3-6bc92279795c}</UniqueIdentifier>
+    </Filter>
     <Filter Include="头文件\ConfigurationWrapper">
-      <UniqueIdentifier>{4df4d9a2-929a-41be-a760-ff0b60436344}</UniqueIdentifier>
+      <UniqueIdentifier>{1cf9ff17-3d21-4fbd-881f-4616467c7d07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{3a62fedf-57e4-4edf-b728-03c5cef84ade}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Include\Foundation\Converter.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\Crc32.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\Debug.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\Deleter.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\SystemInclude.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\Type.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\Time.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h">
-      <Filter>头文件\TsPacketSiTable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Nit.h">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
@@ -90,59 +65,86 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h">
-      <Filter>头文件\TsPacketSiTable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h">
       <Filter>源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h">
-      <Filter>头文件\SiTableWrapper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Controller\ControllerInterface.h">
-      <Filter>头文件\Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Controller\Controller.h">
       <Filter>源文件\Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h">
-      <Filter>头文件\ConfigurationWrapper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Configuration\NetworkCfgInterface.h">
-      <Filter>头文件\Configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\XmlHelper.h">
-      <Filter>头文件\Foundation</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Configuration\DirCfgInterface.h">
-      <Filter>头文件\Configuration</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h">
       <Filter>源文件\Configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h">
-      <Filter>头文件\Configuration</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
       <Filter>源文件\Configuration</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h">
+      <Filter>源文件\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h">
+      <Filter>源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Converter.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Crc32.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Debug.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Deleter.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\SystemInclude.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Time.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\Type.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\XmlHelper.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h">
+      <Filter>头文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h">
+      <Filter>头文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h">
+      <Filter>头文件\SiTableWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Controller\ControllerInterface.h">
+      <Filter>头文件\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\DirCfgInterface.h">
+      <Filter>头文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\NetworkCfgInterface.h">
+      <Filter>头文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h">
+      <Filter>头文件\Configuration</Filter>
+    </ClInclude>
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\DirCfgWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h">
-      <Filter>源文件\Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkRelationWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h">
-      <Filter>源文件\Configuration</Filter>
+    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
+      <Filter>头文件\ConfigurationWrapper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -185,9 +187,6 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TsPacket.cpp">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\Main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp">
       <Filter>源文件\Foundation</Filter>
     </ClCompile>
@@ -205,6 +204,9 @@
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Configuration\NetworksCfg.cpp">
       <Filter>源文件\Configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\Main.cpp">
+      <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

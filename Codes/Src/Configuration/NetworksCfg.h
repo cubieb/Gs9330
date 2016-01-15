@@ -7,7 +7,7 @@
 class Receiver: public ReceiverInterface
 {
 public:
-    Receiver(const struct sockaddr_in &socketAddr);
+    Receiver(uint_t receiverId, const struct sockaddr_in &socketAddr);
     ~Receiver();
 
     void Add(TsId tsId);
@@ -17,10 +17,12 @@ public:
     iterator Find(TsId tsId);
     NodePtr GetMyHead();
 
+    uint_t GetReceiverId() const;
     struct sockaddr_in GetSocketAddr() const;    
     void Put(std::ostream& os) const;
 
 private:
+    uint_t receiverId;
     struct sockaddr_in socketAddr;
     std::list<TsId> tsIds;
 };

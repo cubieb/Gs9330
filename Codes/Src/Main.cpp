@@ -15,17 +15,11 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-#if defined(_WIN32)
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2,2), &wsaData);
-#endif
-    
-    DebugFlag debugFlag;
-    debugFlag.SetState("Controller::handle_close", true);
-
     ACE_Reactor *reactor = ACE_Reactor::instance();
-    auto_ptr<ControllerInterface> controller(CreateControllerInterface(reactor));
+    ControllerInterface *controller = CreateControllerInterface(reactor);
 
     reactor->run_reactor_event_loop();
+    delete controller;
+
     return 0;
 }

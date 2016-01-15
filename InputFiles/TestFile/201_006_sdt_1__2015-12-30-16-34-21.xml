@@ -6,17 +6,17 @@
 				<Item1 Tag="0x48" Data="4808010005CCTV1"/>
 			</Descriptors>
 		</Service>
-		<Service ServiceID="18" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+		<Service ServiceID="2" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
 			<Descriptors Sum="1">
 				<Item1 Tag="0x48" Data="4808010005CCTV2"/>
 			</Descriptors>
 		</Service>
-		<Service ServiceID="2" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+		<Service ServiceID="3" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
 			<Descriptors Sum="1">
 				<Item1 Tag="0x48" Data="480A010007jykaton"/>
 			</Descriptors>
 		</Service>
-		<Service ServiceID="20" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+		<Service ServiceID="4" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
 			<Descriptors Sum="1">
 				<Item1 Tag="0x48" Data="480A010007CCTV 10"/>
 			</Descriptors>

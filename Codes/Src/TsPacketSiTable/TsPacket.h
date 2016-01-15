@@ -32,7 +32,8 @@ public:
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;
-    size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize);
+    size_t MakeCodes(uint_t ccId, TableId tableId, std::list<TsId>& tsIds, 
+                     uchar_t *buffer, size_t bufferSize);
 
 private:
     uint_t GetSegmentNumber(size_t codesSize) const;
@@ -41,7 +42,12 @@ private:
     std::list<SiTableInterface *> siTables;
 
     uchar_t  adaptationFieldControl;
-    uchar_t  continuityCounter; 
+    /* the same TsPacket will be sent to multipule socket-addr, so 
+     * we need save one continuity_counter per socket-addr.
+     * map<continuity-counter-id, continuity-counter>
+    */
+    std::map<uint_t, uchar_t> continuityCounters;
+
     NetId    netId;
     Pid      pid;
     uint16_t transportPriority;

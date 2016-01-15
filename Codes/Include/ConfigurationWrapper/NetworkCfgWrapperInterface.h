@@ -38,6 +38,7 @@ public:
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         assert(nodes != nullptr);
 
+        uint_t recieverId = 0;
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
             node = nodes->nodeTab[i];
@@ -52,7 +53,7 @@ public:
                 socketAddr.sin_family = AF_INET;
                 socketAddr.sin_addr.s_addr = inet_addr((char *)ip.get());
                 socketAddr.sin_port = htons(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"port"));
-                ReceiverInterface *receiver = CreateReceiverInterface(socketAddr);
+                ReceiverInterface *receiver = CreateReceiverInterface(recieverId++, socketAddr);
 
                 xmlNodePtr tsIdNode;
                 for (tsIdNode = xmlFirstElementChild(node); 

@@ -67,7 +67,6 @@ public:
     ~Controller();
 
     int handle_signal(int signum, siginfo_t *, ucontext_t *);
-    int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask close_mask);
     int handle_timeout(const ACE_Time_Value &currentTime, const void *act);
 
 private:

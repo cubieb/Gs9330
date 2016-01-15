@@ -8,9 +8,9 @@
 #include "NetworksCfg.h"
 using namespace std;
 
-ReceiverInterface * CreateReceiverInterface(const struct sockaddr_in &socketAddr)
+ReceiverInterface * CreateReceiverInterface(uint_t receiverId, const struct sockaddr_in &socketAddr)
 {
-    return new Receiver(socketAddr);
+    return new Receiver(receiverId, socketAddr);
 }
 
 NetworkCfgInterface * CreateNetworkCfgInterface(NetId netId)
@@ -25,8 +25,8 @@ NetworkCfgsInterface * CreateNetworkCfgsInterface()
 
 /**********************class Receiver**********************/
 /* public function */
-Receiver::Receiver(const struct sockaddr_in &socketAddr)
-    : socketAddr(socketAddr)
+Receiver::Receiver(uint_t receiverId, const struct sockaddr_in &socketAddr)
+    : receiverId(receiverId), socketAddr(socketAddr)
 {
     AllocProxy();
 }
@@ -66,6 +66,11 @@ Receiver::iterator Receiver::Find(TsId tsId)
 Receiver::NodePtr Receiver::GetMyHead()
 {
     return NodePtr(tsIds.end());
+}
+
+uint_t Receiver::GetReceiverId() const
+{
+    return receiverId;
 }
 
 struct sockaddr_in Receiver::GetSocketAddr() const

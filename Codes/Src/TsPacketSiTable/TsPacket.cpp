@@ -25,7 +25,7 @@ TsPacketsInterface * CreateTsPacketsInterface()
 
 /**********************class TsPacket**********************/
 TsPacket::TsPacket(NetId netId, Pid pid)
-    : adaptationFieldControl(1), continuityCounter(0), pid(pid), netId(netId),
+    : adaptationFieldControl(1), pid(pid), netId(netId),
       transportPriority(0)
 {}
 
@@ -92,12 +92,21 @@ uint_t TsPacket::GetSegmentNumber(size_t codesSize) const
     return (codesSize + segmentPayloadSize - 1) / segmentPayloadSize;
 }
 
-size_t TsPacket::MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize)
+size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, std::list<TsId>& tsIds, 
+                           uchar_t *buffer, size_t bufferSize)
 {
     size_t segmentPayloadSize = TsPacketSize - sizeof(transport_packet);
     uchar_t *ptr = buffer;
 
-    continuityCounter = 0;
+    map<uint_t, uchar_t>::iterator ccIter = continuityCounters.find(ccId);
+    if (ccIter == continuityCounters.end())
+    {
+        pair<map<uint_t, uchar_t>::iterator, bool> pr;
+        pr = continuityCounters.insert(make_pair(ccId, 0));
+        assert(pr.second == true);
+        ccIter = pr.first;
+    }
+
     for (auto iter: siTables)
     {
         size_t tablePlainSize = iter->GetCodesSize(tableId, tsIds);
@@ -142,7 +151,7 @@ size_t TsPacket::MakeCodes(TableId tableId, std::list<TsId>& tsIds, uchar_t *buf
                 }
             */
             //The continuity_counter is a 4-bit field incrementing with each Transport Stream packet with the same PID.
-            ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | (continuityCounter++ & 0xF)); 
+            ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | (ccIter->second++ & 0xF)); 
             ptr = ptr + Write(ptr, segmentPayloadSize, tableCodes.get() + segmentPayloadSize * i, segmentPayloadSize);
         }
     }

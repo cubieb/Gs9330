@@ -9,11 +9,11 @@
         </receiver>	
     </network>
     <network id="201">
-        <receiver ip="20.0.0.11" port="5001">
+        <receiver ip="10.0.0.10" port="5001">
             <tsid>1</tsid>
             <tsid>2</tsid>
         </receiver>	
-        <receiver ip="20.0.0.11" port="5002">
+        <receiver ip="10.0.0.10" port="5002">
             <tsid>3</tsid>
         </receiver>	
     </network>    

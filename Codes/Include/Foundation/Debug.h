@@ -21,6 +21,11 @@ std::ostream& ErrOStream(char const*, uint32_t);
 */
 #define DbgExpandVar(v, type) #v << " = " << (type)v
 
+/*
+Example:
+    DebugFlag debugFlag;
+    debugFlag.SetState("Controller::handle_close", true);
+*/
 class DebugFlag
 {
 public:

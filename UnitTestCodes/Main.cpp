@@ -1,8 +1,13 @@
 // VcUnitTestProject.cpp : 定义控制台应用程序的入口点。
 //
-#ifdef _WIN32
-#pragma comment(lib, "cppunit.lib")
-#endif
+#include "Include/Foundation/SystemInclude.h"
+
+/* Foundation */
+#include "Include/Foundation/Type.h"
+#include "Include/Foundation/Debug.h"
+
+/* ControllerInterface */
+#include "Include/Controller/ControllerInterface.h"
 
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/CompilerOutputter.h>
@@ -10,6 +15,11 @@
 #include <cppunit/TestResult.h>
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
+
+#include "ExitProcessTest.h"
+
+using namespace std;
+using namespace UnitTest;
 
 int main(int argc, char* argv[])
 {
@@ -32,7 +42,7 @@ int main(int argc, char* argv[])
     // Print test in a compiler compatible format.
     CPPUNIT_NS::CompilerOutputter outputter( &result, CPPUNIT_NS::stdCOut() );
     outputter.write();
-
+       
 	return 0;
 }
 

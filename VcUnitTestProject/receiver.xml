@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>    
+    <network id="200">
+        <receiver ip="10.0.0.10" port="5001">
+            <tsid>1</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5002">
+            <tsid>2</tsid>
+        </receiver>	
+    </network>
+    <network id="201">
+        <receiver ip="10.0.0.10" port="5001">
+            <tsid>1</tsid>
+            <tsid>2</tsid>
+        </receiver>	
+    </network>    
+</root>

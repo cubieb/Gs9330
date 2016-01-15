@@ -112,9 +112,16 @@ Controller::~Controller()
 {
     ACE_Reactor *reactor = this->reactor();
     
-    /* stop monitoring dir */
-    vector<ACE_HANDLE>::iterator handleIter;    
-    reactor->remove_handler(dirHandle, ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL);
+    /* stop monitoring dir 
+    * remove_handler() may put event in Reactor's event queue, and the the event will cause a
+    * invoke to ACE_Event_Handler::handle_close(). 
+    * now we call remove_handler() in destruct function, that ACE_Event_Handler::handle_close()
+    * will occur at sometime this Controller is invalid.  In order to avoid invalid calling to
+    * handle_close(), we set the ACE_Event_Handler::DONT_CALL bit.
+    */
+    ACE_Reactor_Mask mask = ACE_Event_Handler::ALL_EVENTS_MASK | ACE_Event_Handler::DONT_CALL;
+    reactor->remove_handler(dirHandle, mask);
+    ::FindCloseChangeNotification(dirHandle);
     dirHandle = ACE_INVALID_HANDLE;
 
     /* clear file summary */
@@ -209,18 +216,6 @@ int Controller::handle_signal(int signum, siginfo_t *, ucontext_t *)
     }
 
     ::FindNextChangeNotification(dirHandle);
-    return 0;
-}
-
-int Controller::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask close_mask)
-{
-    dbgstrm << "handle " << handle << " removed from reactor."  << endl;
-    if (dirHandle == handle)
-    {
-        ::FindCloseChangeNotification(handle);
-        dirHandle = ACE_INVALID_HANDLE;
-    }
-
     return 0;
 }
 
@@ -410,7 +405,7 @@ void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPack
         }
 
         size_t size = tsPacket->GetCodesSize(tableId, tsIds);        
-        tsPacket->MakeCodes(tableId, tsIds, buffer, size);
+        tsPacket->MakeCodes(receiver->GetReceiverId(), tableId, tsIds, buffer, size);
 
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;
         struct sockaddr_in socketAddr = receiver->GetSocketAddr();
