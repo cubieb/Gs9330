@@ -1,6 +1,6 @@
 #include "Include/Foundation/SystemInclude.h"
 #include <regex>
-#include "ace/OS_main.h"
+#include "ace/OS.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -37,17 +37,16 @@ static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> nitWrapper
 static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> sdtWrapper
     (string("sdt"), new SdtXmlWrapper<TsPacketInterface, SdtTableInterface>);
 
-ControllerInterface * CreateControllerInterface(ACE_Reactor *reactor)
+ControllerInterface * CreateControllerInterface()
 {
-    return new Controller(reactor);
+    return new Controller;
 }
 
 /**********************class Controller**********************/
 /* public function */
-Controller::Controller(ACE_Reactor *reactor)
+Controller::Controller()
+    : tsPackets(nullptr), timerRepository(nullptr)
 {
-    this->reactor (reactor);
-
     tableNameToPid.insert(make_pair("nit", NitPid));
     tableNameToPid.insert(make_pair("bat", BatPid));
     tableNameToPid.insert(make_pair("sdt", SdtPid));
@@ -79,33 +78,6 @@ Controller::Controller(ACE_Reactor *reactor)
     timerCfg = CreateTimerCfgInterface();
     TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
     timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());    
-    
-    /* this->tsPackets */
-    tsPackets = CreateTsPacketsInterface();    
-
-    /* Timer Repository(timer runtimer information) */
-    timerRepository = new TimerRepository();
-    
-    string fileSpecification = string(dirCfg->GetXmlDir()) + string("\\*.xml");
-    _finddata_t fileInfo;  
-    long handle = _findfirst(fileSpecification.c_str(), &fileInfo); 
-    if (handle != -1) 
-    {
-        do 
-        {              
-            if (regex_match(fileInfo.name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
-            {
-                string path = string(dirCfg->GetXmlDir()) + string("\\") + string(fileInfo.name);
-                dbgstrm << path << endl; 
-
-                AddSiTable(path.c_str());
-            }
-        } while (_findnext(handle, &fileInfo) == 0); 
-    } 
-    
-    /* this->handles */
-    AddMonitoredDir(dirCfg->GetXmlDir());
-    //AddMonitoredDir(dirCfg->GetTsDir());    
 }
 
 Controller::~Controller()
@@ -157,63 +129,8 @@ int Controller::handle_signal(int signum, siginfo_t *, ucontext_t *)
     {
         Sleep(10);
     }
-
-    list<string> newPathes, oldPathes;
-    string fileSpecification = string(dirCfg->GetXmlDir()) + string("\\*.xml");
-    _finddata_t fileInfo;  
-    long handle = _findfirst(fileSpecification.c_str(), &fileInfo); 
-    if (handle != -1) 
-    {
-        do 
-        {              
-            if (regex_match(fileInfo.name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
-            {
-                string path = string(dirCfg->GetXmlDir()) + string("\\") + string(fileInfo.name);
-                dbgstrm << path << endl; 
-
-                newPathes.push_back(path);
-            }
-        } while (_findnext(handle, &fileInfo) == 0); 
-    }
-
-    list<FileSummary *>::iterator summeryIter;
-    for (summeryIter = fileSummaries.begin(); summeryIter != fileSummaries.end(); ++summeryIter)
-    {
-        oldPathes.push_back((*summeryIter)->fileName);
-    }
     
-    list<string>::iterator newIter, oldIter;
-    for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
-    {
-        for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
-        {
-            if (*newIter == *oldIter)
-            {
-                break;
-            }
-        }
-
-        if (oldIter == oldPathes.end())
-        {
-            AddSiTable(newIter->c_str());
-        }
-    }
-
-    for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
-    {
-        for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
-        {
-            if (*oldIter == *newIter)
-            {
-                break;
-            }
-        }
-
-        if (newIter == newPathes.end())
-        {
-            DelSiTable(oldIter->c_str());
-        }
-    }
+    ReadDir(dirCfg->GetXmlDir());
 
     ::FindNextChangeNotification(dirHandle);
     return 0;
@@ -223,7 +140,7 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
                                const void *act)
 {
     string pause = string(dirCfg->GetXmlDir()) + string("\\pause");
-    if (_access(pause.c_str(), 0) == 0)
+    if (ACE_OS::access(pause.c_str(), F_OK) == 0)
     {
         return 0;
     }
@@ -251,6 +168,21 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
     return 0;
 }
 
+void Controller::Start(ACE_Reactor *reactor)
+{
+    this->reactor (reactor);
+
+    /* this->tsPackets */
+    tsPackets = CreateTsPacketsInterface();    
+
+    /* Timer Repository(timer runtimer information) */
+    timerRepository = new TimerRepository();
+    
+    ReadDir(dirCfg->GetXmlDir());
+    AddMonitoredDir(dirCfg->GetXmlDir());
+    //AddMonitoredDir(dirCfg->GetTsDir()); 
+}
+
 /* private function */
 void Controller::AnalyzeFileName(const char *path, NetId &netId, Pid &pid, string &type)
 {    
@@ -258,7 +190,7 @@ void Controller::AnalyzeFileName(const char *path, NetId &netId, Pid &pid, strin
    char dir[PATH_MAX];
    char fname[FILENAME_MAX];
    char ext[FILENAME_MAX];
-
+   
     _splitpath(path, drive, dir, fname, ext); 
 
     char buffer[FILENAME_MAX];
@@ -384,6 +316,67 @@ void Controller::DelSiTable(const char *path)
 
     for_each(fileSummaries.begin(), fileSummaries.end(), DeleteSummaryFileName(path));
     fileSummaries.remove(nullptr);
+}
+
+void Controller::ReadDir(const char *dir)
+{    
+    list<string> newPathes, oldPathes;
+
+    ACE_DIR *aceDir = ACE_OS::opendir (dirCfg->GetXmlDir());
+    ACE_DIRENT *entry;    
+    while((entry = ACE_OS::readdir(aceDir)) != NULL) 
+    {        
+        string path = string(dirCfg->GetXmlDir()) + string("\\") + string(entry->d_name);
+        ACE_stat   stat;
+        ACE_OS::lstat(path.c_str(), &stat);
+        if(S_ISDIR(stat.st_mode)) 
+        {
+           continue;
+        }
+        if (regex_match(entry->d_name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
+        {
+            newPathes.push_back(path);
+        }
+    }
+
+    list<FileSummary *>::iterator summeryIter;
+    for (summeryIter = fileSummaries.begin(); summeryIter != fileSummaries.end(); ++summeryIter)
+    {
+        oldPathes.push_back((*summeryIter)->fileName);
+    }
+
+    list<string>::iterator newIter, oldIter;
+    for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
+    {
+        for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
+        {
+            if (*newIter == *oldIter)
+            {
+                break;
+            }
+        }
+
+        if (oldIter == oldPathes.end())
+        {
+            AddSiTable(newIter->c_str());
+        }
+    }
+
+    for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
+    {
+        for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
+        {
+            if (*oldIter == *newIter)
+            {
+                break;
+            }
+        }
+
+        if (newIter == newPathes.end())
+        {
+            DelSiTable(oldIter->c_str());
+        }
+    }
 }
 
 void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPacket, TableId tableId)

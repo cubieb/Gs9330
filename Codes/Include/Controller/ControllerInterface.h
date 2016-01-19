@@ -8,8 +8,10 @@ class ControllerInterface: public ACE_Event_Handler
 public:
     ControllerInterface() {};
     virtual ~ControllerInterface() {};
+
+    virtual void Start(ACE_Reactor *reactor) = 0;
 };
 
-ControllerInterface * CreateControllerInterface(ACE_Reactor *reactor);
+ControllerInterface * CreateControllerInterface();
 
 #endif

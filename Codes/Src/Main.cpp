@@ -3,7 +3,6 @@
 */
 #include "Include/Foundation/SystemInclude.h"
 #include "ace/OS_main.h"
-#include "ace/Reactor.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -16,7 +15,8 @@ using namespace std;
 int main(int argc, char **argv)
 {
     ACE_Reactor *reactor = ACE_Reactor::instance();
-    ControllerInterface *controller = CreateControllerInterface(reactor);
+    ControllerInterface *controller = CreateControllerInterface();
+    controller->Start(reactor);
 
     reactor->run_reactor_event_loop();
     delete controller;

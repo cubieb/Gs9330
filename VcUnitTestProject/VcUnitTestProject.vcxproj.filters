@@ -5,47 +5,56 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{601d8ee5-fc80-4998-81fd-d5a4a50aee11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Foundation">
-      <UniqueIdentifier>{b53ec3e7-cd44-449e-85ec-35b347d7faee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\TsPacketSiTable">
-      <UniqueIdentifier>{c550c133-12ce-4de4-9d14-b5db5201a16c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\SiTableWrapper">
-      <UniqueIdentifier>{f24850d4-b8d8-4f80-8a14-3377a9bdf2a0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Controller">
-      <UniqueIdentifier>{6efe1f2f-3648-4207-bc7b-bb76cc85cbe8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\Configuration">
-      <UniqueIdentifier>{5536f092-8e49-465d-9029-99b38039ae85}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\ConfigurationWrapper">
-      <UniqueIdentifier>{53d8cdc6-5874-4bfc-b871-81a9f93e4548}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{27ae4852-33cc-401c-bef0-580e37a451dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Foundation">
-      <UniqueIdentifier>{4cf47fd7-b33d-47bc-9bb9-310e2aadc67b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\TsPacketSiTable">
-      <UniqueIdentifier>{488f86ea-c46d-400d-a958-f0e11e1c2f62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Controller">
-      <UniqueIdentifier>{edadbd72-425b-4975-9399-164b1919d90e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Configuration">
-      <UniqueIdentifier>{495c6af7-48df-47cf-9138-8301990dcd75}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UnitTestCodes">
       <UniqueIdentifier>{1b36b2ef-1d12-4fcd-a49b-2d772d871ae8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{4f5edb66-6053-4215-a660-7df9afa80fa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Foundation">
+      <UniqueIdentifier>{4030ee64-4e1e-4033-ab8f-c96e4b5cfaec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\TsPacketSiTable">
+      <UniqueIdentifier>{6d7a97b8-90fc-40da-90db-f8ffab5e6433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\SiTableWrapper">
+      <UniqueIdentifier>{792818e3-5a2d-4990-877e-cb2157c2164d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Controller">
+      <UniqueIdentifier>{2e32a17d-0e74-4398-a2ed-3678c59215ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Configuration">
+      <UniqueIdentifier>{878da884-34a9-49c7-bff9-9d006a7f8d42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\ConfigurationWrapper">
+      <UniqueIdentifier>{143f7781-f3dc-4ebd-9e65-be369d26f836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{a501620b-9186-47b0-85d1-e7f5caca56b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Foundation">
+      <UniqueIdentifier>{dcfaca2c-15f2-4b97-8077-d40ac3956c26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\TsPacketSiTable">
+      <UniqueIdentifier>{7305a34c-03d1-40df-904f-450e366d5840}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Controller">
+      <UniqueIdentifier>{80634d9f-b12b-4ed3-a788-ff02e8bea809}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Configuration">
+      <UniqueIdentifier>{81e2a1aa-7e78-4ed2-89b0-1dd1e4839c41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\UnitTestCodes\ExitProcessTest.cpp">
+      <Filter>UnitTestCodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UnitTestLibLinking.cpp">
+      <Filter>UnitTestCodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\Main.cpp">
+      <Filter>UnitTestCodes</Filter>
+    </ClCompile>
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp">
       <Filter>源文件\Foundation</Filter>
     </ClCompile>
@@ -103,21 +112,12 @@
     <ClCompile Include="..\Codes\Src\Configuration\TimerCfg.cpp">
       <Filter>源文件\Configuration</Filter>
     </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\ExitProcessTest.cpp">
-      <Filter>UnitTestCodes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\UnitTestLibLinking.cpp">
-      <Filter>UnitTestCodes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\Main.cpp">
-      <Filter>UnitTestCodes</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
-      <Filter>头文件\Foundation</Filter>
+    <ClInclude Include="..\UnitTestCodes\ExitProcessTest.h">
+      <Filter>UnitTestCodes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h">
+    <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
       <Filter>头文件\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Foundation\Converter.h">
@@ -130,6 +130,9 @@
       <Filter>头文件\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Foundation\Deleter.h">
+      <Filter>头文件\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\Foundation\PacketHelper.h">
       <Filter>头文件\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Foundation\SystemInclude.h">
@@ -212,9 +215,6 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
       <Filter>源文件\Configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\ExitProcessTest.h">
-      <Filter>UnitTestCodes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

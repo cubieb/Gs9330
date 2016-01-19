@@ -7,7 +7,7 @@
 #include "Include/Foundation/Debug.h"
 
 /* ControllerInterface */
-#include "Include/Controller/ControllerInterface.h"
+#include "Include/Configuration/DirCfgInterface.h"
 
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/CompilerOutputter.h>
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     // Print test in a compiler compatible format.
     CPPUNIT_NS::CompilerOutputter outputter( &result, CPPUNIT_NS::stdCOut() );
     outputter.write();
-       
+
 	return 0;
 }
 
