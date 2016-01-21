@@ -14,12 +14,10 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    ACE_Reactor *reactor = ACE_Reactor::instance();
-    ControllerInterface *controller = CreateControllerInterface();
-    controller->Start(reactor);
+    ControllerInterface &controller = ControllerInterface::GetInstance();
+    controller.Start(ACE_Reactor::instance());
 
-    reactor->run_reactor_event_loop();
-    delete controller;
+    ACE_Reactor::instance()->run_reactor_event_loop();
 
     return 0;
 }

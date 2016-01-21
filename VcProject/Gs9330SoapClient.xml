@@ -2,6 +2,6 @@
 <Root>
     <ChildXML ReceivDir ="D:\Project.VC\Gs9330\InputFiles\XmlFiles" 
               CfgDir ="D:\Project.Vc\Gs9330\VcProject"
-              ServerIP ="192.168.3.153" RegionCode ="200"
-    />
+              ServerIP ="192.168.3.153" RegionCode ="200">
+    </ChildXML>
 </Root>

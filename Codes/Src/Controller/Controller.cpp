@@ -1,6 +1,7 @@
 #include "Include/Foundation/SystemInclude.h"
 #include <regex>
 #include "ace/OS.h"
+#include "ace/Singleton.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -37,10 +38,13 @@ static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> nitWrapper
 static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> sdtWrapper
     (string("sdt"), new SdtXmlWrapper<TsPacketInterface, SdtTableInterface>);
 
-ControllerInterface * CreateControllerInterface()
+ControllerInterface &ControllerInterface::GetInstance()
 {
-    return new Controller;
+    typedef ACE_Singleton<Controller, ACE_Recursive_Thread_Mutex> TheController;
+
+    return *TheController::instance();
 }
+
 
 /**********************class Controller**********************/
 /* public function */
@@ -140,7 +144,7 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
                                const void *act)
 {
     string pause = string(dirCfg->GetXmlDir()) + string("\\pause");
-    if (ACE_OS::access(pause.c_str(), F_OK) == 0)
+    if (_access(pause.c_str(), F_OK) == 0)
     {
         return 0;
     }
@@ -322,21 +326,19 @@ void Controller::ReadDir(const char *dir)
 {    
     list<string> newPathes, oldPathes;
 
-    ACE_DIR *aceDir = ACE_OS::opendir (dirCfg->GetXmlDir());
-    ACE_DIRENT *entry;    
-    while((entry = ACE_OS::readdir(aceDir)) != NULL) 
+    string path = string(dir) + string("\\*.xml");
+    _finddata_t fileInfo;  
+    long handle = _findfirst(path.c_str(), &fileInfo); 
+    if (handle != -1) 
     {        
-        string path = string(dirCfg->GetXmlDir()) + string("\\") + string(entry->d_name);
-        ACE_stat   stat;
-        ACE_OS::lstat(path.c_str(), &stat);
-        if(S_ISDIR(stat.st_mode)) 
+        do
         {
-           continue;
-        }
-        if (regex_match(entry->d_name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
-        {
-            newPathes.push_back(path);
-        }
+            dbgstrm << fileInfo.name << endl; 
+            if (regex_match(fileInfo.name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
+            {
+                newPathes.push_back(string(dir) + string("\\") + string(fileInfo.name));
+            } 
+        } while (_findnext(handle, &fileInfo) == 0); 
     }
 
     list<FileSummary *>::iterator summeryIter;
