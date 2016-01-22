@@ -27,7 +27,7 @@ inline uchar_t ConvertValueToBcd(uchar_t value)
 	return( ( ( value / 10 ) << 4 ) | ( value % 10 ) );				/* Convert Value to BCD */
 }
 
-size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber);
-size_t ConvertUtf8ToString(uchar_t *src, std::string &dst);
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber, bool doFirstByte);
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, bool doFirstByte);
 
 #endif

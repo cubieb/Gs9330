@@ -166,7 +166,7 @@ TableId SdtTable::GetTableId() const
     return tableId;
 }
 
-size_t SdtTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
+size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
                            uchar_t *buffer, size_t bufferSize) const
 {    
     uchar_t *ptr = buffer;

@@ -80,7 +80,7 @@ TableId NitTable::GetTableId() const
     return tableId;
 }
 
-size_t NitTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
+size_t NitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
                            uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
@@ -98,9 +98,9 @@ size_t NitTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds,
     ptr = ptr + Write16(ptr, ui16Value);  //section_length
     ptr = ptr + Write16(ptr, networkId);  //network_id
     
-    /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table is the currently applicable
-       sub_table. When the bit is set to "0", it indicates that the sub_table sent is not yet applicable and shall be the next
-       sub_table to be valid.
+    /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table is the 
+	   currently applicable sub_table. When the bit is set to "0", it indicates that the sub_table sent 
+	   is not yet applicable and shall be the next sub_table to be valid.
      */
     uchar_t currentNextIndicator = 1;
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);

@@ -93,7 +93,7 @@ proposal 3:
 Example:
     std::string str  = ConvertUtf8ToString(str("\xe6\xb2\x88\xe9\x98\xb3\xe5\xb8\x82\xe7\xbd\x91\0");
  */
-size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber, bool doFirstByte)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
     //utf-8 -> unicode
@@ -117,9 +117,10 @@ size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
     typedef std::codecvt<wchar_t, char, mbstate_t> convertFacet;
 	mbstate_t outState = 0;
     //unicode -> GB2312
+    size_t offset = doFirstByte ? 1 : 0;
 	auto result = std::use_facet<convertFacet>(sysLocale).out(
 		outState, dataFrom, dataFromEnd, dataFromNext,
-		dataTo + 1, dataToEnd, dataToNext);
+		dataTo + offset, dataToEnd, dataToNext);
 	if( result == convertFacet::ok)
 	{
         if (strlen(dataTo) == 1)
@@ -136,7 +137,7 @@ size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, size_t maxCharNumber)
     return GetUtfMemSize(src, charNumber);
 }
 
-size_t ConvertUtf8ToString(uchar_t *src, std::string &dst)
+size_t ConvertUtf8ToString(uchar_t *src, std::string &dst, bool doFirstByte)
 {
-    return ConvertUtf8ToString(src, dst, std::numeric_limits<size_t>::max() );
+    return ConvertUtf8ToString(src, dst, std::numeric_limits<size_t>::max(), doFirstByte);
 }

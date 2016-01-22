@@ -32,7 +32,7 @@ public:
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;
-    size_t MakeCodes(uint_t ccId, TableId tableId, std::list<TsId>& tsIds, 
+    size_t MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
                      uchar_t *buffer, size_t bufferSize);
 
 private:

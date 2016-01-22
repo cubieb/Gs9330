@@ -79,7 +79,7 @@ Descriptor* NetworkNameDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t *ptr = buffer;        
 
     std::string networkName;
-    data =  data + ConvertUtf8ToString(data, networkName, descriptorLenght);
+    data =  data + ConvertUtf8ToString(data, networkName, descriptorLenght, true);
 
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, (uchar_t)networkName.size());
@@ -259,8 +259,8 @@ Descriptor * BouquetNameDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t *ptr = buffer;        
 
     std::string bouquetName;
-    data =  data + ConvertUtf8ToString(data, bouquetName, descriptorLenght);
-
+    data = data + ConvertUtf8ToString(data, bouquetName, descriptorLenght, true);
+    
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, (uchar_t)bouquetName.size());
     ptr = ptr + WriteBuffer(ptr, bouquetName);
@@ -297,9 +297,9 @@ Descriptor * ServiceDescriptorCreator::CreateInstance(std::string &strData)
 
     data = data + ConvertHexStrToInt(data, serviceType);
     data = data + ConvertHexStrToInt(data, serviceProviderNameLength);
-    data = data + ConvertUtf8ToString(data, serviceProviderName, serviceProviderNameLength);
+    data = data + ConvertUtf8ToString(data, serviceProviderName, serviceProviderNameLength, true);
     data = data + ConvertHexStrToInt(data, serviceNameLength);
-    data = data + ConvertUtf8ToString(data, serviceName, serviceNameLength);        
+    data = data + ConvertUtf8ToString(data, serviceName, serviceNameLength, true);        
 
     ptr = ptr + WriteBuffer(ptr, serviceType);
     ptr = ptr + WriteBuffer(ptr, (uchar_t)serviceProviderName.size());
@@ -468,9 +468,9 @@ Descriptor* ShortEventDescriptorCreator::CreateInstance(std::string &strData)
     std::string text;
     data = data + Write(languageCode, 3, data, 3);
     data = data + ConvertHexStrToInt(data, eventNameLength);
-    data = data + ConvertUtf8ToString(data, eventName, eventNameLength);
+    data = data + ConvertUtf8ToString(data, eventName, eventNameLength, true);
     data = data + ConvertHexStrToInt(data, textLength);
-    data = data + ConvertUtf8ToString(data, text, textLength);     
+    data = data + ConvertUtf8ToString(data, text, textLength, true);     
 
     ptr = ptr + Write(ptr, 3, languageCode, 3);
     ptr = ptr + WriteBuffer(ptr, (uchar_t)eventName.size());
@@ -530,12 +530,12 @@ Descriptor * ExtendedEventDescriptorCreator::CreateInstance(std::string &strData
         std::string itemDescriptionChar, itemChar;
 
         data = data + ConvertHexStrToInt(data, itemDescriptionLength);
-        data = data + ConvertUtf8ToString(data, itemDescriptionChar, itemDescriptionLength);
+        data = data + ConvertUtf8ToString(data, itemDescriptionChar, itemDescriptionLength, true);
         ptr = ptr + WriteBuffer(ptr, (uchar_t)itemDescriptionChar.size());
         ptr = ptr + WriteBuffer(ptr, itemDescriptionChar);
 
         data = data + ConvertHexStrToInt(data, itemLength);
-        data = data + ConvertUtf8ToString(data, itemChar, itemLength);
+        data = data + ConvertUtf8ToString(data, itemChar, itemLength, true);
         ptr = ptr + WriteBuffer(ptr, (uchar_t)itemChar.size());
         ptr = ptr + WriteBuffer(ptr, itemChar);
 
@@ -546,7 +546,7 @@ Descriptor * ExtendedEventDescriptorCreator::CreateInstance(std::string &strData
     WriteBuffer(buffer + 6, (uchar_t)(ptr - buffer - 7));
 
     data = data + ConvertHexStrToInt(data, textLength);
-    data = data + ConvertUtf8ToString(data, text, textLength);
+    data = data + ConvertUtf8ToString(data, text, textLength, true);
 
     ptr = ptr + WriteBuffer(ptr, (uchar_t)text.size());
     ptr = ptr + WriteBuffer(ptr, text);
@@ -626,7 +626,7 @@ ComponentDescriptor::ComponentDescriptor(uchar_t *data)
     uchar_t languageCode[3];
     std::string text;
     data = data + Write(languageCode, 3, data, 3);
-    data = data + ConvertUtf8ToString(data, text, descriptorLenght - 6);
+    data = data + ConvertUtf8ToString(data, text, descriptorLenght - 6, true);
 
     ptr = ptr + Write(ptr, 3, languageCode, 3);
     ptr = ptr + WriteBuffer(ptr, text);
@@ -821,7 +821,7 @@ Descriptor * MultilingualNetworkNameDescriptorCreator::CreateInstance(std::strin
         uchar_t networkNameLength;
         std::string text;
         data = data + ConvertHexStrToInt(data, networkNameLength);
-        data = data + ConvertUtf8ToString(data, text, networkNameLength);
+        data = data + ConvertUtf8ToString(data, text, networkNameLength, true);
 
         ptr = ptr + Write(ptr, 3, languageCode, 3);
         ptr = ptr + WriteBuffer(ptr, (uchar_t)text.size());
@@ -872,7 +872,7 @@ Descriptor * MultilingualComponentDescriptorCreator::CreateInstance(std::string 
         uchar_t textDescriptionLength;
         std::string text;
         data = data + ConvertHexStrToInt(data, textDescriptionLength);
-        data = data + ConvertUtf8ToString(data, text, textDescriptionLength);
+        data = data + ConvertUtf8ToString(data, text, textDescriptionLength, true);
 
         ptr = ptr + Write(ptr, 3, languageCode, 3);
         ptr = ptr + WriteBuffer(ptr, (uchar_t)text.size());
@@ -996,7 +996,7 @@ Descriptor * DataBroadcastDescriptorCreator::CreateInstance(std::string &strData
     uchar_t textLength;
     std::string text;
     data = data + ConvertHexStrToInt(data, textLength);
-    data = data + ConvertUtf8ToString(data, text, textLength);
+    data = data + ConvertUtf8ToString(data, text, textLength, true);
 
     ptr = ptr + Write(ptr, 3, languageCode, 3);
     ptr = ptr + WriteBuffer(ptr, (uchar_t)text.size());
@@ -1124,13 +1124,18 @@ Descriptor * UserdefinedDscriptor83Creator::CreateInstance(std::string &strData)
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, descriptorLenght);  
 
-    uint16_t lcn;  // lcn flag + lcn
-    uchar_t vc;    // vc falg + vc
+	for (size_t i = 0; i < descriptorLenght; i = i + 4)
+	{
+		uint16_t  ui16Value;;
 
-    data = data + ConvertHexStrToInt(data, lcn);
-    data = data + ConvertHexStrToInt(data, vc);
-    ptr = ptr + WriteBuffer(ptr, lcn);
-    ptr = ptr + WriteBuffer(ptr, vc);
+		/* Logical Channel Number */
+		data = data + ConvertHexStrToInt(data, ui16Value);
+		ptr = ptr + WriteBuffer(ptr, ui16Value);
+
+		/* Service Id */
+		data = data + ConvertHexStrToInt(data, ui16Value);
+		ptr = ptr + WriteBuffer(ptr, ui16Value);
+	}
 
     return new UserdefinedDscriptor83(buffer);
 }

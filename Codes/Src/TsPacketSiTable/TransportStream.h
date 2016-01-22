@@ -54,7 +54,7 @@ public:
     void AddTsDescriptor(TsId tsId, Descriptor *discriptor);
     
     size_t GetCodesSize(const std::list<TsId>& tsIds) const;
-    size_t MakeCodes(std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const;
+    size_t MakeCodes(const std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const;
 
     /* the following function is provided just for debug */
     //void Put(std::ostream& os) const;

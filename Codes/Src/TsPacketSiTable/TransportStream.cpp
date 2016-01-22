@@ -95,7 +95,7 @@ size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds) const
     return size;
 }
 
-size_t TransportStreams::MakeCodes(std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const
+size_t TransportStreams::MakeCodes(const std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
     assert(GetCodesSize(tsIds) <= bufferSize);
@@ -104,8 +104,8 @@ size_t TransportStreams::MakeCodes(std::list<TsId>& tsIds, uchar_t *buffer, size
     size_t size = 0;  
     for (auto iter: transportStreams)
     {
-        list<TsId>::iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
-        if (tsIdIter != tsIds.end())
+		list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
+        if (tsIdIter != tsIds.cend())
         {
             ptr = ptr + iter->MakeCodes(ptr, buffer + bufferSize - ptr);
             size = size + iter->GetCodesSize();

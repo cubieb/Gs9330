@@ -80,8 +80,8 @@ TableId BatTable::GetTableId() const
     return tableId;
 }
 
-size_t BatTable::MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
-                    uchar_t *buffer, size_t bufferSize) const
+size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+						   uchar_t *buffer, size_t bufferSize) const
 {
     uchar_t *ptr = buffer;
     uint16_t ui16Value; 

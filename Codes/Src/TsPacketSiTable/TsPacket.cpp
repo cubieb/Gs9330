@@ -92,7 +92,7 @@ uint_t TsPacket::GetSegmentNumber(size_t codesSize) const
     return (codesSize + segmentPayloadSize - 1) / segmentPayloadSize;
 }
 
-size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, std::list<TsId>& tsIds, 
+size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
                            uchar_t *buffer, size_t bufferSize)
 {
     size_t segmentPayloadSize = TsPacketSize - sizeof(transport_packet);

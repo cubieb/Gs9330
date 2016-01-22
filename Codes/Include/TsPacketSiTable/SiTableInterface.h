@@ -13,7 +13,8 @@ public:
     virtual uint16_t GetKey() const = 0;  
     //table type: nit 0x41, 0x41; sdt 0x42, 0x46;  bat 0x4a; eit 0x4e, 0x4f, 0x50, 0x60
     virtual TableId GetTableId() const = 0;  
-    virtual size_t MakeCodes(TableId tableId, std::list<TsId> &tsIds, uchar_t *buffer, size_t bufferSize) const = 0;
+    virtual size_t MakeCodes(TableId tableId, const std::list<TsId> &tsIds, 
+		                     uchar_t *buffer, size_t bufferSize) const = 0;
 };
 
 class CompareSiTableIdAndKey: public std::unary_function<SiTableInterface, bool>

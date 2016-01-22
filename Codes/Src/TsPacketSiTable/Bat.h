@@ -62,7 +62,7 @@ public:
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     uint16_t GetKey() const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, std::list<TsId>& tsIds, 
+    size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
                      uchar_t *buffer, size_t bufferSize) const;
 
 private:
