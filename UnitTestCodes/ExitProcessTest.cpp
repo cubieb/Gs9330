@@ -1,4 +1,5 @@
 #include "Include/Foundation/SystemInclude.h"
+#include <cppunit/extensions/HelperMacros.h>
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -12,7 +13,12 @@ using namespace std;
 
 CxxBeginNameSpace(UnitTest)
     
-/**********************XXX**********************/
+/**********************Xxx**********************/
+CPPUNIT_TEST_SUITE_REGISTRATION(Xxx);
 
+void Xxx::TestXxx()
+{
+	CPPUNIT_ASSERT(true);
+}
 
 CxxEndNameSpace
