@@ -32,14 +32,14 @@ struct network_information_section
     uchar_t  current_next_indicator:1;          // 1 bslbf   -  
     uchar_t  section_number:8;                  // 8 uimsbf  - 
     uchar_t  last_section_number:8;             // 8 uimsbf  -
-    //uint32_t reserved_future_use2:4;            // 4 bslbf   
-    //uint32_t network_descriptors_length:12;     // 12 uimsbf --
+    uint16_t reserved_future_use2:4;            // 4 bslbf   
+    uint16_t network_descriptors_length:12;     // 12 uimsbf --
     //for(i=0;i<N;i++)
     //{
     //    descriptor()
     //}
-    //uint16_t reserved_future_use3:4;              // 4 bslbf   
-    //uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
+    uint16_t reserved_future_use3:4;              // 4 bslbf   
+    uint16_t transport_stream_loop_length:12;     // 12 uimsbf --
     //for(i=0;i<N;i++)
     //{
     //    transport_stream_id          16 uimsbf
@@ -55,6 +55,7 @@ struct network_information_section
     uint32_t CRC_32;                           //32 rpchof  ----
 };
 #pragma pack(pop)
+#define MaxNitDesAndTsContentSize (MaxNitSectionLength - sizeof(network_information_section))
 
 /**********************class NitTable**********************/
 class NitTable: public NitTableInterface
@@ -67,11 +68,14 @@ public:
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
+                        uint_t secIndex) const;
     uint16_t GetKey() const;
+    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-                     uchar_t *buffer, size_t bufferSize) const;
+                     uchar_t *buffer, size_t bufferSize,
+                     uint_t secIndex) const;
 
 private:
     TableId tableId;

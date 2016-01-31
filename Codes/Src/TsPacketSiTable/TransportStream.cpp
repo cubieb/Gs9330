@@ -9,7 +9,11 @@
 
 /* TsPacketSiTable */
 #include "Descriptor.h"
+#include "LengthWriteHelper.h"
 #include "TransportStream.h"
+#include "Include/TsPacketSiTable/SiTableInterface.h"
+#include "Bat.h"
+#include "Nit.h"
 using namespace std;
 
 /**********************class TransportStream**********************/
@@ -29,7 +33,11 @@ void TransportStream::AddDescriptor(Descriptor *descriptor)
 
 size_t TransportStream::GetCodesSize() const
 {
-    return (descriptors.GetCodesSize() + 4);
+    size_t size = (descriptors.GetCodesSize() + sizeof(transport_stream));
+    
+    //see the definition of MaxTransportStreamSize
+    assert(size <= MaxTransportStreamSize);
+    return size;
 }
 
 OnId TransportStream::GetOnId() const
@@ -50,8 +58,14 @@ size_t TransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write16(ptr, transportStreamId);
     ptr = ptr + Write16(ptr, originalNetworkId);
 
-    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);
+    LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+    //fill "reserved_future_use + transport_descriptors_length" to 0 temporarily.
+    ptr = ptr + Write16(ptr, 0); 
+    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);    
+    //rewrite reserved_future_use + transport_descriptors_length.
+    desHelper.Write(Reserved4Bit, ptr); 
 
+    assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);
 }
 
@@ -80,41 +94,67 @@ void TransportStreams::AddTsDescriptor(TsId tsId, Descriptor *descriptor)
     (*iter)->AddDescriptor(descriptor);
 }
     
-size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds) const
+size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds, 
+                                      size_t maxSize, size_t &offset) const
 {
-    size_t size = 2;  //reserved_future_use + transport_stream_loop_length
+    size_t size = 0;
+    size_t curOffset = 0;
     for (auto iter: transportStreams)
     {
         list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
-        if (tsIdIter != tsIds.end())
+        if (tsIdIter == tsIds.end())
         {
-            size = size + iter->GetCodesSize();
+            continue;            
         }
+
+        if (curOffset < offset)
+        {
+            curOffset = curOffset + iter->GetCodesSize();
+            continue;
+        }
+        assert(curOffset == offset);
+
+        if (size + iter->GetCodesSize() > maxSize)
+        {
+            break;
+        }
+
+        size = size + iter->GetCodesSize();
     }
 
+    offset = offset + size;
     return size;
 }
 
-size_t TransportStreams::MakeCodes(const std::list<TsId>& tsIds, uchar_t *buffer, size_t bufferSize) const
+size_t TransportStreams::MakeCodes(const std::list<TsId>& tsIds, 
+                                   uchar_t *buffer, size_t bufferSize, 
+                                   size_t offset) const
 {
     uchar_t *ptr = buffer;
-    assert(GetCodesSize(tsIds) <= bufferSize);
 
-    ptr = ptr + Write16(ptr, 0);
-    size_t size = 0;  
+    size_t curOffset = 0;
     for (auto iter: transportStreams)
     {
 		list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
-        if (tsIdIter != tsIds.cend())
+        if (tsIdIter == tsIds.cend())
         {
-            ptr = ptr + iter->MakeCodes(ptr, buffer + bufferSize - ptr);
-            size = size + iter->GetCodesSize();
+            continue;
         }
-    }
-    //reserved_future_use + transport_stream_loop_length
-    uint16_t ui16Value = (Reserved4Bit << 12) | size;
-    Write16(buffer, ui16Value);
+        
+        if (curOffset < offset)
+        {
+            curOffset = curOffset + iter->GetCodesSize();
+            continue;
+        }
+        assert(curOffset == offset);
 
-    assert(ptr - buffer == GetCodesSize(tsIds));
+        if (ptr + iter->GetCodesSize() > buffer + bufferSize)
+        {
+            break;
+        }
+
+        ptr = ptr + iter->MakeCodes(ptr, buffer + bufferSize - ptr);
+    }
+
     return (ptr - buffer);
 }

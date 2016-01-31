@@ -9,6 +9,7 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
+#include "LengthWriteHelper.h"
 #include "Nit.h"
 using namespace std;
 
@@ -59,20 +60,58 @@ void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
     transportStreams.AddTsDescriptor(tsId, descriptor);
 }
 
-size_t NitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
+size_t NitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
+                              uint_t secIndex) const
 {    
     if (this->tableId != tableId)
         return 0;
 
-    size_t descriptorSize = descriptors.GetCodesSize();
-    size_t transportStreamSize = transportStreams.GetCodesSize(tsIds);
+    //we assume all descriptor to be packed in first section.
+    assert(descriptors.GetCodesSize() <= MaxNitDesAndTsContentSize);
+    //check secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
 
-    return (sizeof(network_information_section) + descriptorSize + transportStreamSize); 
+    size_t desSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxNitDesAndTsContentSize - desSize;
+    size_t tsOffset = 0;
+    
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+        desSize = 0;
+        maxSize = MaxNitDesAndTsContentSize;
+    }
+    
+    size_t size = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+    return (sizeof(network_information_section) + desSize + size); 
 }
 
 uint16_t NitTable::GetKey() const
 {
     return networkId;
+}
+
+uint_t NitTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+{
+    if (this->tableId != tableId)
+        return 0;
+
+    uint_t secNumber = 1;
+    size_t maxSize = MaxNitDesAndTsContentSize - descriptors.GetCodesSize();
+    size_t tsOffset = 0;
+    transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+    
+    size_t tsSize;
+    maxSize = MaxNitDesAndTsContentSize;
+    for (tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+         tsSize != 0;
+         tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset))
+    {
+        ++secNumber;
+    }
+
+    return secNumber;
 }
 
 TableId NitTable::GetTableId() const
@@ -81,38 +120,73 @@ TableId NitTable::GetTableId() const
 }
 
 size_t NitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-                           uchar_t *buffer, size_t bufferSize) const
+                           uchar_t *buffer, size_t bufferSize, 
+                           uint_t secIndex) const
 {
     uchar_t *ptr = buffer;
-    uint16_t ui16Value; 
-    size_t  size = GetCodesSize(tableId, tsIds);
+    size_t size = GetCodesSize(tableId, tsIds, secIndex);
+    assert(size <= bufferSize);
     if (size == 0)
         return 0;
+
+    //we assume all descriptor to be packed in first section.
+    assert(descriptors.GetCodesSize() <= MaxNitDesAndTsContentSize);
+    //check secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
+
+    size_t desSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxNitDesAndTsContentSize - desSize;
+    size_t tsOffset = 0;
     
-    assert(size <= bufferSize && size <= (MaxNitSectionLength - 3));
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+        desSize = 0;
+        maxSize = MaxNitDesAndTsContentSize;
+    }
 
     ptr = ptr + Write8(ptr, tableId);
+    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
-    ui16Value = (NitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12) | (size - 3);
-
-    ptr = ptr + Write16(ptr, ui16Value);  //section_length
+    ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + Write16(ptr, networkId);  //network_id
-    
+
     /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table is the 
-	   currently applicable sub_table. When the bit is set to "0", it indicates that the sub_table sent 
-	   is not yet applicable and shall be the next sub_table to be valid.
-     */
+    currently applicable sub_table. When the bit is set to "0", it indicates that the sub_table sent 
+    is not yet applicable and shall be the next sub_table to be valid.
+    */
     uchar_t currentNextIndicator = 1;
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);
-    ptr = ptr + Write8(ptr, sectionNumber);     //section_number
-    ptr = ptr + Write8(ptr, lastSectionNumber); //last_section_number
+    ptr = ptr + Write8(ptr, secIndex);     //section_number
+    ptr = ptr + Write8(ptr, secNumber - 1); //last_section_number
 
-    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);
-    ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, bufferSize);
-        
+    //we assume all descriptor to be packed in first section.
+    if (desSize == 0)
+    {
+        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | desSize); 
+    }
+    else
+    {
+        LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+        //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
+        ptr = ptr + Write16(ptr, 0);  
+        ptr = ptr + descriptors.MakeCodes(ptr, MaxNitDesAndTsContentSize);
+        //rewrite reserved_future_use + network_descriptors_length.
+        desHelper.Write(Reserved4Bit, ptr); 
+    }
+
+    LengthWriteHelpter<4, uint16_t> tsHelper(ptr);
+    //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
+    ptr = ptr + Write16(ptr, 0);  
+    ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
+    //rewrite reserved_future_use + transport_stream_loop_length.
+    tsHelper.Write(Reserved4Bit, ptr); 
+
+    siHelper.Write((NitSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 
-    assert(ptr - buffer == size);
+    assert(size == ptr - buffer);
     return (ptr - buffer);
 }

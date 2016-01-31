@@ -23,16 +23,15 @@ struct bouquet_association_section
     uchar_t section_number:8;
     uchar_t last_section_number:8;
 
-    //uint16_t reserved_future_use2:4;
-    //uint16_t bouquet_descriptors_length:12;
+    uint16_t reserved_future_use2:4;
+    uint16_t bouquet_descriptors_length:12;
     //for(i=0;i<N;i++)
     //{
     //    descriptor()
     //}
 
-    //uint16_t reserved_future_use:4;
-    //uint16_t transport_stream_loop_length:12;
-    //
+    uint16_t reserved_future_use:4;
+    uint16_t transport_stream_loop_length:12;
     //for(i=0;i<N;i++)
     //{
     //    uint16_ttransport_stream_id:16;
@@ -47,6 +46,8 @@ struct bouquet_association_section
     //}
     uint32_t CRC_32:32;
 };
+#pragma pack(pop)
+#define MaxBatDesAndTsContentSize (MaxBatSectionLength - sizeof(bouquet_association_section))
 
 /**********************class BatTable**********************/
 class BatTable: public BatTableInterface
@@ -59,21 +60,21 @@ public:
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
+                        uint_t secIndex) const;
     uint16_t GetKey() const;
+    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-                     uchar_t *buffer, size_t bufferSize) const;
+                     uchar_t *buffer, size_t bufferSize,
+                     uint_t secIndex) const;
 
 private:
     TableId tableId;
     BouquetId bouquetId;
     Version versionNumber;
-    SectionNumber sectionNumber;
-    SectionNumber lastSectionNumber;
     Descriptors descriptors;
     TransportStreams transportStreams;
 };
 
-#pragma pack(pop)
 #endif

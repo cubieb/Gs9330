@@ -14,6 +14,12 @@ time_t CalculateUtcGmtDiff()
 }
 
 /******************convert string to time_t******************/
+void ConvertStrToTm(const char *str, tm &timeInfo)
+{
+    std::istringstream ss(str);
+    ss >> std::get_time(&timeInfo, "%Y-%m-%d %H:%M:%S");  
+}
+
 /* to convert struct tm to string, use std::put_time().
    consider use std::get_time, std::time_get::get_time, std::time_get_byname::get_time 
    to impliment current function.
@@ -27,11 +33,11 @@ time_t CalculateUtcGmtDiff()
  */
 time_t ConvertStrToTime(const char *str)  
 {  
-    tm timeinfo;  
-    std::istringstream ss(str);
-    ss >> std::get_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
-  
-    time_t ret = mktime(&timeinfo); 
+    tm timeInfo;  
+
+    ConvertStrToTm(str, timeInfo);
+    time_t ret = mktime(&timeInfo); 
+   
     return ret; 
 } 
 

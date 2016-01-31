@@ -63,13 +63,17 @@ size_t TsPacket::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) con
 
     for (auto iter: siTables)
     {
-        size_t tableSize = iter->GetCodesSize(tableId, tsIds);
-        if (tableSize == 0)
-        {
-            continue;
-        }
-
-        segmentNumber = segmentNumber + GetSegmentNumber(tableSize + 1); //+1 for pointer_field
+        uint_t secNumber = iter->GetSecNumber(tableId, tsIds);
+        for (uint_t i = 0; i < secNumber; ++i)
+        {            
+            size_t tableSize = iter->GetCodesSize(tableId, tsIds, i);
+            if (tableSize == 0)
+            {
+                continue;
+            }
+            //+1 for pointer_field
+            segmentNumber = segmentNumber + GetSegmentNumber(tableSize + 1); 
+        }        
     }
 
     return (TsPacketSize * segmentNumber);
@@ -109,52 +113,62 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
 
     for (auto iter: siTables)
     {
-        size_t tablePlainSize = iter->GetCodesSize(tableId, tsIds);
-        if (tablePlainSize == 0)
-        {
-            continue;
-        }
+        uint_t secNumber = iter->GetSecNumber(tableId, tsIds);
+        for (uint_t i = 0; i < secNumber; ++i)
+        { 
+            size_t tablePlainSize = iter->GetCodesSize(tableId, tsIds, i);
+            if (tablePlainSize == 0)
+            {
+                continue;
+            }
 
-        uint_t segmentNumber = GetSegmentNumber(tablePlainSize + 1); //+1 for pointer_field
-        size_t tableExtSize = segmentPayloadSize * segmentNumber;  //pointer_field and 0xff tail included
+            //+1 for pointer_field
+            uint_t segmentNumber = GetSegmentNumber(tablePlainSize + 1); 
+            //pointer_field and 0xff tail included
+            size_t tableExtSize = segmentPayloadSize * segmentNumber;  
 
-        shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
-        Write8(tableCodes.get(), 0x0); //pointer_field
-        iter->MakeCodes(tableId, tsIds, tableCodes.get() + 1, tablePlainSize);
-        memset(tableCodes.get() + 1 + tablePlainSize, 0xff, tableExtSize - 1 - tablePlainSize);
+            shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
+            Write8(tableCodes.get(), 0x0); //pointer_field
+            iter->MakeCodes(tableId, tsIds, tableCodes.get() + 1, tablePlainSize, i);
+            memset(tableCodes.get() + 1 + tablePlainSize, 0xff, tableExtSize - 1 - tablePlainSize);
 
-        for (uint_t i = 0; i < segmentNumber; ++i)
-        {
-            ptr = ptr + Write8(ptr, 0x47);
-            /* transport_error_indicator(1 bit), payload_unit_start_indicator(1 bit), 
-                transport_priority(1 bit), PID(13 bits)
-                transport_error_indicator = 0;
-                transport_priority = 0;
-                payload_unit_start_indicator = (first byte of current section) ? 1 : 0;
-            */
-            uint16_t startIndicator = (i == 0 ? 1 : 0);
-            ptr = ptr + Write16(ptr, (startIndicator << 14) | (transportPriority << 13) | pid);
-            /* transport_scrambling_control[2] = '00';
-		        adaptation_field_control[2] = '01';
-		        continuity_counter[4] = 'xxxx';
-		    */
-            /* refer to "2.4.3.3 Semantic definition of fields in Transport Stream packet layer",
-                continuity_counter should be increase by 1 in all case.  
-                when send udp packet, we may send duplicate packet two time, in this circumstance, the
-                continuity_counter keep same with the oringinal packet.
-                for example, the udp sending function may like this:
-                ts.MakeCodes(buffer, bufferSize);
-                for (ptr = buffer; ptr = ptr < buffer + buffersize; buffer + 188)
-                {
-                    SendUdp(ptr, 188);
-                    SendUdp(ptr, 188);   //again
-                }
-            */
-            //The continuity_counter is a 4-bit field incrementing with each Transport Stream packet with the same PID.
-            ptr = ptr + Write8(ptr, adaptationFieldControl << 4 | (ccIter->second++ & 0xF)); 
-            ptr = ptr + Write(ptr, segmentPayloadSize, tableCodes.get() + segmentPayloadSize * i, segmentPayloadSize);
-        }
-    }
+            for (uint_t i = 0; i < segmentNumber; ++i)
+            {
+                ptr = ptr + Write8(ptr, 0x47);
+                /* transport_error_indicator(1 bit), payload_unit_start_indicator(1 bit), 
+                    transport_priority(1 bit), PID(13 bits)
+                    transport_error_indicator = 0;
+                    transport_priority = 0;
+                    payload_unit_start_indicator = (first byte of current section) ? 1 : 0;
+                */
+                uint16_t startIndicator = (i == 0 ? 1 : 0);
+                ptr = ptr + Write16(ptr, (startIndicator << 14) | (transportPriority << 13) | pid);
+                /* transport_scrambling_control[2] = '00';
+		            adaptation_field_control[2] = '01';
+		            continuity_counter[4] = 'xxxx';
+		        */
+                /* refer to "2.4.3.3 Semantic definition of fields in Transport Stream packet layer",
+                    continuity_counter should be increase by 1 in all case.  
+                    when send udp packet, we may send duplicate packet two time, in this circumstance, the
+                    continuity_counter keep same with the oringinal packet.
+                    for example, the udp sending function may like this:
+                    ts.MakeCodes(buffer, bufferSize);
+                    for (ptr = buffer; ptr = ptr < buffer + buffersize; buffer + 188)
+                    {
+                        SendUdp(ptr, 188);
+                        SendUdp(ptr, 188);   //again
+                    }
+                */
+                /* The continuity_counter is a 4-bit field incrementing with each 
+                   Transport Stream packet with the same PID.
+                 */
+                ptr = ptr + Write8(ptr, (adaptationFieldControl << 4) | (ccIter->second++ & 0xF)); 
+                ptr = ptr + Write(ptr, segmentPayloadSize, 
+                                  tableCodes.get() + segmentPayloadSize * i, segmentPayloadSize);
+            } //for (uint_t i = 0; i < segmentNumber; ++i)
+        } //for (uint_t i = 0; i < secNumber; ++i)
+    } //for (auto iter: siTables)
+        
     return ptr - buffer;
 }
 

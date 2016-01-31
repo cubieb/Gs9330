@@ -9,18 +9,19 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
+#include "LengthWriteHelper.h"
 #include "Bat.h"
 using namespace std;
 
-BatTableInterface * BatTableInterface::CreateInstance(TableId tableId, BouquetId bouquetId,  Version versionNumber)
+BatTableInterface * BatTableInterface::CreateInstance(TableId tableId, BouquetId bouquetId,  
+													  Version versionNumber)
 {
     return new BatTable(tableId, bouquetId, versionNumber);
 }
 
 /**********************class NitTable**********************/
 BatTable::BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber)
-    : tableId(tableId), bouquetId(bouquetId), versionNumber(versionNumber),
-      sectionNumber(0), lastSectionNumber(0)       
+    : tableId(tableId), bouquetId(bouquetId), versionNumber(versionNumber)
 {
 }
 
@@ -59,20 +60,58 @@ void BatTable::AddTsDescriptor(TsId tsId, std::string &data)
     transportStreams.AddTsDescriptor(tsId, descriptor);
 }
 
-size_t BatTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
+size_t BatTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
+                              uint_t secIndex) const
 {
     if (this->tableId != tableId)
         return 0;
 
-    size_t descriptorSize = descriptors.GetCodesSize();
-    size_t transportStreamSize = transportStreams.GetCodesSize(tsIds);
+    //we assume all descriptor to be packed in first section.
+    assert(descriptors.GetCodesSize() <= MaxBatDesAndTsContentSize);
+    //check secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
 
-    return (sizeof(bouquet_association_section) + descriptorSize + transportStreamSize); 
+    size_t desSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxBatDesAndTsContentSize - desSize;
+    size_t tsOffset = 0;
+
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+        desSize = 0;
+        maxSize = MaxBatDesAndTsContentSize;
+    }
+    
+    size_t size = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+    return (sizeof(bouquet_association_section) + desSize + size); 
 }
 
 uint16_t BatTable::GetKey() const
 {
     return bouquetId;
+}
+
+uint_t BatTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+{
+    if (this->tableId != tableId)
+        return 0;
+
+    uint_t secNumber = 1;
+    size_t maxSize = MaxBatDesAndTsContentSize - descriptors.GetCodesSize();
+    size_t tsOffset = 0;
+    transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+    
+    size_t tsSize;
+    maxSize = MaxBatDesAndTsContentSize;
+    for (tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+         tsSize != 0;
+         tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset))
+    {
+        ++secNumber;
+    }
+
+    return secNumber;
 }
 
 TableId BatTable::GetTableId() const
@@ -81,35 +120,71 @@ TableId BatTable::GetTableId() const
 }
 
 size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-						   uchar_t *buffer, size_t bufferSize) const
+						   uchar_t *buffer, size_t bufferSize,
+                           uint_t secIndex) const
 {
     uchar_t *ptr = buffer;
-    uint16_t ui16Value; 
-    size_t  size = GetCodesSize(tableId, tsIds);
+    size_t size = GetCodesSize(tableId, tsIds, secIndex);
+    assert(size <= bufferSize);
     if (size == 0)
         return 0;
     
-    assert(size <= bufferSize && size <= (MaxBatSectionLength - 3));
+    //we assume all descriptor to be packed in first section.
+    assert(descriptors.GetCodesSize() <= MaxBatDesAndTsContentSize);
+    //check secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
+
+    size_t desSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxBatDesAndTsContentSize - desSize;
+    size_t tsOffset = 0;
+
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
+        desSize = 0;
+        maxSize = MaxBatDesAndTsContentSize;
+    }
 
     ptr = ptr + Write8(ptr, tableId);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
-    ui16Value = (BatSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12) | (size - 3);
-
-    ptr = ptr + Write16(ptr, ui16Value);  //section_length
+    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
+    ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + Write16(ptr, bouquetId);  //bouquet_id
     
-    /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table is the currently applicable
-       sub_table. When the bit is set to "0", it indicates that the sub_table sent is not yet applicable and shall be the next
-       sub_table to be valid.
+    /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table 
+	   is the currently applicable sub_table. When the bit is set to "0", it indicates that the 
+	   sub_table sent is not yet applicable and shall be the next sub_table to be valid.
      */
     uchar_t currentNextIndicator = 1;
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);
-    ptr = ptr + Write8(ptr, sectionNumber);    //section_number
-    ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
+    ptr = ptr + Write8(ptr, secIndex);    //section_number
+    ptr = ptr + Write8(ptr, secNumber - 1);  //last_section_number
 
-    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);
-    ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, bufferSize);
+    //we assume all descriptor to be packed in first section.
+    if (desSize == 0)
+    {
+        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | desSize); 
+    }
+    else
+    {
+        LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+        //fill "reserved_future_use + bouquet_descriptors_length" to 0 temporarily.
+        ptr = ptr + Write16(ptr, 0);  
+        ptr = ptr + descriptors.MakeCodes(ptr, MaxBatDesAndTsContentSize);
+        //rewrite reserved_future_use + network_descriptors_length.
+        desHelper.Write(Reserved4Bit, ptr); 
+    }
 
+    LengthWriteHelpter<4, uint16_t> tsHelper(ptr);
+    //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
+    ptr = ptr + Write16(ptr, 0);  
+    ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
+    //rewrite reserved_future_use + transport_stream_loop_length.
+    tsHelper.Write(Reserved4Bit, ptr); 
+
+    siHelper.Write((BatSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 

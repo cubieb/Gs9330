@@ -129,7 +129,7 @@ int Controller::handle_signal(int signum, siginfo_t *, ucontext_t *)
     }
 
     string ok = string(dirCfg->GetXmlDir()) + string("\\ok");
-    while((_access(ok.c_str(), 0 )) != 0 )
+	while((ACE_OS::access(ok.c_str(), F_OK)) != 0 )
     {
         Sleep(10);
     }
@@ -144,7 +144,7 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
                                const void *act)
 {
     string pause = string(dirCfg->GetXmlDir()) + string("\\pause");
-    if (_access(pause.c_str(), F_OK) == 0)
+    if (ACE_OS::access(pause.c_str(), F_OK) == 0)
     {
         return 0;
     }
@@ -325,7 +325,8 @@ void Controller::DelSiTable(const char *path)
 void Controller::ReadDir(const char *dir)
 {    
     list<string> newPathes, oldPathes;
-
+    
+#if 0
     string path = string(dir) + string("\\*.xml");
     _finddata_t fileInfo;  
     long handle = _findfirst(path.c_str(), &fileInfo); 
@@ -340,6 +341,19 @@ void Controller::ReadDir(const char *dir)
             } 
         } while (_findnext(handle, &fileInfo) == 0); 
     }
+#else    
+	ACE_DIR *aceDir = ACE_OS::opendir(dir);
+	assert(aceDir != nullptr);
+	while (ACE_DIRENT *entry = ACE_OS::readdir(aceDir))
+	{
+		if (regex_match(entry->d_name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
+        {
+            newPathes.push_back(string(dir) + string("\\") + string(entry->d_name));
+        }
+	}
+	ACE_OS::closedir(aceDir);
+#endif
+
 
     list<FileSummary *>::iterator summeryIter;
     for (summeryIter = fileSummaries.begin(); summeryIter != fileSummaries.end(); ++summeryIter)
@@ -383,7 +397,8 @@ void Controller::ReadDir(const char *dir)
 
 void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPacket, TableId tableId)
 {
-    static uchar_t buffer[8192];
+#define MaxBufferSize 1024 * 1024 * 64
+    static uchar_t buffer[MaxBufferSize];
     int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     NetworkCfgInterface::iterator receiverIter;
@@ -399,7 +414,8 @@ void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPack
             tsIds.push_back(*tsIdIter);
         }
 
-        size_t size = tsPacket->GetCodesSize(tableId, tsIds);        
+        size_t size = tsPacket->GetCodesSize(tableId, tsIds);    
+        assert(size <= MaxBufferSize);
         tsPacket->MakeCodes(receiver->GetReceiverId(), tableId, tsIds, buffer, size);
 
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;

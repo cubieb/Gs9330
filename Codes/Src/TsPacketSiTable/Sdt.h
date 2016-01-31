@@ -45,6 +45,28 @@ struct service_description_section
     uint32_t CRC_32:                  32;       //rpchof ----
 };
 
+struct service_description_section_detail
+{
+    //for (i=0;i<N;i++)
+    //{
+    uint16_t service_id:           16;       //uimsbf     --
+
+    uchar_t  reserved_future_use3: 6;        //bslbf
+    uchar_t  EIT_schedule_flag:    1;        // bslbf
+    uchar_t  EIT_present_following_flag: 1;  //bslbf       -
+
+    uint16_t running_status:             3;  //uimsbf 
+    uint16_t free_CA_mode:               1;  //bslbf
+    uint16_t descriptors_loop_length:    12; //uimsbf        --
+    //    for (j=0;j<N;j++)
+    //    {
+    //        descriptor()
+    //    }
+    //}
+};
+#pragma pack(pop)
+#define MaxSdtServiceContentSize (MaxSdtSectionLength - sizeof(service_description_section))
+
 /**********************class SdtService**********************/
 class SdtService
 {
@@ -95,12 +117,12 @@ class SdtServices
 public:
     SdtServices();
     ~SdtServices();
-
-    size_t GetCodesSize() const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;
-
+    
     void AddSdtService(SdtService* service);
     void AddServiceDescriptor(ServiceId serviceId, Descriptor *descriptor);
+
+    size_t GetCodesSize(size_t maxSize, size_t &offset) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
 
 private:
     std::list<SdtService*> sdtServices;
@@ -117,22 +139,22 @@ public:
                     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
     void AddServiceDescriptor(ServiceId serviceId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
+                        uint_t secIndex) const;
     uint16_t GetKey() const;
+    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-                     uchar_t *buffer, size_t bufferSize) const;
+                     uchar_t *buffer, size_t bufferSize,
+                     uint_t secIndex) const;
 
 private:
     TableId  tableId;    
     TsId transportStreamId;
     Version  versionNumber;
-    uchar_t  sectionNumber;
-    uchar_t  lastSectionNumber;
     NetId originalNetworkId;
 
     SdtServices sdtServices;
 };
 
-#pragma pack(pop)
 #endif

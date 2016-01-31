@@ -1194,8 +1194,7 @@ void Descriptors::AddDescriptor(Descriptor *discriptor)
 
 size_t Descriptors::GetCodesSize() const
 {
-    /* 2 bytes for reserved_future_use and descriptors_loop_length */
-    size_t size = 2;
+    size_t size = 0;
 
     for (const auto iter: descriptors)
     {
@@ -1207,31 +1206,17 @@ size_t Descriptors::GetCodesSize() const
 
 size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 {
-    uchar_t *ptr = buffer;    
-    
-    ptr = ptr + this->MakeCodes(buffer, bufferSize, Reserved4Bit);
+    uchar_t *ptr = buffer;
+    size_t size = GetCodesSize();
+    assert(size <= bufferSize);
 
-    assert(ptr - buffer == GetCodesSize());
-    return (ptr - buffer);
-}
-
-size_t Descriptors::MakeCodes(uchar_t *buffer, size_t bufferSize, uint16_t reserved4Bit) const
-{
-    uchar_t *ptr = buffer;    
-    assert(GetCodesSize() <= bufferSize);
-
-    ptr = ptr + Write16(ptr, 0);
-    size_t size = 0;
     for (const auto iter: descriptors)
     {
         ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
-        size = size + iter->GetCodesSize();
     }
-    uint16_t ui16Value = (reserved4Bit << 12) | size;
-    Write16(buffer, ui16Value);
 
-    assert(ptr - buffer == GetCodesSize());
-    return (ptr - buffer);
+    assert(ptr - buffer == size);
+    return (size);
 }
 
 /**********************class DescriptorFactory**********************/

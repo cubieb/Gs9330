@@ -10,6 +10,7 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
+#include "LengthWriteHelper.h"
 #include "Sdt.h"
 using namespace std;
 
@@ -37,7 +38,9 @@ void SdtService::AddDescriptor(Descriptor *descriptor)
 
 size_t SdtService::GetCodesSize() const
 {
-    return (descriptors.GetCodesSize() + 3);
+    size_t size = descriptors.GetCodesSize() + sizeof(service_description_section_detail);
+    assert(size <= MaxSdtServiceContentSize);
+    return size;
 }
 
 ServiceId SdtService::GetServiceId() const
@@ -53,8 +56,13 @@ size_t SdtService::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     
     ptr = ptr + Write16(ptr, serviceId);
     ptr = ptr + Write8(ptr, (Reserved6Bit << 2) | (eitScheduleFlag << 1) | eitPresentFollowingFlag);
-    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize - 3, (runningStatus << 1) | freeCaMode);
-    
+
+    LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+    //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
+    ptr = ptr + Write16(ptr, 0);  
+    ptr = ptr + descriptors.MakeCodes(ptr, bufferSize - (ptr - buffer));
+    desHelper.Write((runningStatus << 1) | freeCaMode, ptr); 
+
     assert(ptr - buffer == size);
     return (ptr - buffer);
 }
@@ -70,34 +78,6 @@ SdtServices::~SdtServices()
     for_each(sdtServices.begin(), sdtServices.end(), ScalarDeleter());
 }
 
-size_t SdtServices::GetCodesSize() const
-{    
-    /* there is no reserved_future_use and xxx_xxx__length fields, so we
-       have to impliment GetCodesSize() and MakeCodes() myself.
-     */
-    size_t size = 0;
-    for (const auto iter: sdtServices)
-    {
-        size = size + iter->GetCodesSize();
-    }
-        
-    return size; 
-}
-
-size_t SdtServices::MakeCodes(uchar_t *buffer, size_t bufferSize) const
-{
-    uchar_t *ptr = buffer;  
-    size_t size = GetCodesSize();
-    assert(size <= bufferSize);
-
-    for (const auto iter: sdtServices)
-    {
-        ptr = ptr + iter->MakeCodes(ptr, bufferSize - (ptr - buffer));
-    }
-    assert(ptr - buffer == size);
-    return (ptr - buffer);
-}
-
 void SdtServices::AddSdtService(SdtService* service)
 {
     sdtServices.push_back(service);
@@ -110,11 +90,64 @@ void SdtServices::AddServiceDescriptor(ServiceId serviceId, Descriptor *descript
     (*iter)->AddDescriptor(descriptor);
 }
 
+size_t SdtServices::GetCodesSize(size_t maxSize, size_t &offset) const
+{    
+    size_t size = 0;
+    size_t curOffset = 0;
+    for (const auto iter: sdtServices)
+    {
+        if (curOffset < offset)
+        {
+            curOffset = curOffset + iter->GetCodesSize();
+            continue;
+        }
+        assert(curOffset == offset);        
+
+        if (size + iter->GetCodesSize() > maxSize)
+        {
+            //at lest 1 SdtService is counted.
+            assert(size != 0);
+            break;
+        }
+
+        size = size + iter->GetCodesSize();
+    }
+
+    offset = offset + size;
+    return size; 
+}
+
+size_t SdtServices::MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
+{
+    uchar_t *ptr = buffer;  
+
+    size_t curOffset = 0;
+    for (const auto iter: sdtServices)
+    {
+        if (curOffset < offset)
+        {
+            curOffset = curOffset + iter->GetCodesSize();
+            continue;
+        }
+        assert(curOffset == offset);
+        
+        if (ptr + iter->GetCodesSize() > buffer + bufferSize)
+        {
+            //at lest 1 SdtService is counted.
+            assert(ptr != buffer);
+            break;
+        }
+
+        ptr = ptr + iter->MakeCodes(ptr, buffer + bufferSize - ptr);
+    }
+
+    return (ptr - buffer);
+}
+
 /**********************class SdtTable**********************/
 /* public function */
 SdtTable::SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId)
-    : tableId(tableId), transportStreamId(transportStreamId), versionNumber(versionNumber), 
-      sectionNumber(0), lastSectionNumber(0), originalNetworkId(originalNetworkId) 
+    : tableId(tableId), transportStreamId(transportStreamId), versionNumber(versionNumber)
 {
 }
 
@@ -143,7 +176,8 @@ void SdtTable::AddServiceDescriptor(ServiceId serviceId, std::string &data)
     sdtServices.AddServiceDescriptor(serviceId, descriptor);
 }
 
-size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
+size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
+                              uint_t secIndex) const
 {
     if (this->tableId != tableId)
         return 0;
@@ -153,12 +187,48 @@ size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) con
     if (iter == tsIds.cend())
         return 0;
 
-    return sdtServices.GetCodesSize() + sizeof(service_description_section);
+    //check secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
+
+    size_t serviceOffset = 0;
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
+    }
+
+    size_t size = sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
+    return size + sizeof(service_description_section);
 }
 
 uint16_t SdtTable::GetKey() const
 {
     return transportStreamId;
+}
+
+uint_t SdtTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+{
+    if (this->tableId != tableId)
+        return 0;
+    
+    std::list<TsId>::const_iterator iter;
+    iter = find(tsIds.cbegin(), tsIds.cend(), transportStreamId);
+    if (iter == tsIds.cend())
+        return 0;
+
+    uint_t secNumber = 1;
+    size_t serviceOffset = 0;
+    sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
+
+    size_t tsSize;
+    for (tsSize = sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
+         tsSize != 0;
+         tsSize = sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset))
+    {
+        ++secNumber;
+    }
+
+    return secNumber;
 }
 
 TableId SdtTable::GetTableId() const
@@ -167,31 +237,44 @@ TableId SdtTable::GetTableId() const
 }
 
 size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
-                           uchar_t *buffer, size_t bufferSize) const
-{    
+                           uchar_t *buffer, size_t bufferSize,
+                           uint_t secIndex) const
+{
     uchar_t *ptr = buffer;
-    uint16_t ui16Value; 
-    size_t  size = GetCodesSize(tableId, tsIds);
+    size_t  size = GetCodesSize(tableId, tsIds, secIndex);
+    assert(size <= bufferSize);
     if (size == 0)
         return 0;
 
-    assert(size <= bufferSize && size <= (MaxSdtSectionLength - 3));
+    //check if secIndex is valid.
+    assert(secIndex < GetSecNumber(tableId, tsIds));
+
+    size_t serviceOffset = 0;
+    uint_t secNumber = GetSecNumber(tableId, tsIds);
+    for (uint_t i = 0; i < secIndex; ++i)
+    {
+        sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
+    }
+
     ptr = ptr + Write8(ptr, tableId);
-    ui16Value = (SdtSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12) | (size - 3);
-    ptr = ptr + Write16(ptr, ui16Value);         //section_length
+    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    ptr = ptr + Write16(ptr, 0); 
     ptr = ptr + Write16(ptr, transportStreamId); //transport_stream_id
 
     uchar_t currentNextIndicator = 1;
-    ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator); //version_number
-    ptr = ptr + Write8(ptr, sectionNumber);      //section_number
-    ptr = ptr + Write8(ptr, lastSectionNumber);  //last_section_number
+    //version_number
+    ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator); 
+    ptr = ptr + Write8(ptr, secIndex);           //section_number
+    ptr = ptr + Write8(ptr, secNumber - 1);      //last_section_number
     ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
     ptr = ptr + Write8(ptr, Reserved8Bit);
 
-    ptr = ptr + sdtServices.MakeCodes(ptr, bufferSize - sizeof(service_description_section));
+    ptr = ptr + sdtServices.MakeCodes(ptr, MaxSdtServiceContentSize, serviceOffset);
 
+    siHelper.Write((SdtSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+
     assert(ptr - buffer == size);
     return (ptr - buffer);
 }
