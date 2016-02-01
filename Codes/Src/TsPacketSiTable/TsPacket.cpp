@@ -13,12 +13,12 @@
 #include "TsPacket.h"
 using namespace std;
 
-TsPacketInterface * CreateTsPacketInterface(NetId netId, Pid pid)
+TsPacketInterface * TsPacketInterface::CreateInstance(NetId netId, Pid pid)
 {
     return new TsPacket(netId, pid);
 }
 
-TsPacketsInterface * CreateTsPacketsInterface()
+TsPacketsInterface * TsPacketsInterface::CreateInstance()
 {
     return new TsPackets;
 }
@@ -92,14 +92,12 @@ Pid TsPacket::GetPid() const
 uint_t TsPacket::GetSegmentNumber(size_t codesSize) const
 {
     assert(codesSize != 0);
-    size_t segmentPayloadSize = TsPacketSize - sizeof(transport_packet);
-    return (codesSize + segmentPayloadSize - 1) / segmentPayloadSize;
+    return (codesSize + MaxTsPacketPayloadSize - 1) / MaxTsPacketPayloadSize;
 }
 
 size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
                            uchar_t *buffer, size_t bufferSize)
 {
-    size_t segmentPayloadSize = TsPacketSize - sizeof(transport_packet);
     uchar_t *ptr = buffer;
 
     map<uint_t, uchar_t>::iterator ccIter = continuityCounters.find(ccId);
@@ -125,7 +123,7 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
             //+1 for pointer_field
             uint_t segmentNumber = GetSegmentNumber(tablePlainSize + 1); 
             //pointer_field and 0xff tail included
-            size_t tableExtSize = segmentPayloadSize * segmentNumber;  
+            size_t tableExtSize = MaxTsPacketPayloadSize * segmentNumber;  
 
             shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
             Write8(tableCodes.get(), 0x0); //pointer_field
@@ -163,8 +161,8 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
                    Transport Stream packet with the same PID.
                  */
                 ptr = ptr + Write8(ptr, (adaptationFieldControl << 4) | (ccIter->second++ & 0xF)); 
-                ptr = ptr + Write(ptr, segmentPayloadSize, 
-                                  tableCodes.get() + segmentPayloadSize * i, segmentPayloadSize);
+                ptr = ptr + Write(ptr, MaxTsPacketPayloadSize, 
+                                  tableCodes.get() + MaxTsPacketPayloadSize * i, MaxTsPacketPayloadSize);
             } //for (uint_t i = 0; i < segmentNumber; ++i)
         } //for (uint_t i = 0; i < secNumber; ++i)
     } //for (auto iter: siTables)

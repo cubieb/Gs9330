@@ -177,7 +177,7 @@ void Controller::Start(ACE_Reactor *reactor)
     this->reactor (reactor);
 
     /* this->tsPackets */
-    tsPackets = CreateTsPacketsInterface();    
+    tsPackets = TsPacketsInterface::CreateInstance();    
 
     /* Timer Repository(timer runtimer information) */
     timerRepository = new TimerRepository();
@@ -257,7 +257,7 @@ void Controller::AddSiTable(const char *path)
     TsPacketsInterface::iterator iter = tsPackets->Find(netId, pid);
     if (iter == tsPackets->End())
     {
-        tsPacket = CreateTsPacketInterface(netId, pid);
+        tsPacket = TsPacketInterface::CreateInstance(netId, pid);
         tsPackets->Add(tsPacket);
     }
     else

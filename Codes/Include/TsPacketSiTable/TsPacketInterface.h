@@ -25,8 +25,9 @@ public:
     virtual Pid    GetPid() const = 0;
     virtual size_t MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
                              uchar_t *buffer, size_t bufferSize) = 0;
+
+    static TsPacketInterface * CreateInstance(NetId netId, Pid pid);
 };
-TsPacketInterface * CreateTsPacketInterface(NetId netId, Pid pid);
 
 class CompareTsPacketNetIdAndPid: public std::unary_function<TsPacketInterface, bool>
 {
@@ -121,7 +122,8 @@ public:
     {
         return ((reference)*ptr.myIter);
     }
+
+    static TsPacketsInterface * CreateInstance();
 };
-TsPacketsInterface * CreateTsPacketsInterface();
 
 #endif

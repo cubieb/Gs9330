@@ -14,4 +14,6 @@
  3.2) VcProject, VcUnitTestProject
  3.3) Documents
 
-v2.2:  采用最新的构架设计, 并且修改了所有已知的bug.
+ver.2.2:  采用最新的构架设计, 并且修改了所有已知的bug.
+ver.2.5:  支持将单个table分为多个section的功能, 拆分时 nit 和 bat 将多个ts放入不同的section中. sdt 将多个service详细信息放入不同的section中. 
+          eit将多个event信息放入不同的section中.

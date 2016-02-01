@@ -17,6 +17,7 @@ struct transport_packet
     uchar_t  continuity_counter:4;              // 4 bslbf   -
 };
 #pragma pack(pop)
+#define MaxTsPacketPayloadSize (TsPacketSize - sizeof(transport_packet))
 
 /**********************class TsPacket**********************/
 class TsPacket: public TsPacketInterface
