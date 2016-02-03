@@ -73,8 +73,8 @@ Controller::Controller()
     
     /* networks configuration */
     string receiverCfgPath = string(dirCfg->GetCfgDir()) + string("\\receiver.xml");
-    networkCfgs = CreateNetworkCfgsInterface();
-    NetworkCfgWrapperInterface<NetworkCfgsInterface> networkCfgWrapper;
+    networkCfgs = NetworkCfgsInterface::CreateInstance();
+    NetworkCfgWrapperInterface<NetworkCfgsInterface, NetworkCfgInterface, ReceiverInterface> networkCfgWrapper;
     networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
 
     /* timer configuration */
@@ -265,7 +265,7 @@ void Controller::AddSiTable(const char *path)
         tsPacket = *iter;
     }
     TableId tableId;
-    list<uint16_t> keys;    
+    list<SiTableKey> keys;    
     SiTableXmlWrapperRepository<TsPacketInterface> &siTableWrapperRepository =
         SiTableXmlWrapperRepository<TsPacketInterface>::GetInstance();
     SiTableXmlWrapperInterface<TsPacketInterface> &siTableWrapper = 
@@ -311,7 +311,7 @@ void Controller::DelSiTable(const char *path)
             continue;
         }
 
-        list<uint16_t>::iterator keyIter;
+        list<SiTableKey>::iterator keyIter;
         for (keyIter = (*summaryIter)->keys.begin(); keyIter != (*summaryIter)->keys.end(); ++keyIter)
         {
             tsPacket->DelSiTable((*summaryIter)->tableId, *keyIter);
@@ -397,8 +397,9 @@ void Controller::ReadDir(const char *dir)
 
 void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPacket, TableId tableId)
 {
-#define MaxBufferSize 1024 * 1024 * 64
-    static uchar_t buffer[MaxBufferSize];
+    static size_t bufferSize = 1024 * 1024 * 16;
+    static uchar_t *buffer = new uchar_t[bufferSize];
+    
     int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     NetworkCfgInterface::iterator receiverIter;
@@ -415,7 +416,13 @@ void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPack
         }
 
         size_t size = tsPacket->GetCodesSize(tableId, tsIds);    
-        assert(size <= MaxBufferSize);
+        if (size > bufferSize)
+        {
+            bufferSize = bufferSize * 2;
+            delete[] buffer;
+            buffer = new uchar_t[bufferSize];
+            assert(bufferSize <= 1024*1024*512);
+        }
         tsPacket->MakeCodes(receiver->GetReceiverId(), tableId, tsIds, buffer, size);
 
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;

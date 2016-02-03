@@ -11,6 +11,7 @@ typedef uint16_t ServiceId;
 typedef uchar_t  TableId;
 typedef uint16_t TsId;  //Transport Stream Id
 typedef uchar_t  Version;
+typedef uint32_t SiTableKey;
 
 #define TsPacketSize 188
 
@@ -31,10 +32,10 @@ typedef uchar_t  Version;
 #define Reserved8Bit               0xFF
 #define Reserved12Bit              0xFFF
 
-#define NitPid                     0x0010
 #define BatPid                     0x0011
-#define SdtPid                     0x0011
 #define EitPid                     0x0012
+#define NitPid                     0x0010
+#define SdtPid                     0x0011
 
 #define BatTableId                 0x4A
 #define EitActualPfTableId         0x4E

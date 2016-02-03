@@ -105,8 +105,9 @@ Descriptor * ServiceListDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x41);
-
     assert(descriptorLenght % 3 == 0);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
+
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
     ptr = ptr + WriteBuffer(ptr, tag);
@@ -149,6 +150,7 @@ Descriptor * StuffingDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t *ptr = buffer;
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, descriptorLenght);
+    assert(descriptorLenght * 2 == strData.size() - 4);
 
     ptr = ptr + ConvertStrToIntStr(data, descriptorLenght * 2, ptr);
 
@@ -177,6 +179,7 @@ Descriptor * SatelliteDeliverySystemDescriptorCreator::CreateInstance(std::strin
     uchar_t *ptr = buffer;
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, descriptorLenght);
+    assert(descriptorLenght * 2 == strData.size() - 4);
 
     uint32_t frequency;
     uint16_t orbitalPosition;
@@ -218,6 +221,7 @@ Descriptor * CableDeliverySystemDescriptorCreator::CreateInstance(std::string &s
     uchar_t *ptr = buffer;
     ptr = ptr + WriteBuffer(ptr, tag);
     ptr = ptr + WriteBuffer(ptr, descriptorLenght);
+    assert(descriptorLenght * 2 == strData.size() - 4);
 
     uint32_t frequency;
     uint16_t reserved; //reserved_future_use + FEC_outer
@@ -330,6 +334,7 @@ Descriptor * LinkageDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x4A);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -499,8 +504,8 @@ Descriptor * ExtendedEventDescriptorCreator::CreateInstance(std::string &strData
     uchar_t *data = (uchar_t *)strData.c_str();
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
-    assert(tag == 0x4E);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
+    assert(tag == 0x4E);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -573,6 +578,7 @@ Descriptor * TimeShiftedEventDescriptorCreator::CreateInstance(std::string &strD
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x4F);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -651,6 +657,7 @@ Descriptor * CaIdentifierDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x53);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -685,6 +692,7 @@ Descriptor * ContentDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x54);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -760,6 +768,7 @@ Descriptor * TerrestrialDeliverySystemDescriptorCreator::CreateInstance(std::str
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x5A);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -904,6 +913,7 @@ Descriptor * PrivateDataSpecifierDescriptorCreator::CreateInstance(std::string &
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x5F);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -935,6 +945,7 @@ Descriptor * FrequencyListDescriptorCreator::CreateInstance(std::string &strData
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x62);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -1023,6 +1034,7 @@ Descriptor * ExtensionDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     data = data + ConvertHexStrToInt(data, descriptorTagExtension);
     assert(tag == 0x7F);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -1117,6 +1129,7 @@ Descriptor * UserdefinedDscriptor83Creator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     assert(tag == 0x83);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;

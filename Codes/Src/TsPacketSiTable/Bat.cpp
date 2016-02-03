@@ -9,13 +9,15 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "LengthWriteHelper.h"
 #include "Bat.h"
 using namespace std;
 
 BatTableInterface * BatTableInterface::CreateInstance(TableId tableId, BouquetId bouquetId,  
 													  Version versionNumber)
 {
+    if (tableId != BatTableId)
+        return nullptr;
+
     return new BatTable(tableId, bouquetId, versionNumber);
 }
 
@@ -40,6 +42,9 @@ void BatTable::AddDescriptor(std::string &data)
     }
 
     descriptors.AddDescriptor(descriptor);
+    //in order to packet all descriptor into single one section, we
+    //demand descriptor size less than MaxBatDesAndTsContentSize.
+    assert(descriptors.GetCodesSize() <= MaxBatDesAndTsContentSize);
 }
 
 void BatTable::AddTs(TsId tsId, OnId onId)
@@ -87,7 +92,7 @@ size_t BatTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     return (sizeof(bouquet_association_section) + desSize + size); 
 }
 
-uint16_t BatTable::GetKey() const
+SiTableKey BatTable::GetKey() const
 {
     return bouquetId;
 }
@@ -148,7 +153,7 @@ size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
 
     ptr = ptr + Write8(ptr, tableId);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
-    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    WriteHelper<uint16_t> siHelper(ptr, ptr + 2);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
     ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + Write16(ptr, bouquetId);  //bouquet_id
@@ -169,22 +174,22 @@ size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     }
     else
     {
-        LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+        WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
         //fill "reserved_future_use + bouquet_descriptors_length" to 0 temporarily.
         ptr = ptr + Write16(ptr, 0);  
         ptr = ptr + descriptors.MakeCodes(ptr, MaxBatDesAndTsContentSize);
         //rewrite reserved_future_use + network_descriptors_length.
-        desHelper.Write(Reserved4Bit, ptr); 
+        desHelper.Write(Reserved4Bit << 12, ptr); 
     }
 
-    LengthWriteHelpter<4, uint16_t> tsHelper(ptr);
+    WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
     //rewrite reserved_future_use + transport_stream_loop_length.
-    tsHelper.Write(Reserved4Bit, ptr); 
+    tsHelper.Write(Reserved4Bit << 12, ptr); 
 
-    siHelper.Write((BatSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
+    siHelper.Write((BatSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 

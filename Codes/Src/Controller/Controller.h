@@ -14,7 +14,7 @@ struct FileSummary
 {
     std::string        fileName;
     TableId            tableId;
-    std::list<uint16_t> keys;
+    std::list<SiTableKey> keys;
 };
 
 class CompareSummaryFileName: public std::unary_function<FileSummary, bool>

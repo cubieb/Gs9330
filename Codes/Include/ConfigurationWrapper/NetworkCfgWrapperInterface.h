@@ -17,7 +17,7 @@
 
     cout << *networks;
 */
-template<typename Networks>
+template<typename Networks, typename Network, typename Receiver>
 class NetworkCfgWrapperInterface
 {
 public:
@@ -44,7 +44,7 @@ public:
             node = nodes->nodeTab[i];
             NetId netId = GetXmlAttrValue<NetId>(node, (const xmlChar*)"id");
 
-            NetworkCfgInterface *network = CreateNetworkCfgInterface(netId);
+            Network *network = Network::CreateInstance(netId);
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
                 SharedXmlChar ip = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"ip");
@@ -53,7 +53,7 @@ public:
                 socketAddr.sin_family = AF_INET;
                 socketAddr.sin_addr.s_addr = inet_addr((char *)ip.get());
                 socketAddr.sin_port = htons(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"port"));
-                ReceiverInterface *receiver = CreateReceiverInterface(recieverId++, socketAddr);
+                Receiver *receiver = Receiver::CreateInstance(recieverId++, socketAddr);
 
                 xmlNodePtr tsIdNode;
                 for (tsIdNode = xmlFirstElementChild(node); 

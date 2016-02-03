@@ -15,6 +15,9 @@ using namespace std;
 
 TsPacketInterface * TsPacketInterface::CreateInstance(NetId netId, Pid pid)
 {
+    if (pid != NitPid && pid != BatPid && pid != SdtPid && pid != EitPid)
+        return nullptr;
+
     return new TsPacket(netId, pid);
 }
 
@@ -36,10 +39,31 @@ TsPacket::~TsPacket()
 
 void TsPacket::AddSiTable(SiTableInterface *siTable)
 {
+    TableId tableId = siTable->GetTableId();
+    switch (pid)
+    {
+    case BatPid:
+        assert(tableId == BatTableId 
+               || tableId == SdtActualTableId
+               || tableId == SdtOtherTableId);
+        break;
+
+    case EitPid:
+        assert(tableId == EitActualPfTableId 
+               || tableId == EitOtherPfTableId
+               || tableId == EitActualSchTableId
+               || tableId == EitOtherSchTableId);
+        break;
+        
+    case NitPid:
+        assert(tableId == NitActualTableId 
+               || tableId == NitOtherTableId);
+        break;
+    };
     siTables.push_back(siTable);
 }
 
-void TsPacket::DelSiTable(TableId tableId, uint16_t key)
+void TsPacket::DelSiTable(TableId tableId, SiTableKey key)
 {
     list<SiTableInterface *>::iterator iter;
     iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
@@ -50,7 +74,7 @@ void TsPacket::DelSiTable(TableId tableId, uint16_t key)
     }
 }
 
-SiTableInterface * TsPacket::FindSiTable(TableId tableId, uint16_t key)
+SiTableInterface * TsPacket::FindSiTable(TableId tableId, SiTableKey key)
 {
     list<SiTableInterface *>::iterator iter;
     iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
@@ -99,6 +123,7 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
                            uchar_t *buffer, size_t bufferSize)
 {
     uchar_t *ptr = buffer;
+    assert(GetCodesSize(BatTableId, tsIds) <= bufferSize);
 
     map<uint_t, uchar_t>::iterator ccIter = continuityCounters.find(ccId);
     if (ccIter == continuityCounters.end())

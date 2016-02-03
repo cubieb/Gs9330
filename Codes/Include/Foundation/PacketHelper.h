@@ -50,4 +50,26 @@ size_t Write32(uchar_t* buf, uint32_t);
 size_t Write64(uchar_t* buf, uint64_t);
 size_t Write(void *dest, size_t destSize, const void *src, size_t count);
 
+/**********************class WriteHelper**********************/
+template <typename T>
+class WriteHelper
+{
+public:
+    WriteHelper(uchar_t *destination, uchar_t *start)
+        : destination(destination), start(start)
+    {}
+
+    size_t Write(T orBits, uchar_t *end)
+    {
+        size_t size = end - start;
+        WriteBuffer(destination, (T)(orBits | size));
+
+        return size;
+    }
+
+private:
+    uchar_t *destination;
+    uchar_t *start;
+};
+
 #endif

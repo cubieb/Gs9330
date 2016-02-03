@@ -132,7 +132,7 @@ private:
 class SdtTable: public SdtTableInterface
 {
 public:
-    SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);
+    friend class SdtTableInterface;
     ~SdtTable();    
 
     void AddService(ServiceId serviceId, uchar_t eitScheduleFlag, 
@@ -141,12 +141,15 @@ public:
 
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
                         uint_t secIndex) const;
-    uint16_t GetKey() const;
+    SiTableKey GetKey() const;
     uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
                      uchar_t *buffer, size_t bufferSize,
                      uint_t secIndex) const;
+
+private:
+    SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);
 
 private:
     TableId  tableId;    

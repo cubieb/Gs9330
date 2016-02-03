@@ -10,12 +10,15 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "LengthWriteHelper.h"
 #include "Sdt.h"
 using namespace std;
 
-SdtTableInterface * SdtTableInterface::CreateInstance(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId)
+SdtTableInterface * SdtTableInterface::CreateInstance(TableId tableId, TsId transportStreamId, 
+                                                      Version versionNumber, NetId originalNetworkId)
 {
+    if (tableId != SdtActualTableId && tableId != SdtOtherTableId)
+        return nullptr;
+
     return new SdtTable(tableId, transportStreamId, versionNumber, originalNetworkId);
 }
 
@@ -57,11 +60,11 @@ size_t SdtService::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write16(ptr, serviceId);
     ptr = ptr + Write8(ptr, (Reserved6Bit << 2) | (eitScheduleFlag << 1) | eitPresentFollowingFlag);
 
-    LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+    WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
     //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + descriptors.MakeCodes(ptr, bufferSize - (ptr - buffer));
-    desHelper.Write((runningStatus << 1) | freeCaMode, ptr); 
+    desHelper.Write((runningStatus << 13) | (freeCaMode << 12), ptr); 
 
     assert(ptr - buffer == size);
     return (ptr - buffer);
@@ -201,7 +204,7 @@ size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     return size + sizeof(service_description_section);
 }
 
-uint16_t SdtTable::GetKey() const
+SiTableKey SdtTable::GetKey() const
 {
     return transportStreamId;
 }
@@ -257,7 +260,7 @@ size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     }
 
     ptr = ptr + Write8(ptr, tableId);
-    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    WriteHelper<uint16_t> siHelper(ptr, ptr + 2);
     ptr = ptr + Write16(ptr, 0); 
     ptr = ptr + Write16(ptr, transportStreamId); //transport_stream_id
 
@@ -271,7 +274,7 @@ size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
 
     ptr = ptr + sdtServices.MakeCodes(ptr, MaxSdtServiceContentSize, serviceOffset);
 
-    siHelper.Write((SdtSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
+    siHelper.Write((SdtSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 

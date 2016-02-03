@@ -11,7 +11,6 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "LengthWriteHelper.h"
 #include "Eit.h"
 using namespace std;
 
@@ -112,11 +111,11 @@ size_t EitEvent::MakeCodes(uchar_t *buffer, size_t bufferSize) const
         | ((seconds.count() / 10) << 4) | (seconds.count() % 10);
     ptr = ptr + Write64(ptr, (((startDate << 24) | (startTime)) << 24) | (duration & 0xFFFFFF));
 
-    LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+    WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
     //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0); 
     ptr = ptr + descriptors.MakeCodes(ptr, bufferSize - (ptr - buffer));
-    desHelper.Write((runningStatus << 1) | freeCaMode, ptr); 
+    desHelper.Write((runningStatus << 13) | (freeCaMode << 12), ptr); 
     
     assert(ptr - buffer == size);
     return (ptr - buffer);
@@ -292,9 +291,10 @@ size_t EitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     return size + sizeof(event_information_section);
 }
 
-uint16_t EitTable::GetKey() const
+SiTableKey EitTable::GetKey() const
 {
-    return serviceId;
+    SiTableKey key = (transportStreamId << 16) | serviceId;
+    return key;
 }
 
 uint_t EitTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
@@ -351,7 +351,7 @@ size_t EitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     }
 
     ptr = ptr + Write8(ptr, tableId);
-    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    WriteHelper<uint16_t> siHelper(ptr, ptr + 2);
     ptr = ptr + Write16(ptr, 0); 
     ptr = ptr + Write16(ptr, serviceId);    //service_id
 
@@ -366,7 +366,7 @@ size_t EitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     
     ptr = ptr + eitEvents.MakeCodes(tableId, ptr, MaxEitEventContentSize, eventOffset);
 
-    siHelper.Write((EitSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
+    siHelper.Write((EitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 

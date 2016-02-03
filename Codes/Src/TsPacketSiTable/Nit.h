@@ -61,7 +61,7 @@ struct network_information_section
 class NitTable: public NitTableInterface
 {
 public:
-    NitTable(TableId tableId, NetId networkId, Version versionNumber);
+    friend class NitTableInterface;
     ~NitTable();    
 
     void AddDescriptor(std::string &data);
@@ -70,12 +70,15 @@ public:
 
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
                         uint_t secIndex) const;
-    uint16_t GetKey() const;
+    SiTableKey GetKey() const;
     uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
                      uchar_t *buffer, size_t bufferSize,
                      uint_t secIndex) const;
+
+private:
+    NitTable(TableId tableId, NetId networkId, Version versionNumber);
 
 private:
     TableId tableId;

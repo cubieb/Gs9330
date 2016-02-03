@@ -18,7 +18,7 @@ public:
     virtual ~SiTableXmlWrapperInterface() {};
 
     //tableId and keys are used to record operation history */
-    virtual void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys) = 0;
+    virtual void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys) = 0;
 };
 
 /**********************class NitXmlWrapper**********************/
@@ -29,7 +29,7 @@ public:
     BatXmlWrapper() {};
     virtual ~BatXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
 
@@ -59,7 +59,7 @@ public:
             BouquetId bouquetId = GetXmlAttrValue<BouquetId>(node, (const xmlChar*)"BouquetID");
             Version versionNumber = GetXmlAttrValue<Version>(node, (const xmlChar*)"Version");
             SiTable *siTable = SiTable::CreateInstance(tableId, bouquetId, versionNumber);
-            keys.push_back(bouquetId);
+            keys.push_back((SiTableKey)bouquetId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
@@ -125,7 +125,7 @@ public:
     EitXmlWrapper() {};
     virtual ~EitXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
         shared_ptr<xmlDoc> doc;
@@ -162,7 +162,8 @@ public:
             ServiceId serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
 
             SiTable *siTable = SiTable::CreateInstance(tableId, serviceId, versionNumber, tsId, onId);
-            keys.push_back(serviceId);
+            SiTableKey key = (tsId << 16) | serviceId;
+            keys.push_back(key);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
@@ -205,7 +206,7 @@ public:
     NitXmlWrapper() {};
     virtual ~NitXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
 
@@ -235,7 +236,7 @@ public:
             NetId networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
             Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
             SiTable *siTable = SiTable::CreateInstance(tableId, networkId, versionNumber);
-            keys.push_back(networkId);
+            keys.push_back((SiTableKey)networkId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
@@ -302,7 +303,7 @@ public:
     SdtXmlWrapper() {};
     virtual ~SdtXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<uint16_t> &keys)
+    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
 
@@ -333,7 +334,7 @@ public:
             NetId onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
             Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
             SiTable *siTable = SiTable::CreateInstance(tableId, tsId, versionNumber, onId);
-            keys.push_back(tsId);
+            keys.push_back((SiTableKey)tsId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {

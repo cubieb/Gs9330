@@ -9,7 +9,6 @@
 
 /* TsPacketSiTable */
 #include "Descriptor.h"
-#include "LengthWriteHelper.h"
 #include "TransportStream.h"
 #include "Include/TsPacketSiTable/SiTableInterface.h"
 #include "Bat.h"
@@ -58,12 +57,12 @@ size_t TransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
     ptr = ptr + Write16(ptr, transportStreamId);
     ptr = ptr + Write16(ptr, originalNetworkId);
 
-    LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+    WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_descriptors_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0); 
     ptr = ptr + descriptors.MakeCodes(ptr, bufferSize);    
     //rewrite reserved_future_use + transport_descriptors_length.
-    desHelper.Write(Reserved4Bit, ptr); 
+    desHelper.Write(Reserved4Bit << 12, ptr); 
 
     assert(ptr - buffer == GetCodesSize());
     return (ptr - buffer);

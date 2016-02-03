@@ -148,7 +148,7 @@ private:
 class EitTable: public EitTableInterface
 {
 public:
-    EitTable(TableId tableId, ServiceId serviceId, Version versionNumber, TsId transportStreamId, NetId originalNetworkId);
+    friend class EitTableInterface;
     ~EitTable(); 
 
     void AddEvent(EventId eventId, const char *startTime, 
@@ -157,7 +157,7 @@ public:
     
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
                         uint_t secIndex) const;
-    uint16_t GetKey() const;
+    SiTableKey GetKey() const;
     uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
     TableId GetTableId() const;
     size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
@@ -165,6 +165,8 @@ public:
                      uint_t secIndex) const;
 
 private:
+    EitTable(TableId tableId, ServiceId serviceId, Version versionNumber, 
+             TsId transportStreamId, NetId originalNetworkId);
     bool CheckTableId(TableId tableId) const;
 
 private:    

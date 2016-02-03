@@ -8,17 +8,17 @@
 #include "NetworksCfg.h"
 using namespace std;
 
-ReceiverInterface * CreateReceiverInterface(uint_t receiverId, const struct sockaddr_in &socketAddr)
+ReceiverInterface * ReceiverInterface::CreateInstance(uint_t receiverId, const struct sockaddr_in &socketAddr)
 {
     return new Receiver(receiverId, socketAddr);
 }
 
-NetworkCfgInterface * CreateNetworkCfgInterface(NetId netId)
+NetworkCfgInterface * NetworkCfgInterface::CreateInstance(NetId netId)
 {
     return new NetworkCfg(netId);
 }
 
-NetworkCfgsInterface * CreateNetworkCfgsInterface()
+NetworkCfgsInterface * NetworkCfgsInterface::CreateInstance()
 {
     return new NetworkCfgs;
 }

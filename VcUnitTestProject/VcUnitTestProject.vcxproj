@@ -97,8 +97,11 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Sdt.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportStream.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TsPacket.cpp" />
-    <ClCompile Include="..\UnitTestCodes\ExitProcessTest.cpp" />
+    <ClCompile Include="..\UnitTestCodes\DescriptorHelper.cpp" />
+    <ClCompile Include="..\UnitTestCodes\Example.cpp" />
     <ClCompile Include="..\UnitTestCodes\Main.cpp" />
+    <ClCompile Include="..\UnitTestCodes\MpegTransportStream.cpp" />
+    <ClCompile Include="..\UnitTestCodes\SiTable.cpp" />
     <ClCompile Include="..\UnitTestCodes\UnitTestLibLinking.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -135,7 +138,10 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h" />
-    <ClInclude Include="..\UnitTestCodes\ExitProcessTest.h" />
+    <ClInclude Include="..\UnitTestCodes\DescriptorHelper.h" />
+    <ClInclude Include="..\UnitTestCodes\Example.h" />
+    <ClInclude Include="..\UnitTestCodes\MpegTransportStream.h" />
+    <ClInclude Include="..\UnitTestCodes\SiTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

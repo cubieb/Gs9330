@@ -146,9 +146,6 @@
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\LengthWriteHelper.h">
-      <Filter>源文件\TsPacketSiTable</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Foundation\Delete.cpp">

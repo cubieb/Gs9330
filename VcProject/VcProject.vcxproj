@@ -40,7 +40,6 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Bat.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Descriptor.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Eit.h" />
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\LengthWriteHelper.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Nit.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h" />

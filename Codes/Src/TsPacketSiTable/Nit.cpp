@@ -9,12 +9,14 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "LengthWriteHelper.h"
 #include "Nit.h"
 using namespace std;
 
 NitTableInterface * NitTableInterface::CreateInstance(TableId tableId, NetId networkId, Version versionNumber)
 {
+    if (tableId != NitActualTableId && tableId != NitOtherTableId)
+        return nullptr;
+
     return new NitTable(tableId, networkId, versionNumber);
 }
 
@@ -87,7 +89,7 @@ size_t NitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     return (sizeof(network_information_section) + desSize + size); 
 }
 
-uint16_t NitTable::GetKey() const
+SiTableKey NitTable::GetKey() const
 {
     return networkId;
 }
@@ -147,7 +149,7 @@ size_t NitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     }
 
     ptr = ptr + Write8(ptr, tableId);
-    LengthWriteHelpter<4, uint16_t> siHelper(ptr);
+    WriteHelper<uint16_t> siHelper(ptr, ptr+2);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
     ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + Write16(ptr, networkId);  //network_id
@@ -168,22 +170,22 @@ size_t NitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     }
     else
     {
-        LengthWriteHelpter<4, uint16_t> desHelper(ptr);
+        WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
         //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
         ptr = ptr + Write16(ptr, 0);  
         ptr = ptr + descriptors.MakeCodes(ptr, MaxNitDesAndTsContentSize);
         //rewrite reserved_future_use + network_descriptors_length.
-        desHelper.Write(Reserved4Bit, ptr); 
+        desHelper.Write(Reserved4Bit << 12, ptr); 
     }
 
-    LengthWriteHelpter<4, uint16_t> tsHelper(ptr);
+    WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
     ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
     //rewrite reserved_future_use + transport_stream_loop_length.
-    tsHelper.Write(Reserved4Bit, ptr); 
+    tsHelper.Write(Reserved4Bit << 12, ptr); 
 
-    siHelper.Write((NitSectionSyntaxIndicator << 3) | (Reserved1Bit << 2) | (Reserved2Bit), ptr + 4); 
+    siHelper.Write((NitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     Crc32 crc32;
     ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
 

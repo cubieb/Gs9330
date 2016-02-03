@@ -10,8 +10,8 @@ public:
     
     virtual size_t GetCodesSize(TableId tableId, const std::list<TsId> &tsIds, 
                                 uint_t secIndex) const = 0;
-    //nit: network_id, sdt: transport_stream_id, bat: bouquet_id, eit: service_id
-    virtual uint16_t GetKey() const = 0;  
+    //nit: network_id, sdt: transport_stream_id, bat: bouquet_id, eit: transport_stream_id+service_id
+    virtual SiTableKey GetKey() const = 0;  
     virtual uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const = 0;
     //table type: nit 0x41, 0x41; sdt 0x42, 0x46;  bat 0x4a; eit 0x4e, 0x4f, 0x50, 0x60
     virtual TableId GetTableId() const = 0;  
@@ -23,7 +23,7 @@ public:
 class CompareSiTableIdAndKey: public std::unary_function<SiTableInterface, bool>
 {
 public:
-    CompareSiTableIdAndKey(TableId tableId, uint16_t key)
+    CompareSiTableIdAndKey(TableId tableId, SiTableKey key)
         : tableId(tableId), key(key)
     {}
 
@@ -39,7 +39,7 @@ public:
 
 private:
     TableId  tableId;
-    uint16_t key;
+    SiTableKey key;
 };
 
 /**********************class BatTableInterface**********************/
@@ -96,7 +96,8 @@ public:
                     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode) = 0;
     virtual void AddServiceDescriptor(ServiceId serviceId, std::string &data) = 0;
     
-    static SdtTableInterface * CreateInstance(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);
+    static SdtTableInterface * CreateInstance(TableId tableId, TsId transportStreamId, 
+                                              Version versionNumber, NetId originalNetworkId);
 };
 
 #endif

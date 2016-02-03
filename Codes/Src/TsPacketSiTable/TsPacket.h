@@ -27,9 +27,9 @@ public:
     virtual ~TsPacket();
 
     void AddSiTable(SiTableInterface *siTable);
-    void DelSiTable(TableId tableId, uint16_t key);
+    void DelSiTable(TableId tableId, SiTableKey key);
 
-    SiTableInterface * FindSiTable(TableId tableId, uint16_t key);
+    SiTableInterface * FindSiTable(TableId tableId, SiTableKey key);
     size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;

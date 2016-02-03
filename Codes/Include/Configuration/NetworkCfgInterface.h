@@ -98,8 +98,9 @@ public:
     
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
+
+    static ReceiverInterface * CreateInstance(uint_t receiverId, const struct sockaddr_in &socketAddr);
 };
-ReceiverInterface * CreateReceiverInterface(uint_t receiverId, const struct sockaddr_in &socketAddr);
 
 inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& value) 
 { 
@@ -209,8 +210,9 @@ public:
 
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
+
+    static NetworkCfgInterface * CreateInstance(NetId netId);
 };
-NetworkCfgInterface * CreateNetworkCfgInterface(NetId netId);
 
 inline std::ostream& operator << (std::ostream& os, const NetworkCfgInterface& value) 
 { 
@@ -331,8 +333,9 @@ public:
 
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
+
+    static NetworkCfgsInterface * CreateInstance();
 };
-NetworkCfgsInterface * CreateNetworkCfgsInterface();
 
 inline std::ostream& operator << (std::ostream& os, const NetworkCfgsInterface& value) 
 { 
