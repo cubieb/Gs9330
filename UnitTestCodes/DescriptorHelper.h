@@ -1,5 +1,5 @@
-#ifndef _DescriptorHelper_h_
-#define _DescriptorHelper_h_
+#ifndef _UtDescriptorHelper_h_
+#define _UtDescriptorHelper_h_
 
 CxxBeginNameSpace(UnitTest)
 

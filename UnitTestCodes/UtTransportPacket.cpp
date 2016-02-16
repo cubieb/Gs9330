@@ -8,37 +8,37 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "Include/TsPacketSiTable/TsPacketInterface.h"
+#include "Include/TsPacketSiTable/TransportPacketInterface.h"
 
 #include "DescriptorHelper.h"
-#include "SiTable.h"
-#include "MpegTransportStream.h"
+#include "UtSiTable.h"
+#include "UtTransportPacket.h"
 using namespace std;
 
 CxxBeginNameSpace(UnitTest)
-CPPUNIT_TEST_SUITE_REGISTRATION(MpegTransportStream);
 
-/**********************class MpegTransportStream**********************/
-void MpegTransportStream::TestTsPacketConstruct()
+/**********************class TransportPacket**********************/
+CPPUNIT_TEST_SUITE_REGISTRATION(TransportPacket);
+void TransportPacket::TestTransportPacketConstruct()
 {
     NetId netId = 1;
-    TsPacketInterface *tsPacket;
+    TransportPacketInterface *tsPacket;
 
-    tsPacket = TsPacketInterface::CreateInstance(netId, InvalidPid);
+    tsPacket = TransportPacketInterface::CreateInstance(netId, InvalidPid);
     CPPUNIT_ASSERT(tsPacket == nullptr);
 
-    tsPacket = TsPacketInterface::CreateInstance(netId, BatPid);
+    tsPacket = TransportPacketInterface::CreateInstance(netId, BatPid);
     CPPUNIT_ASSERT(tsPacket != nullptr);
     delete tsPacket;
 }
 
-void MpegTransportStream::TestTsPacketAddSiTable()
+void TransportPacket::TestTransportPacketAddSiTable()
 {
     NetId netId = 1;
     BouquetId bouquetId = 1;
     Version   version = 1;
 
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
 
     SiTableInterface *siTable;
     siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
@@ -46,14 +46,14 @@ void MpegTransportStream::TestTsPacketAddSiTable()
     CPPUNIT_ASSERT(tsPacket->FindSiTable(BatTableId, bouquetId) != nullptr);
 }
 
-void MpegTransportStream::TestTsPacketDelSiTable()
+void TransportPacket::TestTransportPacketDelSiTable()
 {
     NetId netId = 1;
     BouquetId bouquetId1 = 1;
     BouquetId bouquetId2 = 2;
     Version   version = 1;
 
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
 
     SiTableInterface *siTable;
     siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId1, version);
@@ -70,13 +70,13 @@ void MpegTransportStream::TestTsPacketDelSiTable()
     CPPUNIT_ASSERT(tsPacket->FindSiTable(BatTableId, bouquetId2) == nullptr);
 }
 
-void MpegTransportStream::TestTsPacketFindSiTable()
+void TransportPacket::TestTransportPacketFindSiTable()
 {
-    TestTsPacketAddSiTable();
-    TestTsPacketDelSiTable();
+    TestTransportPacketAddSiTable();
+    TestTransportPacketDelSiTable();
 }
 
-void MpegTransportStream::TestTsPacketGetCodesSize()
+void TransportPacket::TestTransportPacketGetCodesSize()
 {
     NetId netId = 1;
     BouquetId bouquetId = 1;
@@ -84,10 +84,10 @@ void MpegTransportStream::TestTsPacketGetCodesSize()
     TsId      tsId = 1;
     OnId      onId = 0;
 
-    std::list<TsId> tsIds;
+    TsIds tsIds;
     tsIds.push_back(tsId);
 
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == 0);
 
     BatTableInterface *siTable;
@@ -104,28 +104,28 @@ void MpegTransportStream::TestTsPacketGetCodesSize()
     CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == TsPacketSize * 2);
 }
 
-void MpegTransportStream::TestTsPacketGetNetId()
+void TransportPacket::TestTransportPacketGetNetId()
 {
     NetId     netId = 1;
     BouquetId bouquetId = 2;
     Version   version = 3;
     
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     CPPUNIT_ASSERT(tsPacket->GetNetId() == netId);
 }
 
-void MpegTransportStream::TestTsPacketGetPid()
+void TransportPacket::TestTransportPacketGetPid()
 {
     NetId     netId = 1;
     BouquetId bouquetId = 2;
     Version   version = 3;
     
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     CPPUNIT_ASSERT(tsPacket->GetPid() == BatPid);
 }
 
 /* SiTable with only one section */
-void MpegTransportStream::TestTsPacketMakeCodes1()
+void TransportPacket::TestTransportPacketMakeCodes1()
 {
     NetId     netId = 1;
     BouquetId bouquetId = 2;
@@ -133,10 +133,10 @@ void MpegTransportStream::TestTsPacketMakeCodes1()
     TsId      tsId = 1;
     OnId      onId = 0;
 
-    std::list<TsId> tsIds;
+    TsIds tsIds;
     tsIds.push_back(tsId);
     
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     static uchar_t buffer[2048];
 
     CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, 2048) == 0);
@@ -165,13 +165,13 @@ void MpegTransportStream::TestTsPacketMakeCodes1()
 }
 
 /* SiTable with two or more sections, and performance test!!! */
-void MpegTransportStream::TestTsPacketMakeCodes2()
+void TransportPacket::TestTransportPacketMakeCodes2()
 {
     NetId     netId = 1;
     BouquetId bouquetId = 2;
     Version   version = 3;
     
-    auto_ptr<TsPacketInterface> tsPacket(TsPacketInterface::CreateInstance(netId, BatPid));
+    auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     #define MaxBufferSize (1024 * 16)
     static uchar_t buffer[MaxBufferSize];
 
@@ -180,7 +180,7 @@ void MpegTransportStream::TestTsPacketMakeCodes2()
     siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
     tsPacket->AddSiTable(siTable);
 
-    uint_t tsNumber = 1300;
+    uint_t tsNumber = 200;  //1300
     uint_t sectionUnitTsNumber = MaxBatDesAndTsContentSize / sizeof(transport_stream);
     uint_t headSectionNumber = tsNumber / sectionUnitTsNumber;
     uint_t tailSectionNumber = (tsNumber % sectionUnitTsNumber) == 0 ? 0 : 1;
@@ -194,7 +194,7 @@ void MpegTransportStream::TestTsPacketMakeCodes2()
     size_t tsPacketNumber = headSectionUnitPacketNumber * headSectionNumber + tailSectionUnitPacketNumber;
     
     OnId      onId = 0;
-    std::list<TsId> tsIds;
+    TsIds tsIds;
 
     uint_t i;
     for (i = 0; i < tsNumber; ++i)
@@ -224,6 +224,38 @@ void MpegTransportStream::TestTsPacketMakeCodes2()
         code[3] = 0x10 | (0x0F & i);
         CPPUNIT_ASSERT(memcmp(buffer + 188 * i, code, cmpSize) == 0);
     }
+}
+
+/**********************class TransportPackets**********************/
+CPPUNIT_TEST_SUITE_REGISTRATION(TransportPackets);
+void TransportPackets::TestTransportPacketsBegin()
+{
+    auto_ptr<TransportPacketsInterface> tsPackets(TransportPacketsInterface::CreateInstance());
+    CPPUNIT_ASSERT(tsPackets->Begin() == tsPackets->End());
+
+    NetId     netId = 1;
+    BouquetId bouquetId = 2;
+    Version   version = 3;
+    
+    TransportPacketInterface *tsPacket = TransportPacketInterface::CreateInstance(netId, BatPid);
+    tsPackets->Add(tsPacket);
+    CPPUNIT_ASSERT(tsPackets->Begin() != tsPackets->End());
+    uint_t count = 0;
+    TransportPacketsInterface::iterator iter;
+    for (iter = tsPackets->Begin(); iter != tsPackets->End(); ++iter)
+    {
+        count++;
+    }
+    CPPUNIT_ASSERT(count == 1);
+
+    iter = tsPackets->Find(netId, BatPid);
+    CPPUNIT_ASSERT(iter != tsPackets->End());
+
+    iter = tsPackets->Find(netId + 1, BatPid);
+    CPPUNIT_ASSERT(iter == tsPackets->End());
+
+    iter = tsPackets->Find(netId, InvalidPid);
+    CPPUNIT_ASSERT(iter == tsPackets->End());
 }
 
 CxxEndNameSpace

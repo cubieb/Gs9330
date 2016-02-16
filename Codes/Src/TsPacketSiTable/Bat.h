@@ -60,14 +60,14 @@ public:
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
-                        uint_t secIndex) const;
+    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
                      uchar_t *buffer, size_t bufferSize,
-                     uint_t secIndex) const;
+                     SectionNumber secIndex) const;
 
 private:
     BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber);

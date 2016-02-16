@@ -4,6 +4,7 @@
 #include "Include/Foundation/Time.h"
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
+#include "CatchHelper.h"
 
 #pragma pack(push, 1)
 struct event_information_section
@@ -50,7 +51,12 @@ struct event_information_section_detail
     //}
 };
 #pragma pack(pop)
+//MaxEitEventContentSize = 4078
 #define MaxEitEventContentSize (MaxEitSectionLength - sizeof(event_information_section))
+//sizeof(event_information_section_detail) = 12
+#define MaxEitEventDescriptorSize (MaxEitEventContentSize - sizeof(event_information_section_detail))
+
+#define UseCatchOptimization
 
 /**********************class EitEvent**********************/
 class EitEvent
@@ -67,8 +73,8 @@ public:
     EventId GetEventId() const;
     const std::string &GetStartTime() const;
 
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const;   
-    
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize) const; 
+
 private:
     EventId  eventId;  
     std::string  startTime;
@@ -138,7 +144,7 @@ public:
     size_t MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
     
     /* remove out-of-date event */
-    void RemoveOutOfDateEvent();
+    bool RemoveOutOfDateEvent();
 
 private:
     std::list<EitEvent *> eitEvents;
@@ -155,14 +161,16 @@ public:
                   time_t duration, uint16_t runningStatus, uint16_t freeCaMode);
     void AddEventDescriptor(EventId eventId, std::string &data);
     
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
-                        uint_t secIndex) const;
+    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
                      uchar_t *buffer, size_t bufferSize,
-                     uint_t secIndex) const;
+                     SectionNumber secIndex) const;
+      
+    void RefreshCatch();
 
 private:
     EitTable(TableId tableId, ServiceId serviceId, Version versionNumber, 
@@ -175,7 +183,13 @@ private:
     Version versionNumber;
     TsId    transportStreamId;
     NetId   originalNetworkId;
-    mutable EitEvents eitEvents;
+    EitEvents eitEvents;
+
+private:
+    mutable CatchIdHelper catchIdHelper;
+    mutable std::map<CatchId, size_t> codeSizeCatches;
+    mutable std::map<CatchId, uchar_t*> codeCatches;
+    mutable std::map<CatchId, uint_t> secNumberCatches;
 };
 
 #endif

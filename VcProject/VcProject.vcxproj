@@ -31,19 +31,20 @@
     <ClInclude Include="..\Codes\Include\Foundation\XmlHelper.h" />
     <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h" />
     <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h" />
-    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h" />
+    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TransportPacketInterface.h" />
     <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h" />
     <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h" />
     <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h" />
     <ClInclude Include="..\Codes\Src\Controller\Controller.h" />
     <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Bat.h" />
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\CatchHelper.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Descriptor.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Eit.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Nit.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h" />
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h" />
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportPacket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Configuration\DirCfg.cpp" />
@@ -60,12 +61,13 @@
     <ClCompile Include="..\Codes\Src\Foundation\Time.cpp" />
     <ClCompile Include="..\Codes\Src\Main.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Bat.cpp" />
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\CatchHelper.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Descriptor.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Eit.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Nit.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Sdt.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportStream.cpp" />
-    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TsPacket.cpp" />
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportPacket.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7370CBCE-A25C-4EAE-A2AC-7D4B2039FF85}</ProjectGuid>

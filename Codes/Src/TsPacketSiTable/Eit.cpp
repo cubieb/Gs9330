@@ -226,10 +226,39 @@ size_t EitEvents::MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
    
-void EitEvents::RemoveOutOfDateEvent()
+bool EitEvents::RemoveOutOfDateEvent()
 {
     time_t curTime = time(nullptr); 
-    eitEvents.remove_if(CompareEitEventTime(curTime));
+    list<EitEvent *>::iterator iter, start, end;
+
+    start = eitEvents.begin();
+    if (start == eitEvents.end())
+    {
+        return true;
+    }
+    time_t eventTime = ConvertStrToTime((*start)->GetStartTime().c_str()) + (*start)->GetDuration();
+    if (eventTime > curTime)
+    {
+        return true;
+    }
+
+    for (end = eitEvents.begin(); end != eitEvents.end(); ++end)
+    {
+        eventTime = ConvertStrToTime((*end)->GetStartTime().c_str()) + (*end)->GetDuration();
+        if (eventTime > curTime)
+        {
+            ++end;
+            break;
+        }
+    }
+
+    for (iter = start; iter != end; ++iter)
+    {
+        delete *iter;
+    }
+
+    eitEvents.erase(start, end);
+    return false;
 }
 
 /**********************class EitTable**********************/
@@ -264,31 +293,50 @@ void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
     eitEvents.AddEventDescriptor(eventId, descriptor);
 }
 
-size_t EitTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
-                              uint_t secIndex) const
+size_t EitTable::GetCodesSize(TableId tableId, const TsIds &tsIds,
+                              SectionNumber secIndex) const
 {
     if (!CheckTableId(tableId))
     {
         return 0;
     }
     
-    std::list<TsId>::const_iterator iter;
+#ifdef UseCatchOptimization
+    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsIds, secIndex);
+    map<CatchId, size_t>::iterator catchIter = codeSizeCatches.find(catchId);
+    if (catchIter != codeSizeCatches.end())
+    {
+        return catchIter->second;
+    }
+#endif
+    
+    TsIds::const_iterator iter;
     iter = find(tsIds.cbegin(), tsIds.cend(), transportStreamId);
     if (iter == tsIds.cend())
+    {
+#ifdef UseCatchOptimization
+        codeSizeCatches.insert(make_pair(catchId, 0));
+#endif
         return 0;
+    }
 
     //check secIndex is valid.
-    assert(secIndex < GetSecNumber(tableId, tsIds));
+    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
 
     size_t eventOffset = 0;
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
     }
 
-    size_t size = eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
-    return size + sizeof(event_information_section);
+    size_t size = eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset)
+                  + sizeof(event_information_section); 
+
+#ifdef UseCatchOptimization
+    codeSizeCatches.insert(make_pair(catchId, size));
+#endif
+
+    return size;
 }
 
 SiTableKey EitTable::GetKey() const
@@ -297,18 +345,31 @@ SiTableKey EitTable::GetKey() const
     return key;
 }
 
-uint_t EitTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+uint_t EitTable::GetSecNumber(TableId tableId, const TsIds &tsIds) const
 {
-    eitEvents.RemoveOutOfDateEvent();
     if (!CheckTableId(tableId))
     {
         return 0;
     }
 
-    std::list<TsId>::const_iterator iter;
+#ifdef UseCatchOptimization
+    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsIds);
+    map<CatchId, uint_t>::iterator catchIter = secNumberCatches.find(catchId);
+    if (catchIter != secNumberCatches.end())
+    {
+        return catchIter->second;
+    }
+#endif
+
+    TsIds::const_iterator iter;
     iter = find(tsIds.cbegin(), tsIds.cend(), transportStreamId);
     if (iter == tsIds.cend())
+    {
+#ifdef UseCatchOptimization
+        secNumberCatches.insert(make_pair(catchId, 0));
+#endif
         return 0;
+    }
 
     uint_t secNumber = 1;
     size_t eventOffset = 0;
@@ -322,6 +383,10 @@ uint_t EitTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) con
         ++secNumber;
     }
 
+#ifdef UseCatchOptimization
+    secNumberCatches.insert(make_pair(catchId, secNumber));
+#endif
+
     return secNumber;
 }
 
@@ -330,9 +395,9 @@ TableId EitTable::GetTableId() const
     return tableId;
 }
 
-size_t EitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+size_t EitTable::MakeCodes(TableId tableId, const TsIds &tsIds, 
 						   uchar_t *buffer, size_t bufferSize,
-                           uint_t secIndex) const
+                           SectionNumber secIndex) const
 {
     uchar_t *ptr = buffer;
     size_t  size = GetCodesSize(tableId, tsIds, secIndex);
@@ -341,11 +406,21 @@ size_t EitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
         return 0;
 
     //check if secIndex is valid.
-    assert(secIndex < GetSecNumber(tableId, tsIds));
+    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
+
+#ifdef UseCatchOptimization
+    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsIds, secIndex);
+    map<CatchId, uchar_t*>::iterator catchIter = codeCatches.find(catchId);
+    if (catchIter != codeCatches.end())
+    {
+        memcpy(buffer, catchIter->second, size);
+        return size;
+    }
+#endif
 
     size_t eventOffset = 0;
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    SectionNumber secNumber = GetSecNumber(tableId, tsIds);
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
     }
@@ -367,11 +442,33 @@ size_t EitTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     ptr = ptr + eitEvents.MakeCodes(tableId, ptr, MaxEitEventContentSize, eventOffset);
 
     siHelper.Write((EitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
-    Crc32 crc32;
-    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+    ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
+
+    uchar_t *codeCatch = new uchar_t[size];
+    memcpy(codeCatch, buffer, size);
+
+#ifdef UseCatchOptimization
+    codeCatches.insert(make_pair(catchId, codeCatch));
+#endif
 
     assert(ptr - buffer == size);
     return size;
+}
+
+void EitTable::RefreshCatch()
+{
+    if (eitEvents.RemoveOutOfDateEvent())
+    {
+        return;
+    }
+    codeSizeCatches.clear();
+    map<CatchId, uchar_t*>::iterator iter;
+    for (iter = codeCatches.begin(); iter != codeCatches.end(); ++iter)
+    {
+        delete[] iter->second;
+    }
+    codeCatches.clear();
+    secNumberCatches.clear();
 }
 
 /* private function */

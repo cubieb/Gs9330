@@ -7,13 +7,14 @@
 
 /*** OS header. ***/
 #ifdef _WIN32
-    #include <SDKDDKVer.h>
-
     /* Disables fopen(), strcpy(), ... security warning on Microsoft compilers.
      * The _CRT_SECURE_NO_WARNINGS must be defined before including any system 
      * header files which may cause the security warning.
      */
 #   define _CRT_SECURE_NO_WARNINGS 
+
+    #include <SDKDDKVer.h>
+
     /* there are two macro "min, max" definition in minwindef.h,
     they will cause troulbe when we call std::min() or std::max() template.
     #ifndef NOMINMAX

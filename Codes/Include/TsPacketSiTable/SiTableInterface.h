@@ -8,16 +8,17 @@ public:
     SiTableInterface(){};
     virtual ~SiTableInterface(){};
     
-    virtual size_t GetCodesSize(TableId tableId, const std::list<TsId> &tsIds, 
-                                uint_t secIndex) const = 0;
+    virtual size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+                                SectionNumber secIndex) const = 0;
     //nit: network_id, sdt: transport_stream_id, bat: bouquet_id, eit: transport_stream_id+service_id
     virtual SiTableKey GetKey() const = 0;  
-    virtual uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const = 0;
+    virtual uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const = 0;
     //table type: nit 0x41, 0x41; sdt 0x42, 0x46;  bat 0x4a; eit 0x4e, 0x4f, 0x50, 0x60
     virtual TableId GetTableId() const = 0;  
-    virtual size_t MakeCodes(TableId tableId, const std::list<TsId> &tsIds, 
+    virtual size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
 		                     uchar_t *buffer, size_t bufferSize, 
-                             uint_t secIndex) const = 0;
+                             SectionNumber secIndex) const = 0;
+    virtual void RefreshCatch() {};
 };
 
 class CompareSiTableIdAndKey: public std::unary_function<SiTableInterface, bool>

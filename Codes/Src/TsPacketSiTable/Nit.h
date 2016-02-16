@@ -15,7 +15,8 @@ define struct network_information_section just for calculating fixed fields size
 sub_table: collection of sections with the same value of table_id and:
     for a NIT: the same table_id_extension (network_id) and version_number;
     for a BAT: the same table_id_extension (bouquet_id) and version_number;
-    for a SDT: the same table_id_extension (transport_stream_id), the same original_network_id and version_number;
+    for a SDT: the same table_id_extension (transport_stream_id), 
+               the same original_network_id and version_number;
     for a EIT: the same table_id_extension (service_id), the same transport_stream_id, 
                the same original_network_id and version_number.
 */
@@ -68,14 +69,14 @@ public:
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
-                        uint_t secIndex) const;
+    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
                      uchar_t *buffer, size_t bufferSize,
-                     uint_t secIndex) const;
+                     SectionNumber secIndex) const;
 
 private:
     NitTable(TableId tableId, NetId networkId, Version versionNumber);

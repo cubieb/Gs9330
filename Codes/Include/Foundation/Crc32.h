@@ -7,7 +7,7 @@ public:
     Crc32();
     ~Crc32();
 
-    uint32_t CalculateCrc(const uchar_t *buffer, size_t bufferSize);
+    static uint32_t CalculateCrc(const uchar_t *buffer, size_t bufferSize);
 };
 
 #endif /* _Crc32_h_ */

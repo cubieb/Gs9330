@@ -93,14 +93,14 @@ void TransportStreams::AddTsDescriptor(TsId tsId, Descriptor *descriptor)
     (*iter)->AddDescriptor(descriptor);
 }
     
-size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds, 
+size_t TransportStreams::GetCodesSize(const TsIds &tsIds, 
                                       size_t maxSize, size_t &offset) const
 {
     size_t size = 0;
     size_t curOffset = 0;
     for (auto iter: transportStreams)
     {
-        list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
+        TsIds::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
         if (tsIdIter == tsIds.end())
         {
             continue;            
@@ -125,7 +125,7 @@ size_t TransportStreams::GetCodesSize(const list<TsId>& tsIds,
     return size;
 }
 
-size_t TransportStreams::MakeCodes(const std::list<TsId>& tsIds, 
+size_t TransportStreams::MakeCodes(const TsIds &tsIds, 
                                    uchar_t *buffer, size_t bufferSize, 
                                    size_t offset) const
 {
@@ -134,7 +134,7 @@ size_t TransportStreams::MakeCodes(const std::list<TsId>& tsIds,
     size_t curOffset = 0;
     for (auto iter: transportStreams)
     {
-		list<TsId>::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
+		TsIds::const_iterator tsIdIter = find(tsIds.begin(), tsIds.end(), iter->GetTsId());
         if (tsIdIter == tsIds.cend())
         {
             continue;

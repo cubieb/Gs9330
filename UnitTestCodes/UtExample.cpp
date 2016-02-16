@@ -1,7 +1,7 @@
 #include "Include/Foundation/SystemInclude.h"
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "Example.h"
+#include "UtExample.h"
 using namespace std;
 
 CxxBeginNameSpace(UnitTest)

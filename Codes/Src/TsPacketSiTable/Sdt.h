@@ -139,14 +139,14 @@ public:
                     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
     void AddServiceDescriptor(ServiceId serviceId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds, 
-                        uint_t secIndex) const;
+    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const;
+    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
                      uchar_t *buffer, size_t bufferSize,
-                     uint_t secIndex) const;
+                     SectionNumber secIndex) const;
 
 private:
     SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);

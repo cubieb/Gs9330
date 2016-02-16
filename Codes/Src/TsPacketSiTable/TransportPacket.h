@@ -19,31 +19,33 @@ struct transport_packet
 #pragma pack(pop)
 #define MaxTsPacketPayloadSize (TsPacketSize - sizeof(transport_packet))
 
-/**********************class TsPacket**********************/
-class TsPacket: public TsPacketInterface
+/**********************class TransportPacket**********************/
+class TransportPacket: public TransportPacketInterface
 {
 public:
-    TsPacket(NetId netId, Pid pid);
-    virtual ~TsPacket();
+    TransportPacket(NetId netId, Pid pid);
+    virtual ~TransportPacket();
 
     void AddSiTable(SiTableInterface *siTable);
     void DelSiTable(TableId tableId, SiTableKey key);
 
     SiTableInterface * FindSiTable(TableId tableId, SiTableKey key);
-    size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const;
+    size_t GetCodesSize(TableId tableId, const TsIds &tsIds) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;
-    size_t MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
+    size_t MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
                      uchar_t *buffer, size_t bufferSize);
 
+    void RefreshCatch();
+
 private:
-    uint_t GetSegmentNumber(size_t codesSize) const;
+    uint_t GetPacketNumber(size_t codesSize) const;
 
 private:
     std::list<SiTableInterface *> siTables;
 
     uchar_t  adaptationFieldControl;
-    /* the same TsPacket will be sent to multipule socket-addr, so 
+    /* the same TransportPacket will be sent to multipule socket-addr, so 
      * we need save one continuity_counter per socket-addr.
      * map<continuity-counter-id, continuity-counter>
     */
@@ -54,14 +56,14 @@ private:
     uint16_t transportPriority;
 };
 
-/**********************class TsPackets**********************/
-class TsPackets: public TsPacketsInterface
+/**********************class TransportPackets**********************/
+class TransportPackets: public TransportPacketsInterface
 {
 public:
-    TsPackets();
-    virtual ~TsPackets();
+    TransportPackets();
+    virtual ~TransportPackets();
 
-    void Add(TsPacketInterface *tsPacket);
+    void Add(TransportPacketInterface *tsPacket);
     iterator Begin();
     void Delete(NetId netId, Pid pid);
     iterator End();
@@ -69,7 +71,7 @@ public:
     NodePtr GetMyHead();
 
 private:
-    std::list<TsPacketInterface*> tsPackets;
+    std::list<TransportPacketInterface*> tsPackets;
 };
 
 #endif

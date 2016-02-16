@@ -9,35 +9,35 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "Include/TsPacketSiTable/TsPacketInterface.h"
-#include "TsPacket.h"
+#include "Include/TsPacketSiTable/TransportPacketInterface.h"
+#include "TransportPacket.h"
 using namespace std;
 
-TsPacketInterface * TsPacketInterface::CreateInstance(NetId netId, Pid pid)
+TransportPacketInterface * TransportPacketInterface::CreateInstance(NetId netId, Pid pid)
 {
     if (pid != NitPid && pid != BatPid && pid != SdtPid && pid != EitPid)
         return nullptr;
 
-    return new TsPacket(netId, pid);
+    return new TransportPacket(netId, pid);
 }
 
-TsPacketsInterface * TsPacketsInterface::CreateInstance()
+TransportPacketsInterface * TransportPacketsInterface::CreateInstance()
 {
-    return new TsPackets;
+    return new TransportPackets;
 }
 
-/**********************class TsPacket**********************/
-TsPacket::TsPacket(NetId netId, Pid pid)
+/**********************class TransportPacket**********************/
+TransportPacket::TransportPacket(NetId netId, Pid pid)
     : adaptationFieldControl(1), pid(pid), netId(netId),
       transportPriority(0)
 {}
 
-TsPacket::~TsPacket()
+TransportPacket::~TransportPacket()
 {
     for_each(siTables.begin(), siTables.end(), ScalarDeleter());
 }
 
-void TsPacket::AddSiTable(SiTableInterface *siTable)
+void TransportPacket::AddSiTable(SiTableInterface *siTable)
 {
     TableId tableId = siTable->GetTableId();
     switch (pid)
@@ -63,7 +63,7 @@ void TsPacket::AddSiTable(SiTableInterface *siTable)
     siTables.push_back(siTable);
 }
 
-void TsPacket::DelSiTable(TableId tableId, SiTableKey key)
+void TransportPacket::DelSiTable(TableId tableId, SiTableKey key)
 {
     list<SiTableInterface *>::iterator iter;
     iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
@@ -74,16 +74,16 @@ void TsPacket::DelSiTable(TableId tableId, SiTableKey key)
     }
 }
 
-SiTableInterface * TsPacket::FindSiTable(TableId tableId, SiTableKey key)
+SiTableInterface * TransportPacket::FindSiTable(TableId tableId, SiTableKey key)
 {
     list<SiTableInterface *>::iterator iter;
     iter = find_if(siTables.begin(), siTables.end(), CompareSiTableIdAndKey(tableId, key));
     return iter == siTables.end()? nullptr: *iter;
 }
 
-size_t TsPacket::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const
+size_t TransportPacket::GetCodesSize(TableId tableId, const TsIds &tsIds) const
 {
-    uint_t segmentNumber = 0; 
+    uint_t packetNumber = 0; 
 
     for (auto iter: siTables)
     {
@@ -96,30 +96,30 @@ size_t TsPacket::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) con
                 continue;
             }
             //+1 for pointer_field
-            segmentNumber = segmentNumber + GetSegmentNumber(tableSize + 1); 
+            packetNumber = packetNumber + GetPacketNumber(tableSize + 1); 
         }        
     }
 
-    return (TsPacketSize * segmentNumber);
+    return (TsPacketSize * packetNumber);
 }
 
-NetId TsPacket::GetNetId() const
+NetId TransportPacket::GetNetId() const
 {
     return netId;
 }
 
-Pid TsPacket::GetPid() const
+Pid TransportPacket::GetPid() const
 {
     return pid;
 }
 
-uint_t TsPacket::GetSegmentNumber(size_t codesSize) const
+uint_t TransportPacket::GetPacketNumber(size_t codesSize) const
 {
     assert(codesSize != 0);
     return (codesSize + MaxTsPacketPayloadSize - 1) / MaxTsPacketPayloadSize;
 }
 
-size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
+size_t TransportPacket::MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
                            uchar_t *buffer, size_t bufferSize)
 {
     uchar_t *ptr = buffer;
@@ -146,16 +146,16 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
             }
 
             //+1 for pointer_field
-            uint_t segmentNumber = GetSegmentNumber(tablePlainSize + 1); 
+            uint_t packetNumber = GetPacketNumber(tablePlainSize + 1); 
             //pointer_field and 0xff tail included
-            size_t tableExtSize = MaxTsPacketPayloadSize * segmentNumber;  
+            size_t tableExtSize = MaxTsPacketPayloadSize * packetNumber;  
 
             shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
             Write8(tableCodes.get(), 0x0); //pointer_field
             iter->MakeCodes(tableId, tsIds, tableCodes.get() + 1, tablePlainSize, i);
             memset(tableCodes.get() + 1 + tablePlainSize, 0xff, tableExtSize - 1 - tablePlainSize);
 
-            for (uint_t i = 0; i < segmentNumber; ++i)
+            for (uint_t i = 0; i < packetNumber; ++i)
             {
                 ptr = ptr + Write8(ptr, 0x47);
                 /* transport_error_indicator(1 bit), payload_unit_start_indicator(1 bit), 
@@ -188,38 +188,47 @@ size_t TsPacket::MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& 
                 ptr = ptr + Write8(ptr, (adaptationFieldControl << 4) | (ccIter->second++ & 0xF)); 
                 ptr = ptr + Write(ptr, MaxTsPacketPayloadSize, 
                                   tableCodes.get() + MaxTsPacketPayloadSize * i, MaxTsPacketPayloadSize);
-            } //for (uint_t i = 0; i < segmentNumber; ++i)
+            } //for (uint_t i = 0; i < packetNumber; ++i)
         } //for (uint_t i = 0; i < secNumber; ++i)
     } //for (auto iter: siTables)
         
     return ptr - buffer;
 }
 
-/**********************class TsPackets**********************/
-TsPackets::TsPackets()
+void TransportPacket::RefreshCatch()
+{
+    list<SiTableInterface *>::iterator iter;
+    for (iter = siTables.begin(); iter != siTables.end(); ++iter)
+    {
+        (*iter)->RefreshCatch();
+    }
+}
+
+/**********************class TransportPackets**********************/
+TransportPackets::TransportPackets()
 {
     AllocProxy();
 }
 
-TsPackets::~TsPackets()
+TransportPackets::~TransportPackets()
 {
     FreeProxy();
     for_each(tsPackets.begin(), tsPackets.end(), ScalarDeleter());
 }
 
-void TsPackets::Add(TsPacketInterface *tsPacket)
+void TransportPackets::Add(TransportPacketInterface *tsPacket)
 {
     tsPackets.push_back(tsPacket);
 }
 
-TsPackets::iterator TsPackets::Begin()
+TransportPackets::iterator TransportPackets::Begin()
 {
     return iterator(this, NodePtr(tsPackets.begin()));
 }
 
-void TsPackets::Delete(NetId netId, Pid pid)
+void TransportPackets::Delete(NetId netId, Pid pid)
 {
-    list<TsPacketInterface *>::iterator iter;
+    list<TransportPacketInterface *>::iterator iter;
     iter = find_if(tsPackets.begin(), tsPackets.end(), CompareTsPacketNetIdAndPid(netId, pid));
     if (iter != tsPackets.end())
     {
@@ -228,19 +237,19 @@ void TsPackets::Delete(NetId netId, Pid pid)
     }
 }
 
-TsPackets::iterator TsPackets::End()
+TransportPackets::iterator TransportPackets::End()
 {
     return iterator(this, NodePtr(tsPackets.end()));
 }
 
-TsPackets::iterator TsPackets::Find(NetId netId, Pid pid)
+TransportPackets::iterator TransportPackets::Find(NetId netId, Pid pid)
 {
-    list<TsPacketInterface *>::iterator iter;
+    list<TransportPacketInterface *>::iterator iter;
     iter = find_if(tsPackets.begin(), tsPackets.end(), CompareTsPacketNetIdAndPid(netId, pid));
     return iterator(this, iter);
 }
 
-TsPackets::NodePtr TsPackets::GetMyHead()
+TransportPackets::NodePtr TransportPackets::GetMyHead()
 {
     return NodePtr(tsPackets.end());
 }

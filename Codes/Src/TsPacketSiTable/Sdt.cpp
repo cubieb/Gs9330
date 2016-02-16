@@ -179,13 +179,13 @@ void SdtTable::AddServiceDescriptor(ServiceId serviceId, std::string &data)
     sdtServices.AddServiceDescriptor(serviceId, descriptor);
 }
 
-size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
-                              uint_t secIndex) const
+size_t SdtTable::GetCodesSize(TableId tableId, const TsIds &tsIds,
+                              SectionNumber secIndex) const
 {
     if (this->tableId != tableId)
         return 0;
 
-    std::list<TsId>::const_iterator iter;
+    TsIds::const_iterator iter;
     iter = find(tsIds.cbegin(), tsIds.cend(), transportStreamId);
     if (iter == tsIds.cend())
         return 0;
@@ -194,8 +194,7 @@ size_t SdtTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     assert(secIndex < GetSecNumber(tableId, tsIds));
 
     size_t serviceOffset = 0;
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
     }
@@ -209,12 +208,12 @@ SiTableKey SdtTable::GetKey() const
     return transportStreamId;
 }
 
-uint_t SdtTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+uint_t SdtTable::GetSecNumber(TableId tableId, const TsIds &tsIds) const
 {
     if (this->tableId != tableId)
         return 0;
     
-    std::list<TsId>::const_iterator iter;
+    TsIds::const_iterator iter;
     iter = find(tsIds.cbegin(), tsIds.cend(), transportStreamId);
     if (iter == tsIds.cend())
         return 0;
@@ -239,9 +238,9 @@ TableId SdtTable::GetTableId() const
     return tableId;
 }
 
-size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+size_t SdtTable::MakeCodes(TableId tableId, const TsIds &tsIds, 
                            uchar_t *buffer, size_t bufferSize,
-                           uint_t secIndex) const
+                           SectionNumber secIndex) const
 {
     uchar_t *ptr = buffer;
     size_t  size = GetCodesSize(tableId, tsIds, secIndex);
@@ -250,11 +249,11 @@ size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
         return 0;
 
     //check if secIndex is valid.
-    assert(secIndex < GetSecNumber(tableId, tsIds));
+    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
 
     size_t serviceOffset = 0;
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsIds);
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         sdtServices.GetCodesSize(MaxSdtServiceContentSize, serviceOffset);
     }
@@ -275,8 +274,7 @@ size_t SdtTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     ptr = ptr + sdtServices.MakeCodes(ptr, MaxSdtServiceContentSize, serviceOffset);
 
     siHelper.Write((SdtSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
-    Crc32 crc32;
-    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+    ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 
     assert(ptr - buffer == size);
     return (ptr - buffer);

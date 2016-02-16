@@ -65,8 +65,8 @@ void BatTable::AddTsDescriptor(TsId tsId, std::string &data)
     transportStreams.AddTsDescriptor(tsId, descriptor);
 }
 
-size_t BatTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
-                              uint_t secIndex) const
+size_t BatTable::GetCodesSize(TableId tableId, const TsIds &tsIds,
+                              SectionNumber secIndex) const
 {
     if (this->tableId != tableId)
         return 0;
@@ -80,8 +80,7 @@ size_t BatTable::GetCodesSize(TableId tableId, const std::list<TsId>& tsIds,
     size_t maxSize = MaxBatDesAndTsContentSize - desSize;
     size_t tsOffset = 0;
 
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
         desSize = 0;
@@ -97,7 +96,7 @@ SiTableKey BatTable::GetKey() const
     return bouquetId;
 }
 
-uint_t BatTable::GetSecNumber(TableId tableId, const std::list<TsId>& tsIds) const
+uint_t BatTable::GetSecNumber(TableId tableId, const TsIds &tsIds) const
 {
     if (this->tableId != tableId)
         return 0;
@@ -124,9 +123,9 @@ TableId BatTable::GetTableId() const
     return tableId;
 }
 
-size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds, 
+size_t BatTable::MakeCodes(TableId tableId, const TsIds &tsIds, 
 						   uchar_t *buffer, size_t bufferSize,
-                           uint_t secIndex) const
+                           SectionNumber secIndex) const
 {
     uchar_t *ptr = buffer;
     size_t size = GetCodesSize(tableId, tsIds, secIndex);
@@ -137,14 +136,14 @@ size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     //we assume all descriptor to be packed in first section.
     assert(descriptors.GetCodesSize() <= MaxBatDesAndTsContentSize);
     //check secIndex is valid.
-    assert(secIndex < GetSecNumber(tableId, tsIds));
+    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
 
     size_t desSize = descriptors.GetCodesSize();
     size_t maxSize = MaxBatDesAndTsContentSize - desSize;
     size_t tsOffset = 0;
 
-    uint_t secNumber = GetSecNumber(tableId, tsIds);
-    for (uint_t i = 0; i < secIndex; ++i)
+    SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsIds);
+    for (SectionNumber i = 0; i < secIndex; ++i)
     {
         transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
         desSize = 0;
@@ -190,8 +189,7 @@ size_t BatTable::MakeCodes(TableId tableId, const std::list<TsId>& tsIds,
     tsHelper.Write(Reserved4Bit << 12, ptr); 
 
     siHelper.Write((BatSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
-    Crc32 crc32;
-    ptr = ptr + Write32(ptr, crc32.CalculateCrc(buffer, ptr - buffer));
+    ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 
     assert(ptr - buffer == size);
     return (ptr - buffer);

@@ -81,7 +81,7 @@ private:
     void DelSiTable(const char *path);
     void ReadDir(const char *dir);
 
-    void SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPacket, TableId tableId);
+    void SendUdp(NetworkCfgInterface *network, TransportPacketInterface *tsPacket, TableId tableId);
     void ScheduleTimer(NetId netId, TableId tableId);
 
 private:
@@ -95,7 +95,7 @@ private:
     TimerCfgInterface *timerCfg;
 
     /* runtime information */
-    TsPacketsInterface *tsPackets;    //modified by AddSiTable(), tsPackets->Add(tsPacket)
+    TransportPacketsInterface *tsPackets;    //modified by AddSiTable(), tsPackets->Add(tsPacket)
     TimerRepository *timerRepository; //modified by AddSiTable(), timerRepository->Add(timerId, timerArg);
     std::list<FileSummary *>  fileSummaries; //modified by AddSiTable(), fileSummaries.push_back(fileSummary);
     ACE_HANDLE dirHandle;      //monitored dir handle, modified by AddMonitoredDir()

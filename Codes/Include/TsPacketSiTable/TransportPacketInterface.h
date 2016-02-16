@@ -1,5 +1,5 @@
-#ifndef _TsPacketInterface_h_
-#define _TsPacketInterface_h_
+#ifndef _TransportPacketInterface_h_
+#define _TransportPacketInterface_h_
 
 #include "Include/Foundation/SystemInclude.h"
 
@@ -9,27 +9,29 @@
 
 class SiTableInterface;
 
-/**********************class TsPacketInterface**********************/
-class TsPacketInterface
+/**********************class TransportPacketInterface**********************/
+//iso13818-1, 2.4.3.2 Transport Stream packet layer
+class TransportPacketInterface
 {
 public:
-    TsPacketInterface() {};
-    virtual ~TsPacketInterface() {};
+    TransportPacketInterface() {};
+    virtual ~TransportPacketInterface() {};
 
     virtual void AddSiTable(SiTableInterface *siTable) = 0;
     virtual void DelSiTable(TableId tableId, SiTableKey key) = 0;
 
     virtual SiTableInterface * FindSiTable(TableId tableId, SiTableKey key) = 0;
-    virtual size_t GetCodesSize(TableId tableId, const std::list<TsId>& tsIds) const = 0;
+    virtual size_t GetCodesSize(TableId tableId, const TsIds &tsIds) const = 0;
     virtual NetId  GetNetId() const = 0;
     virtual Pid    GetPid() const = 0;
-    virtual size_t MakeCodes(uint_t ccId, TableId tableId, const std::list<TsId>& tsIds, 
+    virtual size_t MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
                              uchar_t *buffer, size_t bufferSize) = 0;
+    virtual void RefreshCatch() = 0;
 
-    static TsPacketInterface * CreateInstance(NetId netId, Pid pid);
+    static TransportPacketInterface * CreateInstance(NetId netId, Pid pid);
 };
 
-class CompareTsPacketNetIdAndPid: public std::unary_function<TsPacketInterface, bool>
+class CompareTsPacketNetIdAndPid: public std::unary_function<TransportPacketInterface, bool>
 {
 public:
     CompareTsPacketNetIdAndPid(NetId netId, Pid pid)
@@ -51,11 +53,11 @@ private:
     Pid   pid;
 };
 
-/**********************class TsPacketsInterface**********************/
-class TsPacketsInterface: public ContainerBase
+/**********************class TransportPacketsInterface**********************/
+class TransportPacketsInterface: public ContainerBase
 {
 public:
-    typedef std::list<TsPacketInterface*> Repository;
+    typedef std::list<TransportPacketInterface*> Repository;
     class NodePtr
     {
     public:
@@ -81,13 +83,13 @@ public:
     typedef Repository::reference reference;
     typedef Repository::const_reference const_reference;
     
-    typedef Iterator<TsPacketsInterface>::MyIter      iterator;
-    typedef ConstIterator<TsPacketsInterface>::MyIter const_iterator;
+    typedef Iterator<TransportPacketsInterface>::MyIter      iterator;
+    typedef ConstIterator<TransportPacketsInterface>::MyIter const_iterator;
 
-    TsPacketsInterface() {};
-    virtual ~TsPacketsInterface() {};
+    TransportPacketsInterface() {};
+    virtual ~TransportPacketsInterface() {};
 
-    virtual void Add(TsPacketInterface *tsPacket) = 0;
+    virtual void Add(TransportPacketInterface *tsPacket) = 0;
 
     // ContainerBase function. construct proxy from _Alnod
     void AllocProxy()
@@ -123,7 +125,7 @@ public:
         return ((reference)*ptr.myIter);
     }
 
-    static TsPacketsInterface * CreateInstance();
+    static TransportPacketsInterface * CreateInstance();
 };
 
 #endif

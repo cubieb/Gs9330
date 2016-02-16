@@ -65,9 +65,6 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h">
-      <Filter>源文件\TsPacketSiTable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Src\Controller\Controller.h">
       <Filter>源文件\Controller</Filter>
     </ClInclude>
@@ -116,9 +113,6 @@
     <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h">
       <Filter>头文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h">
-      <Filter>头文件\TsPacketSiTable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h">
       <Filter>头文件\SiTableWrapper</Filter>
     </ClInclude>
@@ -145,6 +139,15 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\CatchHelper.h">
+      <Filter>源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TransportPacketInterface.h">
+      <Filter>头文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportPacket.h">
+      <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +187,6 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportStream.cpp">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TsPacket.cpp">
-      <Filter>源文件\TsPacketSiTable</Filter>
-    </ClCompile>
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp">
       <Filter>源文件\Foundation</Filter>
     </ClCompile>
@@ -207,6 +207,12 @@
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Main.cpp">
       <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\CatchHelper.cpp">
+      <Filter>源文件\TsPacketSiTable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportPacket.cpp">
+      <Filter>源文件\TsPacketSiTable</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

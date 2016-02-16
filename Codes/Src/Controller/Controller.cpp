@@ -18,7 +18,7 @@
 
 /* TsPacketSiTable */
 #include "Include/TsPacketSiTable/SiTableInterface.h"
-#include "Include/TsPacketSiTable/TsPacketInterface.h"
+#include "Include/TsPacketSiTable/TransportPacketInterface.h"
 
 /* Controller */
 #include "TimerRepository.h"
@@ -26,17 +26,17 @@
 using namespace std;
 
 /**********************SiTableXmlWrapperRepository**********************/
-static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> batWrapper
-    (string("bat"), new BatXmlWrapper<TsPacketInterface, BatTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> batWrapper
+    (string("bat"), new BatXmlWrapper<TransportPacketInterface, BatTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> eitWrapper
-    (string("eit"), new EitXmlWrapper<TsPacketInterface, EitTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> eitWrapper
+    (string("eit"), new EitXmlWrapper<TransportPacketInterface, EitTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> nitWrapper
-    (string("nit"), new NitXmlWrapper<TsPacketInterface, NitTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> nitWrapper
+    (string("nit"), new NitXmlWrapper<TransportPacketInterface, NitTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TsPacketInterface> sdtWrapper
-    (string("sdt"), new SdtXmlWrapper<TsPacketInterface, SdtTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> sdtWrapper
+    (string("sdt"), new SdtXmlWrapper<TransportPacketInterface, SdtTableInterface>);
 
 ControllerInterface &ControllerInterface::GetInstance()
 {
@@ -154,8 +154,9 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
     TableId tableId = timerArg.tableId;
     Pid pid = tableIdToPid.find(tableId)->second;
 
-    TsPacketsInterface::iterator tsPacketIter = tsPackets->Find(netId, pid);
+    TransportPacketsInterface::iterator tsPacketIter = tsPackets->Find(netId, pid);
     assert(tsPacketIter != tsPackets->End());
+    (*tsPacketIter)->RefreshCatch();
 
     NetworkCfgsInterface::iterator networkIter;
     for (networkIter = networkCfgs->Begin(); networkIter != networkCfgs->End(); ++networkIter)
@@ -177,7 +178,7 @@ void Controller::Start(ACE_Reactor *reactor)
     this->reactor (reactor);
 
     /* this->tsPackets */
-    tsPackets = TsPacketsInterface::CreateInstance();    
+    tsPackets = TransportPacketsInterface::CreateInstance();    
 
     /* Timer Repository(timer runtimer information) */
     timerRepository = new TimerRepository();
@@ -253,11 +254,11 @@ void Controller::AddSiTable(const char *path)
     netRelationWrapper.Select(*networkCfgs, relationXmlPath.c_str());
         
     /* Add SiSable to TsPacket */
-    TsPacketInterface *tsPacket;
-    TsPacketsInterface::iterator iter = tsPackets->Find(netId, pid);
+    TransportPacketInterface *tsPacket;
+    TransportPacketsInterface::iterator iter = tsPackets->Find(netId, pid);
     if (iter == tsPackets->End())
     {
-        tsPacket = TsPacketInterface::CreateInstance(netId, pid);
+        tsPacket = TransportPacketInterface::CreateInstance(netId, pid);
         tsPackets->Add(tsPacket);
     }
     else
@@ -266,9 +267,9 @@ void Controller::AddSiTable(const char *path)
     }
     TableId tableId;
     list<SiTableKey> keys;    
-    SiTableXmlWrapperRepository<TsPacketInterface> &siTableWrapperRepository =
-        SiTableXmlWrapperRepository<TsPacketInterface>::GetInstance();
-    SiTableXmlWrapperInterface<TsPacketInterface> &siTableWrapper = 
+    SiTableXmlWrapperRepository<TransportPacketInterface> &siTableWrapperRepository =
+        SiTableXmlWrapperRepository<TransportPacketInterface>::GetInstance();
+    SiTableXmlWrapperInterface<TransportPacketInterface> &siTableWrapper = 
         siTableWrapperRepository.GetWrapperInstance(type);
     siTableWrapper.Select(*tsPacket, path, tableId, keys);
     
@@ -299,9 +300,9 @@ void Controller::DelSiTable(const char *path)
     cout << "Removing " << path << endl;
     AnalyzeFileName(path, netId, pid, type);   
 
-    TsPacketsInterface::iterator iter = tsPackets->Find(netId, pid);
+    TransportPacketsInterface::iterator iter = tsPackets->Find(netId, pid);
     assert(iter != tsPackets->End());
-    TsPacketInterface *tsPacket = *iter;
+    TransportPacketInterface *tsPacket = *iter;
 
     std::list<FileSummary *>::iterator summaryIter;
     for (summaryIter = fileSummaries.begin(); summaryIter != fileSummaries.end(); ++summaryIter)
@@ -326,22 +327,6 @@ void Controller::ReadDir(const char *dir)
 {    
     list<string> newPathes, oldPathes;
     
-#if 0
-    string path = string(dir) + string("\\*.xml");
-    _finddata_t fileInfo;  
-    long handle = _findfirst(path.c_str(), &fileInfo); 
-    if (handle != -1) 
-    {        
-        do
-        {
-            dbgstrm << fileInfo.name << endl; 
-            if (regex_match(fileInfo.name, regex(".*(nit|bat|sdt|eit).*\\.xml")))
-            {
-                newPathes.push_back(string(dir) + string("\\") + string(fileInfo.name));
-            } 
-        } while (_findnext(handle, &fileInfo) == 0); 
-    }
-#else    
 	ACE_DIR *aceDir = ACE_OS::opendir(dir);
 	assert(aceDir != nullptr);
 	while (ACE_DIRENT *entry = ACE_OS::readdir(aceDir))
@@ -352,8 +337,6 @@ void Controller::ReadDir(const char *dir)
         }
 	}
 	ACE_OS::closedir(aceDir);
-#endif
-
 
     list<FileSummary *>::iterator summeryIter;
     for (summeryIter = fileSummaries.begin(); summeryIter != fileSummaries.end(); ++summeryIter)
@@ -395,7 +378,7 @@ void Controller::ReadDir(const char *dir)
     }
 }
 
-void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPacket, TableId tableId)
+void Controller::SendUdp(NetworkCfgInterface *network, TransportPacketInterface *tsPacket, TableId tableId)
 {
     static size_t bufferSize = 1024 * 1024 * 16;
     static uchar_t *buffer = new uchar_t[bufferSize];
@@ -407,7 +390,7 @@ void Controller::SendUdp(NetworkCfgInterface *network, TsPacketInterface *tsPack
          receiverIter != network->End(); 
          ++receiverIter)
     {
-        std::list<TsId> tsIds;
+        TsIds tsIds;
         ReceiverInterface *receiver = *receiverIter;
         ReceiverInterface::iterator tsIdIter;
         for (tsIdIter = receiver->Begin(); tsIdIter != receiver->End(); ++tsIdIter)

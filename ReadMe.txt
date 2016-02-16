@@ -17,3 +17,6 @@
 ver.2.2:  采用最新的构架设计, 并且修改了所有已知的bug.
 ver.2.5:  支持将单个table分为多个section的功能, 拆分时 nit 和 bat 将多个ts放入不同的section中. sdt 将多个service详细信息放入不同的section中. 
           eit将多个event信息放入不同的section中.
+ver.2.6:  添加了一些有用的unit test的代码.  并根据unit test的结果对代码做了一些修改.
+ver.2.7:  为了做性能优化, 特地创建一个branch,  避免性能优化的代码影响了 ver.2.6 稳定的代码.
+          根据iso13818-1的描述， 修改类名 TsPacketInterface => TransportPacketInterface, TsPacketsInterface => TransportPacketsInterface.

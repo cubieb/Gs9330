@@ -14,41 +14,41 @@
     <Filter Include="Main">
       <UniqueIdentifier>{ba836f7d-47a1-4bfa-815c-94796ffacbdd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CodeUnderTest\源文件">
-      <UniqueIdentifier>{ede36230-f915-4b94-9f27-c1c3ca5d8b94}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodeUnderTest\源文件\Foundation">
-      <UniqueIdentifier>{2255b689-39d2-4a08-88aa-5b2cfecaa021}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodeUnderTest\源文件\TsPacketSiTable">
-      <UniqueIdentifier>{992d2b0b-0493-4443-ac76-2fc4a0fe60c1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodeUnderTest\源文件\Controller">
-      <UniqueIdentifier>{637a3112-e709-4f44-a03a-1bf0c09250a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CodeUnderTest\源文件\Configuration">
-      <UniqueIdentifier>{d0aba6d1-ad31-413b-991b-13af7ae1f5ab}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CodeUnderTest\头文件">
-      <UniqueIdentifier>{5e4771ee-2842-44f2-95c0-6ea4e46c053a}</UniqueIdentifier>
+      <UniqueIdentifier>{e8f66ab3-a121-46f5-abbd-57e081d87f1b}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\Foundation">
-      <UniqueIdentifier>{aed5374d-0ca3-47f8-a75b-dd0b642139c1}</UniqueIdentifier>
+      <UniqueIdentifier>{f4a9ce9e-ff9b-43ef-998d-8453d971a1df}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\TsPacketSiTable">
-      <UniqueIdentifier>{67eebf59-3c2a-4320-a181-3dca429c0259}</UniqueIdentifier>
+      <UniqueIdentifier>{efa1730f-f284-49f8-84bd-eef1aeca1928}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\SiTableWrapper">
-      <UniqueIdentifier>{d636a08e-b141-48ce-a005-e9a04b5f2467}</UniqueIdentifier>
+      <UniqueIdentifier>{dad64035-2ca9-4b90-b3fb-6f30df03c63e}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\Controller">
-      <UniqueIdentifier>{34d21c60-d988-45cb-8f78-b981840d862e}</UniqueIdentifier>
+      <UniqueIdentifier>{5204490c-d414-461a-a6d8-e673c0ecb26e}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\Configuration">
-      <UniqueIdentifier>{2b007614-ed8a-4da9-aa5b-677aa4d23e8c}</UniqueIdentifier>
+      <UniqueIdentifier>{f936c654-f266-4eb2-a869-2ead2794664b}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeUnderTest\头文件\ConfigurationWrapper">
-      <UniqueIdentifier>{b98195aa-24ff-4305-a918-af89e46a4f8e}</UniqueIdentifier>
+      <UniqueIdentifier>{3639cf56-934e-4fd3-b1ac-467cebf2ac02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodeUnderTest\源文件">
+      <UniqueIdentifier>{629006ca-4ad9-470e-adfb-0317f0061b9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodeUnderTest\源文件\Foundation">
+      <UniqueIdentifier>{30f32336-13ab-4761-b920-e915dcf5ef09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodeUnderTest\源文件\TsPacketSiTable">
+      <UniqueIdentifier>{f471d0af-cfed-4544-b03b-f7204d80069d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodeUnderTest\源文件\Controller">
+      <UniqueIdentifier>{7a5814b4-edfb-4e1a-80e1-da65c0c79c96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CodeUnderTest\源文件\Configuration">
+      <UniqueIdentifier>{24973b53-23d9-458b-b59e-fdc3ba565a92}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +57,15 @@
     </ClCompile>
     <ClCompile Include="..\UnitTestCodes\Main.cpp">
       <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UtSiTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\DescriptorHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UtExample.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp">
       <Filter>CodeUnderTest\源文件\Foundation</Filter>
@@ -82,6 +91,9 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Bat.cpp">
       <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClCompile>
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\CatchHelper.cpp">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClCompile>
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Descriptor.cpp">
       <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClCompile>
@@ -97,7 +109,7 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportStream.cpp">
       <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClCompile>
-    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TsPacket.cpp">
+    <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportPacket.cpp">
       <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClCompile>
     <ClCompile Include="..\Codes\Src\Controller\Controller.cpp">
@@ -115,55 +127,19 @@
     <ClCompile Include="..\Codes\Src\Configuration\TimerCfg.cpp">
       <Filter>CodeUnderTest\源文件\Configuration</Filter>
     </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\Example.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\SiTable.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\MpegTransportStream.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\DescriptorHelper.cpp">
+    <ClCompile Include="..\UnitTestCodes\UtTransportPacket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Bat.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    <ClInclude Include="..\UnitTestCodes\UtSiTable.h">
+      <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Descriptor.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    <ClInclude Include="..\UnitTestCodes\DescriptorHelper.h">
+      <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Eit.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Nit.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TsPacket.h">
-      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Controller\Controller.h">
-      <Filter>CodeUnderTest\源文件\Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h">
-      <Filter>CodeUnderTest\源文件\Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h">
-      <Filter>CodeUnderTest\源文件\Configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h">
-      <Filter>CodeUnderTest\源文件\Configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
-      <Filter>CodeUnderTest\源文件\Configuration</Filter>
+    <ClInclude Include="..\UnitTestCodes\UtExample.h">
+      <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
       <Filter>CodeUnderTest\头文件\Foundation</Filter>
@@ -198,7 +174,7 @@
     <ClInclude Include="..\Codes\Include\TsPacketSiTable\SiTableInterface.h">
       <Filter>CodeUnderTest\头文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TsPacketInterface.h">
+    <ClInclude Include="..\Codes\Include\TsPacketSiTable\TransportPacketInterface.h">
       <Filter>CodeUnderTest\头文件\TsPacketSiTable</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\SiTableWrapper\SiTableXmlWrapperInterface.h">
@@ -228,16 +204,46 @@
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h">
       <Filter>CodeUnderTest\头文件\ConfigurationWrapper</Filter>
     </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\Example.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Bat.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\SiTable.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\CatchHelper.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\MpegTransportStream.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Descriptor.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
     </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\DescriptorHelper.h">
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Eit.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Nit.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\Sdt.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportPacket.h">
+      <Filter>CodeUnderTest\源文件\TsPacketSiTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Controller\Controller.h">
+      <Filter>CodeUnderTest\源文件\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Controller\TimerRepository.h">
+      <Filter>CodeUnderTest\源文件\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\DirCfg.h">
+      <Filter>CodeUnderTest\源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\NetworksCfg.h">
+      <Filter>CodeUnderTest\源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
+      <Filter>CodeUnderTest\源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UnitTestCodes\UtTransportPacket.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

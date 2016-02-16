@@ -13,6 +13,9 @@ typedef uint16_t TsId;  //Transport Stream Id
 typedef uchar_t  Version;
 typedef uint32_t SiTableKey;
 
+typedef std::list<TsId> TsIds;
+typedef uint64_t CatchId;
+
 #define TsPacketSize 188
 
 #define MaxBatSectionLength     1024

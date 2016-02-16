@@ -16,9 +16,9 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-#include "Example.h"
-#include "SiTable.h"
-#include "MpegTransportStream.h"
+#include "UtExample.h"
+#include "UtSiTable.h"
+#include "UtTransportPacket.h"
 
 using namespace std;
 using namespace UnitTest;
