@@ -20,3 +20,4 @@ ver.2.5:  支持将单个table分为多个section的功能, 拆分时 nit 和 bat 将多个ts放入不
 ver.2.6:  添加了一些有用的unit test的代码.  并根据unit test的结果对代码做了一些修改.
 ver.2.7:  为了做性能优化, 特地创建一个branch,  避免性能优化的代码影响了 ver.2.6 稳定的代码.
           根据iso13818-1的描述， 修改类名 TsPacketInterface => TransportPacketInterface, TsPacketsInterface => TransportPacketsInterface.
+ver.2.8:  对读取xml文件的效率做了优化, 优化后读取16个ts 一周的eit信息只需要3~4秒(优化前大约需要25秒).

@@ -130,6 +130,9 @@
     <ClCompile Include="..\UnitTestCodes\UtTransportPacket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UtConverter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\UtSiTable.h">
@@ -244,6 +247,9 @@
       <Filter>CodeUnderTest\源文件\Configuration</Filter>
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\UtTransportPacket.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UnitTestCodes\UtConverter.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

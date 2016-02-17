@@ -19,6 +19,7 @@
 #include "UtExample.h"
 #include "UtSiTable.h"
 #include "UtTransportPacket.h"
+#include "UtConverter.h"
 
 using namespace std;
 using namespace UnitTest;

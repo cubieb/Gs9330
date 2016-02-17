@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
     <network id="200">
-        <receiver ip="192.168.3.1" port="5001">
+        <receiver ip="10.0.0.10" port="5001">
             <tsid>1</tsid>
             <tsid>2</tsid>
             <tsid>3</tsid>
@@ -52,15 +52,79 @@
             <tsid>120</tsid>
             <tsid>130</tsid>
             <tsid>140</tsid>
+            <tsid>301</tsid>
+            <tsid>302</tsid>
+            <tsid>303</tsid>
+            <tsid>304</tsid>
+            <tsid>305</tsid>
+            <tsid>306</tsid>
+            <tsid>307</tsid>
+            <tsid>308</tsid>
+            <tsid>309</tsid>
+            <tsid>310</tsid>
+            <tsid>311</tsid>
+            <tsid>312</tsid>
+            <tsid>313</tsid>
+            <tsid>314</tsid>
+            <tsid>315</tsid>
+            <tsid>316</tsid>
         </receiver>	
-        <receiver ip="192.168.3.1" port="5002">
+        <receiver ip="10.0.0.10" port="5002">
             <tsid>2</tsid>
         </receiver>	
-        <receiver ip="192.168.3.1" port="5003">
+        <receiver ip="10.0.0.10" port="5003">
             <tsid>3</tsid>
         </receiver>	
-        <receiver ip="192.168.3.1" port="5004">
+        <receiver ip="10.0.0.10" port="5004">
             <tsid>4</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5301">
+            <tsid>301</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5302">
+            <tsid>302</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5303">
+            <tsid>303</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5304">
+            <tsid>304</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5305">
+            <tsid>305</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5306">
+            <tsid>306</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5307">
+            <tsid>307</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5308">
+            <tsid>308</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5309">
+            <tsid>309</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5310">
+            <tsid>310</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5311">
+            <tsid>311</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5312">
+            <tsid>312</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5313">
+            <tsid>313</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5314">
+            <tsid>314</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5315">
+            <tsid>315</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5316">
+            <tsid>316</tsid>
         </receiver>	
     </network>    
 </root>
