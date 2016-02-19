@@ -12,6 +12,21 @@
 
 struct FileSummary
 {
+    FileSummary(const std::string &fileName, TableId tableId, const std::list<SiTableKey> &keys)
+        : fileName(fileName), tableId(tableId), keys(keys)
+    {}
+
+    FileSummary(const FileSummary &value)
+        : fileName(value.fileName), tableId(value.tableId), keys(value.keys)
+    {}
+
+    FileSummary(FileSummary &&value)
+    {
+        fileName = move(value.fileName);
+        tableId = value.tableId;
+        keys = move(value.keys);
+    }
+
     std::string        fileName;
     TableId            tableId;
     std::list<SiTableKey> keys;
@@ -20,7 +35,7 @@ struct FileSummary
 class CompareSummaryFileName: public std::unary_function<FileSummary, bool>
 {
 public:
-    CompareSummaryFileName(std::string fileName)
+    CompareSummaryFileName(const char *fileName)
         : fileName(fileName)
     {}
 
@@ -37,27 +52,6 @@ public:
 private:
     std::string fileName;
 };
-
-class DeleteSummaryFileName: public std::unary_function<FileSummary, void>
-{
-public:
-    DeleteSummaryFileName(std::string fileName)
-        : fileName(fileName)
-    {}
-
-    result_type operator()(argument_type *&summary)
-    {
-        if (summary->fileName == fileName)
-        {
-            delete summary;
-            summary = nullptr;
-        }
-    }
-
-private:
-    std::string fileName;
-};
-
 
 /**********************class Controller**********************/
 class Controller: public ControllerInterface
@@ -97,7 +91,7 @@ private:
     /* runtime information */
     TransportPacketsInterface *tsPackets;    //modified by AddSiTable(), tsPackets->Add(tsPacket)
     TimerRepository *timerRepository; //modified by AddSiTable(), timerRepository->Add(timerId, timerArg);
-    std::list<FileSummary *>  fileSummaries; //modified by AddSiTable(), fileSummaries.push_back(fileSummary);
+    std::list<FileSummary>  fileSummaries; //modified by AddSiTable(), fileSummaries.push_back(fileSummary);
     ACE_HANDLE dirHandle;      //monitored dir handle, modified by AddMonitoredDir()
 };
 

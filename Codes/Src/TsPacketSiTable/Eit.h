@@ -143,7 +143,11 @@ public:
     size_t GetCodesSize(TableId tableId, size_t maxSize, size_t &offset) const;
     size_t MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
     
-    /* remove out-of-date event */
+    /* remove out-of-date event 
+       Return Values:  
+           true if events is same between befor and after.
+           false if some out-of-date event was deleted.
+     */
     bool RemoveOutOfDateEvent();
 
 private:
@@ -176,6 +180,7 @@ private:
     EitTable(TableId tableId, ServiceId serviceId, Version versionNumber, 
              TsId transportStreamId, NetId originalNetworkId);
     bool CheckTableId(TableId tableId) const;
+    void ClearCatch();
 
 private:    
     TableId tableId;
@@ -186,10 +191,12 @@ private:
     EitEvents eitEvents;
 
 private:
+#ifdef UseCatchOptimization
     mutable CatchIdHelper catchIdHelper;
     mutable std::map<CatchId, size_t> codeSizeCatches;
     mutable std::map<CatchId, uchar_t*> codeCatches;
     mutable std::map<CatchId, uint_t> secNumberCatches;
+#endif
 };
 
 #endif

@@ -2,6 +2,11 @@
 2015-07-06 Created by LiuHao.
 */
 #include "Include/Foundation/SystemInclude.h"
+
+#pragma warning(push)
+#pragma warning(disable:702)   //disable warning caused by ACE library.
+#pragma warning(disable:4251)  //disable warning caused by ACE library.
+#pragma warning(disable:4996)  //disable warning caused by ACE library.
 #include "ace/OS_main.h"
 
 /* Foundation */
@@ -13,7 +18,7 @@
 using namespace std;
 
 int main(int argc, char **argv)
-{
+{    
     ControllerInterface &controller = ControllerInterface::GetInstance();
     controller.Start(ACE_Reactor::instance());
 
@@ -21,3 +26,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+#pragma warning(pop) 

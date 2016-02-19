@@ -1,5 +1,9 @@
 #include "Include/Foundation/SystemInclude.h"
 #include <regex>
+#pragma warning(push)
+#pragma warning(disable:702)   //disable warning caused by ACE library.
+#pragma warning(disable:4251)  //disable warning caused by ACE library.
+#pragma warning(disable:4996)  //disable warning caused by ACE library.
 #include "ace/OS.h"
 #include "ace/Singleton.h"
 
@@ -101,8 +105,8 @@ Controller::~Controller()
     dirHandle = ACE_INVALID_HANDLE;
 
     /* clear file summary */
-    for_each(fileSummaries.begin(), fileSummaries.end(), ScalarDeleter());
-
+    fileSummaries.clear();
+    
     /* cancle timers */
     TimerRepository::iterator iter;
     for (iter = timerRepository->Begin(); iter != timerRepository->End(); ++iter)
@@ -173,6 +177,7 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
     return 0;
 }
 
+#define TestReadXmlPerformance
 void Controller::Start(ACE_Reactor *reactor)
 {
     this->reactor (reactor);
@@ -181,9 +186,18 @@ void Controller::Start(ACE_Reactor *reactor)
     tsPackets = TransportPacketsInterface::CreateInstance();    
 
     /* Timer Repository(timer runtimer information) */
-    timerRepository = new TimerRepository();
-    
+    timerRepository = new TimerRepository();    
+
+#ifdef TestReadXmlPerformance
+    auto start = std::chrono::system_clock::now();
     ReadDir(dirCfg->GetXmlDir());
+    auto end = std::chrono::system_clock::now();
+    chrono::milliseconds diff = chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    cout << "elapsed time(milliseconds): " << diff.count() << endl;
+#else
+    ReadDir(dirCfg->GetXmlDir());
+#endif
+
     AddMonitoredDir(dirCfg->GetXmlDir());
     //AddMonitoredDir(dirCfg->GetTsDir()); 
 }
@@ -274,11 +288,7 @@ void Controller::AddSiTable(const char *path)
     siTableWrapper.Select(*tsPacket, path, tableId, keys);
     
     /* save {file name, table id, key list} relation ship */
-    FileSummary *fileSummary = new FileSummary;
-    fileSummary->fileName = path;
-    fileSummary->tableId = tableId;
-    fileSummary->keys = keys;
-    fileSummaries.push_back(fileSummary);
+    fileSummaries.push_back(FileSummary(string(path), tableId, keys));
         
     /* schedule timer for {NetId, TableId} */
     ScheduleTimer(netId, tableId);
@@ -304,23 +314,22 @@ void Controller::DelSiTable(const char *path)
     assert(iter != tsPackets->End());
     TransportPacketInterface *tsPacket = *iter;
 
-    std::list<FileSummary *>::iterator summaryIter;
+    std::list<FileSummary>::iterator summaryIter;
     for (summaryIter = fileSummaries.begin(); summaryIter != fileSummaries.end(); ++summaryIter)
     {
-        if ((*summaryIter)->fileName.compare(path) != 0)
+        if (summaryIter->fileName.compare(path) != 0)
         {
             continue;
         }
 
         list<SiTableKey>::iterator keyIter;
-        for (keyIter = (*summaryIter)->keys.begin(); keyIter != (*summaryIter)->keys.end(); ++keyIter)
+        for (keyIter = summaryIter->keys.begin(); keyIter != summaryIter->keys.end(); ++keyIter)
         {
-            tsPacket->DelSiTable((*summaryIter)->tableId, *keyIter);
+            tsPacket->DelSiTable(summaryIter->tableId, *keyIter);
         }
     }
 
-    for_each(fileSummaries.begin(), fileSummaries.end(), DeleteSummaryFileName(path));
-    fileSummaries.remove(nullptr);
+    fileSummaries.remove_if(CompareSummaryFileName(path));
 }
 
 void Controller::ReadDir(const char *dir)
@@ -338,43 +347,26 @@ void Controller::ReadDir(const char *dir)
 	}
 	ACE_OS::closedir(aceDir);
 
-    list<FileSummary *>::iterator summeryIter;
+    list<FileSummary>::iterator summeryIter;
     for (summeryIter = fileSummaries.begin(); summeryIter != fileSummaries.end(); ++summeryIter)
     {
-        oldPathes.push_back((*summeryIter)->fileName);
+        oldPathes.push_back(summeryIter->fileName);
     }
 
-    list<string>::iterator newIter, oldIter;
-    for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
+    vector<string> added, deled;
+    
+    newPathes.sort();
+    oldPathes.sort();
+    set_difference(newPathes.begin(), newPathes.end(), oldPathes.begin(), oldPathes.end(), std::back_inserter(added));
+    for (vector<string>::iterator iter = added.begin(); iter != added.end(); ++iter)
     {
-        for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
-        {
-            if (*newIter == *oldIter)
-            {
-                break;
-            }
-        }
-
-        if (oldIter == oldPathes.end())
-        {
-            AddSiTable(newIter->c_str());
-        }
+        AddSiTable(iter->c_str());
     }
 
-    for (oldIter = oldPathes.begin(); oldIter != oldPathes.end(); ++oldIter)
+    set_difference(oldPathes.begin(), oldPathes.end(), newPathes.begin(), newPathes.end(), std::back_inserter(deled));
+    for (vector<string>::iterator iter = deled.begin(); iter != deled.end(); ++iter)
     {
-        for (newIter = newPathes.begin(); newIter != newPathes.end(); ++newIter)
-        {
-            if (*oldIter == *newIter)
-            {
-                break;
-            }
-        }
-
-        if (newIter == newPathes.end())
-        {
-            DelSiTable(oldIter->c_str());
-        }
+        DelSiTable(iter->c_str());
     }
 }
 
@@ -440,3 +432,5 @@ void Controller::ScheduleTimer(NetId netId, TableId tableId)
         delete timerArg;
     }
 }
+
+#pragma warning(pop)

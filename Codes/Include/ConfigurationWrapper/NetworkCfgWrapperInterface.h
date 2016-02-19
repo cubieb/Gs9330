@@ -42,7 +42,7 @@ public:
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
             node = nodes->nodeTab[i];
-            NetId netId = GetXmlAttrValue<NetId>(node, (const xmlChar*)"id");
+            NetId netId = GetXmlAttrValue<NetId>(node, (const xmlChar*)"netid");
 
             Network *network = Network::CreateInstance(netId);
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))

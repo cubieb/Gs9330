@@ -145,9 +145,6 @@ void EitEvents::AddEventDescriptor(uint16_t eventId, Descriptor *descriptor)
 
 size_t EitEvents::GetCodesSize(TableId tableId, size_t maxSize, size_t &offset) const
 {
-    /* there is no reserved_future_use and xxx_xxx__length fields, so we
-       have to impliment GetCodesSize() and MakeCodes() myself.
-     */
     size_t size = 0;
     size_t curOffset = 0;
     uint_t number = 0;
@@ -271,6 +268,7 @@ EitTable::EitTable(TableId tableId, ServiceId serviceId, Version versionNumber,
 
 EitTable::~EitTable()
 {
+    ClearCatch();
 }
 
 void EitTable::AddEvent(EventId eventId, const char *startTime, 
@@ -440,14 +438,14 @@ size_t EitTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     ptr = ptr + Write8(ptr, tableId);       //????
     
     ptr = ptr + eitEvents.MakeCodes(tableId, ptr, MaxEitEventContentSize, eventOffset);
-
+    
     siHelper.Write((EitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 
+#ifdef UseCatchOptimization
     uchar_t *codeCatch = new uchar_t[size];
     memcpy(codeCatch, buffer, size);
 
-#ifdef UseCatchOptimization
     codeCatches.insert(make_pair(catchId, codeCatch));
 #endif
 
@@ -461,14 +459,7 @@ void EitTable::RefreshCatch()
     {
         return;
     }
-    codeSizeCatches.clear();
-    map<CatchId, uchar_t*>::iterator iter;
-    for (iter = codeCatches.begin(); iter != codeCatches.end(); ++iter)
-    {
-        delete[] iter->second;
-    }
-    codeCatches.clear();
-    secNumberCatches.clear();
+    ClearCatch();
 }
 
 /* private function */
@@ -490,4 +481,18 @@ bool EitTable::CheckTableId(TableId tableId) const
     }
 
     return true;
+}
+
+void EitTable::ClearCatch()
+{
+#ifdef UseCatchOptimization
+    codeSizeCatches.clear();
+    map<CatchId, uchar_t*>::iterator iter;
+    for (iter = codeCatches.begin(); iter != codeCatches.end(); ++iter)
+    {
+        delete[] iter->second;
+    }
+    codeCatches.clear();
+    secNumberCatches.clear();
+#endif
 }

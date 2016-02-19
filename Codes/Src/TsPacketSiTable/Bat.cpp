@@ -76,19 +76,19 @@ size_t BatTable::GetCodesSize(TableId tableId, const TsIds &tsIds,
     //check secIndex is valid.
     assert(secIndex < GetSecNumber(tableId, tsIds));
 
-    size_t desSize = descriptors.GetCodesSize();
-    size_t maxSize = MaxBatDesAndTsContentSize - desSize;
+    size_t descriptorSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxBatDesAndTsContentSize - descriptorSize;
     size_t tsOffset = 0;
 
     for (SectionNumber i = 0; i < secIndex; ++i)
     {
         transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-        desSize = 0;
+        descriptorSize = 0;
         maxSize = MaxBatDesAndTsContentSize;
     }
     
     size_t size = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-    return (sizeof(bouquet_association_section) + desSize + size); 
+    return (sizeof(bouquet_association_section) + descriptorSize + size); 
 }
 
 SiTableKey BatTable::GetKey() const
@@ -138,15 +138,15 @@ size_t BatTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     //check secIndex is valid.
     assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
 
-    size_t desSize = descriptors.GetCodesSize();
-    size_t maxSize = MaxBatDesAndTsContentSize - desSize;
+    size_t descriptorSize = descriptors.GetCodesSize();
+    size_t maxSize = MaxBatDesAndTsContentSize - descriptorSize;
     size_t tsOffset = 0;
 
     SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsIds);
     for (SectionNumber i = 0; i < secIndex; ++i)
     {
         transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-        desSize = 0;
+        descriptorSize = 0;
         maxSize = MaxBatDesAndTsContentSize;
     }
 
@@ -167,9 +167,9 @@ size_t BatTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     ptr = ptr + Write8(ptr, secNumber - 1);  //last_section_number
 
     //we assume all descriptor to be packed in first section.
-    if (desSize == 0)
+    if (descriptorSize == 0)
     {
-        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | desSize); 
+        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | descriptorSize); 
     }
     else
     {
@@ -187,7 +187,7 @@ size_t BatTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
-
+        
     siHelper.Write((BatSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 
