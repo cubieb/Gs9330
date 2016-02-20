@@ -7,7 +7,7 @@
 /* Configuration */
 #include "DirCfg.h"
 
-DirCfgInterface * CreateDirCfgInterface()
+DirCfgInterface * DirCfgInterface::CreateInstance()
 {
     return new DirCfg;
 }

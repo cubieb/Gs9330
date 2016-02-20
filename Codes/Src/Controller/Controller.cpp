@@ -10,6 +10,7 @@
 /* Foundation */
 #include "Include/Foundation/Type.h"
 #include "Include/Foundation/Debug.h"
+#include "Include/Foundation/Time.h"
 
 /* ConfigurationWrapper */
 #include "Include/ConfigurationWrapper/TimerCfgWrapperInterface.h"
@@ -71,7 +72,7 @@ Controller::Controller()
     tableIdToPid.insert(make_pair(EitOtherSchTableId, EitPid));
     
     /* dir configuration */
-    dirCfg = CreateDirCfgInterface();
+    dirCfg = DirCfgInterface::CreateInstance();
     DirCfgWrapperInterface<DirCfgInterface> dirCfgWrapper;
     dirCfgWrapper.Select(*dirCfg, "Gs9330SoapClient.xml");
     
@@ -83,7 +84,7 @@ Controller::Controller()
 
     /* timer configuration */
     string senderCfgPath = string(dirCfg->GetCfgDir()) + string("\\sender.xml");
-    timerCfg = CreateTimerCfgInterface();
+    timerCfg = TimerCfgInterface::CreateInstance();
     TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
     timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());    
 }
@@ -113,13 +114,12 @@ Controller::~Controller()
     {
         reactor->cancel_timer(iter->first);
     }
-    delete timerRepository;
-    
+    delete timerRepository;    
     delete tsPackets;
 
     /* free configuration */
-    delete networkCfgs;
     delete dirCfg;
+    delete networkCfgs;
     delete timerCfg;
 }
 
@@ -189,11 +189,13 @@ void Controller::Start(ACE_Reactor *reactor)
     timerRepository = new TimerRepository();    
 
 #ifdef TestReadXmlPerformance
-    auto start = std::chrono::system_clock::now();
+    TimeMeter timeMeter;
+    timeMeter.Start();
+
     ReadDir(dirCfg->GetXmlDir());
-    auto end = std::chrono::system_clock::now();
-    chrono::milliseconds diff = chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    cout << "elapsed time(milliseconds): " << diff.count() << endl;
+
+    timeMeter.End();
+    cout << "elapsed time(milliseconds): " << timeMeter.GetDuration().count() << endl;
 #else
     ReadDir(dirCfg->GetXmlDir());
 #endif

@@ -13,6 +13,30 @@ time_t CalculateUtcGmtDiff()
     return diff;
 }
 
+/**********************class TimeMeter**********************/
+TimeMeter::TimeMeter()
+{
+}
+
+TimeMeter::~TimeMeter()
+{
+}
+
+void TimeMeter::Start()
+{
+    startTime = std::chrono::system_clock::now();
+}
+
+void TimeMeter::End()
+{
+    endTime = std::chrono::system_clock::now();
+}
+
+std::chrono::milliseconds TimeMeter::GetDuration()
+{
+    return chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+}
+
 /******************convert string to time_t******************/
 void ConvertStrToTm(const char *str, tm &timeInfo)
 {

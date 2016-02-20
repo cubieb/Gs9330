@@ -8,7 +8,7 @@
 #include "TimerCfg.h"
 using namespace std;
 
-TimerCfgInterface * CreateTimerCfgInterface()
+TimerCfgInterface * TimerCfgInterface::CreateInstance()
 {
     return new TimerCfg;
 }

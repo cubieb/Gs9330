@@ -14,7 +14,8 @@ public:
 
     virtual time_t GetInterval(TableId tableId) const = 0;
     virtual void SetInterval(TableId tableId, time_t sec) = 0;
+
+    static TimerCfgInterface * CreateInstance();
 };
-TimerCfgInterface * CreateTimerCfgInterface();
 
 #endif
