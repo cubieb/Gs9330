@@ -64,9 +64,6 @@
     <ClCompile Include="..\UnitTestCodes\DescriptorHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\UnitTestCodes\UtExample.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\Codes\Src\Foundation\LibLinking.cpp">
       <Filter>CodeUnderTest\源文件\Foundation</Filter>
     </ClCompile>
@@ -133,15 +130,15 @@
     <ClCompile Include="..\UnitTestCodes\UtConverter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UtSiTableXmlWrapperInterface.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\UtSiTable.h">
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\DescriptorHelper.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\UnitTestCodes\UtExample.h">
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Codes\Include\Foundation\ContainerBase.h">
@@ -250,6 +247,9 @@
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="..\UnitTestCodes\UtConverter.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UnitTestCodes\UtSiTableXmlWrapperInterface.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

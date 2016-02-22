@@ -276,6 +276,8 @@ void EitTable::AddEvent(EventId eventId, const char *startTime,
 {
     EitEvent *eitEvent = new EitEvent(eventId, startTime, duration, runningStatus, freeCaMode);
     eitEvents.AddEvent(eitEvent);
+
+    ClearCatch();
 }
 
 void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
@@ -289,6 +291,7 @@ void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
     }
 
     eitEvents.AddEventDescriptor(eventId, descriptor);
+    ClearCatch();
 }
 
 size_t EitTable::GetCodesSize(TableId tableId, const TsIds &tsIds,

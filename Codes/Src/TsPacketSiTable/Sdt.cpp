@@ -150,7 +150,8 @@ size_t SdtServices::MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset)
 /**********************class SdtTable**********************/
 /* public function */
 SdtTable::SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId)
-    : tableId(tableId), transportStreamId(transportStreamId), versionNumber(versionNumber)
+    : tableId(tableId), transportStreamId(transportStreamId), versionNumber(versionNumber),
+      originalNetworkId(originalNetworkId)
 {
 }
 
@@ -272,7 +273,7 @@ size_t SdtTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     ptr = ptr + Write8(ptr, Reserved8Bit);
 
     ptr = ptr + sdtServices.MakeCodes(ptr, MaxSdtServiceContentSize, serviceOffset);
-
+    
     siHelper.Write((SdtSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
     ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 

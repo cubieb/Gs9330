@@ -16,10 +16,10 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-#include "UtExample.h"
 #include "UtSiTable.h"
 #include "UtTransportPacket.h"
 #include "UtConverter.h"
+#include "UtSiTableXmlWrapperInterface.h"
 
 using namespace std;
 using namespace UnitTest;

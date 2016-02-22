@@ -108,6 +108,61 @@ struct event_information_section_detail
     //}
 };
 
+/*
+    define struct service_description_section just for calculating fixed fields size.
+*/
+struct service_description_section
+{
+    uchar_t  table_id:                 8;       //uimsbf  -
+    uint16_t section_syntax_indicator: 1;       //bslbf
+    uint16_t reserved_future_use1:     1;       //bslbf
+    uint16_t reserved1:                2;       //bslbf
+    uint16_t section_length:          12;       //uimsbf  --
+    uint16_t transport_stream_id:     16;       //uimsbf  --
+    uchar_t  reserved2:                2;       //bslbf
+    uchar_t  version_number:           5;       //uimsbf
+    uchar_t  current_next_indicator:   1;       //bslbf   -
+    uchar_t  section_number:           8;       //uimsbf  -
+    uchar_t  last_section_number:      8;       //uimsbf  -
+    uint16_t original_network_id:     16;       //uimsbf  --
+    uchar_t  reserved_future_use2:     8;       //bslbf   -
+    //for (i=0;i<N;i++)
+    //{
+    //    service_id 16 uimsbf                     --
+    //    reserved_future_use3 6 bslbf
+    //    EIT_schedule_flag 1 bslbf
+    //    EIT_present_following_flag 1 bslbf       -
+    //    running_status 3 uimsbf 
+    //    free_CA_mode 1 bslbf
+    //    descriptors_loop_length 12 uimsbf        --
+    //    for (j=0;j<N;j++)
+    //    {
+    //        descriptor()
+    //    }
+    //}
+    uint32_t CRC_32:                  32;       //rpchof ----
+};
+
+struct service_description_section_detail
+{
+    //for (i=0;i<N;i++)
+    //{
+    uint16_t service_id:           16;       //uimsbf     --
+
+    uchar_t  reserved_future_use3: 6;        //bslbf
+    uchar_t  EIT_schedule_flag:    1;        // bslbf
+    uchar_t  EIT_present_following_flag: 1;  //bslbf       -
+
+    uint16_t running_status:             3;  //uimsbf 
+    uint16_t free_CA_mode:               1;  //bslbf
+    uint16_t descriptors_loop_length:    12; //uimsbf        --
+    //    for (j=0;j<N;j++)
+    //    {
+    //        descriptor()
+    //    }
+    //}
+};
+
 #pragma pack(pop)
 
 #define MaxBatDesAndTsContentSize (MaxBatSectionLength - sizeof(bouquet_association_section))
@@ -115,6 +170,7 @@ struct event_information_section_detail
 #define MaxEitEventContentSize (MaxEitSectionLength - sizeof(event_information_section))
 //sizeof(event_information_section_detail) = 12
 #define MaxEitEventDescriptorSize (MaxEitEventContentSize - sizeof(event_information_section_detail))
+#define MaxSdtServiceContentSize (MaxSdtSectionLength - sizeof(service_description_section))
 
 #define InvalidSiTableTableId 0
 
@@ -122,14 +178,24 @@ struct event_information_section_detail
 class SiTable : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE(SiTable);
+    /* Bat */
     CPPUNIT_TEST(TestBatConstruct);
     CPPUNIT_TEST(TestBatGetCodesSize);
     CPPUNIT_TEST(TestBatGetKey);
     CPPUNIT_TEST(TestBatGetSecNumber);
     CPPUNIT_TEST(TestBatGetTableId);
     CPPUNIT_TEST(TestBatMakeCodes);
+    /* Eit */
+    CPPUNIT_TEST(TestEitGetCodesSize);
     CPPUNIT_TEST(TestEitMakeCodes1);
     CPPUNIT_TEST(TestEitMakeCodes2);
+    /* Sdt */
+    CPPUNIT_TEST(TestSdtConstruct);
+    CPPUNIT_TEST(TestSdtGetCodesSize);
+    CPPUNIT_TEST(TestSdtGetKey);
+    CPPUNIT_TEST(TestSdtGetSecNumber);
+    CPPUNIT_TEST(TestSdtGetTableId);
+    CPPUNIT_TEST(TestSdtMakeCodes);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -145,8 +211,16 @@ protected:
     void TestBatGetTableId();
     void TestBatMakeCodes();
     /* Eit */
+    void TestEitGetCodesSize();
     void TestEitMakeCodes1();
     void TestEitMakeCodes2();
+    /* Sdt */
+    void TestSdtConstruct();
+    void TestSdtGetCodesSize();
+    void TestSdtGetKey();
+    void TestSdtGetSecNumber();
+    void TestSdtGetTableId();
+    void TestSdtMakeCodes();
 };
 
 CxxEndNameSpace

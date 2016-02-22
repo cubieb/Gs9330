@@ -22,13 +22,13 @@ void SiTable::TestBatConstruct()
     BouquetId bouquetId = 1;
     Version   version = 1;
 
-    BatTableInterface *bat;
-    bat = BatTableInterface::CreateInstance(InvalidSiTableTableId, bouquetId, version);
-	CPPUNIT_ASSERT(bat == nullptr);
+    BatTableInterface *siTable;
+    siTable = BatTableInterface::CreateInstance(InvalidSiTableTableId, bouquetId, version);
+	CPPUNIT_ASSERT(siTable == nullptr);
 
-    bat = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
-    CPPUNIT_ASSERT(bat != nullptr);
-    delete bat;
+    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    CPPUNIT_ASSERT(siTable != nullptr);
+    delete siTable;
 }
 
 void SiTable::TestBatGetCodesSize()
@@ -41,22 +41,22 @@ void SiTable::TestBatGetCodesSize()
     TsIds tsIds;
     tsIds.push_back(tsId);
 
-    auto_ptr<BatTableInterface> bat(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
-    CPPUNIT_ASSERT(bat->GetCodesSize(BatTableId, tsIds, 0) == sizeof(bouquet_association_section));
+    auto_ptr<BatTableInterface> siTable(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
+    CPPUNIT_ASSERT(siTable->GetCodesSize(BatTableId, tsIds, 0) == sizeof(bouquet_association_section));
 
     uint_t desSize = 100;
     uint_t desNumber = (MaxBatDesAndTsContentSize - 2) / desSize;
     for (uint_t i = 0; i < desNumber; ++i)
     {
-        bat->AddDescriptor(GetDescriptorString(desSize));
+        siTable->AddDescriptor(GetDescriptorString(desSize));
     }
-    bat->AddDescriptor(GetDescriptorString(MaxBatDesAndTsContentSize - desSize * desNumber));
-    CPPUNIT_ASSERT(bat->GetCodesSize(BatTableId, tsIds, 0) == MaxBatSectionLength);
+    siTable->AddDescriptor(GetDescriptorString(MaxBatDesAndTsContentSize - desSize * desNumber));
+    CPPUNIT_ASSERT(siTable->GetCodesSize(BatTableId, tsIds, 0) == MaxBatSectionLength);
 
-    bat->AddTs(tsId, onId);
+    siTable->AddTs(tsId, onId);
     size_t size = sizeof(bouquet_association_section) + sizeof(transport_stream);
-    CPPUNIT_ASSERT(bat->GetCodesSize(BatTableId, tsIds, 0) == MaxBatSectionLength);
-    CPPUNIT_ASSERT(bat->GetCodesSize(BatTableId, tsIds, 1) == size);
+    CPPUNIT_ASSERT(siTable->GetCodesSize(BatTableId, tsIds, 0) == MaxBatSectionLength);
+    CPPUNIT_ASSERT(siTable->GetCodesSize(BatTableId, tsIds, 1) == size);
 }
 
 void SiTable::TestBatGetKey()
@@ -64,8 +64,8 @@ void SiTable::TestBatGetKey()
     BouquetId bouquetId = 1;
     Version   version = 1;
 
-    auto_ptr<BatTableInterface> bat(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
-    CPPUNIT_ASSERT(bat->GetKey() == bouquetId);
+    auto_ptr<BatTableInterface> siTable(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
+    CPPUNIT_ASSERT(siTable->GetKey() == bouquetId);
 }
 
 void SiTable::TestBatGetSecNumber()
@@ -78,21 +78,21 @@ void SiTable::TestBatGetSecNumber()
     TsIds tsIds;
     tsIds.push_back(tsId);
 
-    auto_ptr<BatTableInterface> bat(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
-    CPPUNIT_ASSERT(bat->GetSecNumber(InvalidSiTableTableId, tsIds) == 0);
-    CPPUNIT_ASSERT(bat->GetSecNumber(BatTableId, tsIds) == 1);
+    auto_ptr<BatTableInterface> siTable(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
+    CPPUNIT_ASSERT(siTable->GetSecNumber(InvalidSiTableTableId, tsIds) == 0);
+    CPPUNIT_ASSERT(siTable->GetSecNumber(BatTableId, tsIds) == 1);
 
     uint_t desSize = 100;
     uint_t desNumber = (MaxBatDesAndTsContentSize - 2) / desSize;
     for (uint_t i = 0; i < desNumber; ++i)
     {
-        bat->AddDescriptor(GetDescriptorString(desSize));
+        siTable->AddDescriptor(GetDescriptorString(desSize));
     }
-    bat->AddDescriptor(GetDescriptorString(MaxBatDesAndTsContentSize - desSize * desNumber));
-    CPPUNIT_ASSERT(bat->GetSecNumber(BatTableId, tsIds) == 1);
+    siTable->AddDescriptor(GetDescriptorString(MaxBatDesAndTsContentSize - desSize * desNumber));
+    CPPUNIT_ASSERT(siTable->GetSecNumber(BatTableId, tsIds) == 1);
 
-    bat->AddTs(tsId, onId);
-    CPPUNIT_ASSERT(bat->GetSecNumber(BatTableId, tsIds) == 2);
+    siTable->AddTs(tsId, onId);
+    CPPUNIT_ASSERT(siTable->GetSecNumber(BatTableId, tsIds) == 2);
 }
 
 void SiTable::TestBatGetTableId()
@@ -105,8 +105,8 @@ void SiTable::TestBatGetTableId()
     TsIds tsIds;
     tsIds.push_back(tsId);
 
-    auto_ptr<BatTableInterface> bat(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
-    CPPUNIT_ASSERT(bat->GetTableId() == BatTableId);
+    auto_ptr<BatTableInterface> siTable(BatTableInterface::CreateInstance(BatTableId, bouquetId, version));
+    CPPUNIT_ASSERT(siTable->GetTableId() == BatTableId);
 }
 
 void SiTable::TestBatMakeCodes()
@@ -115,6 +115,7 @@ void SiTable::TestBatMakeCodes()
     Version   version = 1;
     TsId      tsId = 1;
     OnId      onId = 0;
+    size_t    size;
 
     TsIds tsIds;
     tsIds.push_back(tsId);
@@ -214,9 +215,11 @@ void SiTable::TestBatMakeCodes()
     // "FE06000102030405"
     string descriptor8 = GetDescriptorString(MaxBatDesAndTsContentSize - desSize * desNumber);
     bat2->AddDescriptor(descriptor8);
-    bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 0);
+    size = bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == bat2->GetCodesSize(BatTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code2, bat2->GetCodesSize(BatTableId, tsIds, 0)) == 0);
-    bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 0);
+    size = bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == bat2->GetCodesSize(BatTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code2, bat2->GetCodesSize(BatTableId, tsIds, 0)) == 0);
 
     uchar_t code3[] = 
@@ -225,8 +228,81 @@ void SiTable::TestBatMakeCodes()
         0xf0, 0x00, 0xd5, 0x20, 0xe9, 0xf6
     };
     bat2->AddTs(tsId, onId);
-    bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 1);
+    size = bat2->MakeCodes(BatTableId, tsIds, buffer, 1024, 1);
+    CPPUNIT_ASSERT(size == bat2->GetCodesSize(BatTableId, tsIds, 1));
     CPPUNIT_ASSERT(memcmp(buffer, code3, bat2->GetCodesSize(BatTableId, tsIds, 1)) == 0);
+}
+
+void SiTable::TestEitGetCodesSize()
+{
+    ServiceId serviceId = 1;
+    Version   version = 1;
+    TsId      tsId = 1;
+    OnId      onId = 0;
+    size_t    size;
+
+    TsIds tsIds;
+    tsIds.push_back(tsId);
+
+    static uchar_t buffer[4096];
+    /************* case 1 *************/
+    auto_ptr<EitTableInterface> siTable(EitTableInterface::CreateInstance(EitActualSchTableId, 
+                                                                          serviceId, version, 
+                                                                          tsId, onId));
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="EIT" TableID="0x4E">
+	    <Transportstream TSID="1" ONID="201" Version="1" ServiceID="1">
+		    <Nothing />
+	    </Transportstream>
+    </Root>
+    */
+    size = siTable->GetCodesSize(EitActualSchTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == sizeof(event_information_section));
+
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="EIT" TableID="0x4E">
+	    <Transportstream TSID="1" ONID="0" Version="1" ServiceID="1">
+		    <Event EventID="1" StartTime="2017-01-01 00:00:00" Duration="003600" 
+                   running_status="4" free_CA_mode="1">
+			    <Descriptors Sum="0">
+			    </Descriptors>
+		    </Event>
+	    </Transportstream>
+    </Root>
+    */
+    EventId eventId = 1;
+    siTable->AddEvent(eventId, "2017-01-01 00:00:00", 3600, 4, 1);
+    size = siTable->GetCodesSize(EitActualSchTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == sizeof(event_information_section) + sizeof(event_information_section_detail));
+
+    size_t descriptorSize = 42;
+    uint_t i;
+    for (i = 0; i < 50; ++i)
+    {
+        siTable->AddEventDescriptor(eventId, GetDescriptorString(descriptorSize));
+    }
+    eventId = 2;
+    siTable->AddEvent(eventId, "2017-01-01 00:01:00", 3600, 4, 1);
+    for (i = 0; i < 46; ++i)
+    {
+        siTable->AddEventDescriptor(eventId, GetDescriptorString(descriptorSize));
+    }
+    eventId = 3;
+    siTable->AddEvent(eventId, "2017-01-01 00:02:00", 3600, 4, 1);
+    siTable->AddEventDescriptor(eventId, GetDescriptorString(descriptorSize));
+    size = siTable->GetCodesSize(EitActualPfTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == descriptorSize * 96
+                           + sizeof(event_information_section)
+                           + sizeof(event_information_section_detail) * 2);
+
+    uint_t secNumber = siTable->GetSecNumber(EitActualSchTableId, tsIds);
+    CPPUNIT_ASSERT(secNumber == 2);
+    size = siTable->GetCodesSize(EitActualSchTableId, tsIds, 1);
+    CPPUNIT_ASSERT(size == descriptorSize * 1
+                           + sizeof(event_information_section)
+                           + sizeof(event_information_section_detail));
 }
 
 void SiTable::TestEitMakeCodes1()
@@ -235,6 +311,7 @@ void SiTable::TestEitMakeCodes1()
     Version   version = 1;
     TsId      tsId = 1;
     OnId      onId = 0;
+    size_t    size;
 
     TsIds tsIds;
     tsIds.push_back(tsId);
@@ -244,21 +321,33 @@ void SiTable::TestEitMakeCodes1()
     auto_ptr<EitTableInterface> eit1(EitTableInterface::CreateInstance(EitActualSchTableId, 
                                                                        serviceId, version, 
                                                                        tsId, onId));
-
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="EIT" TableID="0x4E">
+	    <Transportstream TSID="1" ONID="0" Version="1" ServiceID="1">
+		    <Event EventID="1" StartTime="2017-01-01 00:00:00" Duration="003600" 
+		           running_status="4" free_CA_mode="1">
+			    <Descriptors Sum="0">
+			    </Descriptors>
+		    </Event>
+	    </Transportstream>
+    </Root>
+    */
     EventId eventId = 1;
     eit1->AddEvent(eventId, "2017-01-01 00:00:00", 3600, 4, 1);
-    eit1->AddEventDescriptor(eventId, GetDescriptorString(4));
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
-
+    eit1->AddEventDescriptor(eventId, GetDescriptorString(4));    
     uchar_t code1[4096] = 
     { 
         0x4e, 0xf0, 0x1f, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x4e, 0x00, 0x01,
         0xe1, 0x99, 0x16, 0x00, 0x00, 0x01, 0x00, 0x00, 0x90, 0x04, 0xfe, 0x02, 0x00, 0x01, 0x1d, 0xdb,
         0xab, 0xb0
     };
-    CPPUNIT_ASSERT(memcmp(buffer, code1, eit1->GetCodesSize(EitActualPfTableId, tsIds, 0)) == 0);
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
-    CPPUNIT_ASSERT(memcmp(buffer, code1, eit1->GetCodesSize(EitActualPfTableId, tsIds, 0)) == 0);    
+    size = eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == eit1->GetCodesSize(EitActualPfTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
+    size = eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == eit1->GetCodesSize(EitActualPfTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);  
 }
 
 void SiTable::TestEitMakeCodes2()
@@ -267,32 +356,32 @@ void SiTable::TestEitMakeCodes2()
     Version   version = 1;
     TsId      tsId = 1;
     OnId      onId = 0;
+    size_t    size;
 
     TsIds tsIds;
     tsIds.push_back(tsId);
 
     static uchar_t buffer[4096];
     /************* case 2 *************/
-    size_t size;
-    auto_ptr<EitTableInterface> eit1(EitTableInterface::CreateInstance(EitActualSchTableId, 
+    auto_ptr<EitTableInterface> siTable(EitTableInterface::CreateInstance(EitActualSchTableId, 
                                                                        serviceId, version, 
                                                                        tsId, onId));
     EventId eventId = 1;
     uint_t i;
-    eit1->AddEvent(eventId, "2017-01-01 00:00:00", 3600, 4, 1);
+    siTable->AddEvent(eventId, "2017-01-01 00:00:00", 3600, 4, 1);
     for (i = 0; i < 50; ++i)
     {
-        eit1->AddEventDescriptor(eventId, GetDescriptorString(42));
+        siTable->AddEventDescriptor(eventId, GetDescriptorString(42));
     }
     eventId = 2;
-    eit1->AddEvent(eventId, "2017-01-01 00:01:00", 3600, 4, 1);
+    siTable->AddEvent(eventId, "2017-01-01 00:01:00", 3600, 4, 1);
     for (i = 0; i < 46; ++i)
     {
-        eit1->AddEventDescriptor(eventId, GetDescriptorString(42));
+        siTable->AddEventDescriptor(eventId, GetDescriptorString(42));
     }
     eventId = 3;
-    eit1->AddEvent(eventId, "2017-01-01 00:02:00", 3600, 4, 1);
-    eit1->AddEventDescriptor(eventId, GetDescriptorString(42));
+    siTable->AddEvent(eventId, "2017-01-01 00:02:00", 3600, 4, 1);
+    siTable->AddEventDescriptor(eventId, GetDescriptorString(42));
 
     uchar_t code1[4096] = 
     { 
@@ -587,25 +676,226 @@ void SiTable::TestEitMakeCodes2()
         0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0xe4, 0x6c, 0xec, 0xaf
     };
 
-    size = eit1->GetCodesSize(EitActualPfTableId, tsIds, 0);
-    CPPUNIT_ASSERT(size == 42 * 96
-                           + sizeof(event_information_section)
-                           + sizeof(event_information_section_detail) * 2);
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    size = siTable->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualPfTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    size = siTable->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualPfTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
 
     tsId = 2;
     tsIds.push_back(tsId);    
-    size = eit1->GetCodesSize(EitActualPfTableId, tsIds, 0);
-    CPPUNIT_ASSERT(size == 42 * 96
-                           + sizeof(event_information_section)
-                           + sizeof(event_information_section_detail) * 2);
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    size = siTable->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualPfTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
-    eit1->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    size = siTable->MakeCodes(EitActualPfTableId, tsIds, buffer, 4096, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualPfTableId, tsIds, 0));
     CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
+
+    uchar_t code2[1024] = 
+    {
+        0x50, 0xf0, 0x45, 0x00, 0x01, 0xc3, 0x01, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01, 0x50, 0x00, 0x03,
+        0xe1, 0x99, 0x16, 0x02, 0x00, 0x01, 0x00, 0x00, 0x90, 0x2a, 0xfe, 0x28, 0x00, 0x01, 0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19,
+        0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35,
+        0x36, 0x37, 0x38, 0x39, 0x33, 0xbb, 0x83, 0x96
+    };
+    uint_t secNumber = siTable->GetSecNumber(EitActualSchTableId, tsIds);
+    CPPUNIT_ASSERT(secNumber == 2);
+    size = siTable->MakeCodes(EitActualSchTableId, tsIds, buffer, 1024, 1);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualSchTableId, tsIds, 1));
+    CPPUNIT_ASSERT(memcmp(buffer, code2, size) == 0);
+    size = siTable->MakeCodes(EitActualSchTableId, tsIds, buffer, 1024, 1);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualSchTableId, tsIds, 1));
+    CPPUNIT_ASSERT(memcmp(buffer, code2, size) == 0);
+}
+
+void SiTable::TestSdtConstruct()
+{    
+    TsId    tsId = 1;
+    Version version = 1;
+    NetId   onId = 1;
+
+    SdtTableInterface *siTable;
+    siTable = SdtTableInterface::CreateInstance(InvalidSiTableTableId, tsId, version, onId);
+	CPPUNIT_ASSERT(siTable == nullptr);
+
+    siTable = SdtTableInterface::CreateInstance(SdtActualTableId, tsId, version, onId);
+    CPPUNIT_ASSERT(siTable != nullptr);
+    delete siTable;
+}
+
+void SiTable::TestSdtGetCodesSize()
+{
+    BouquetId bouquetId = 1;
+    Version   version = 1;
+    TsId      tsId = 1;
+    OnId      onId = 1;
+    size_t    size;
+
+    TsIds tsIds;
+
+    auto_ptr<SdtTableInterface> siTable(SdtTableInterface::CreateInstance(SdtActualTableId, tsId, version, onId));
+    CPPUNIT_ASSERT(siTable->GetCodesSize(SdtActualTableId, tsIds, 0) == 0);    
+    tsIds.push_back(tsId);
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="0">
+		    <Nothing />
+	    </Transportstream>
+    </Root>
+     */
+    size = siTable->GetCodesSize(SdtActualTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == sizeof(service_description_section));
+
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="1">
+		    <Service ServiceID="1" EIT_schedule_flag="1" EIT_present_following_flag="1" 
+                     running_status="4" free_CA_mode="0">
+			    <Descriptors Sum="0">
+			    </Descriptors>
+		    </Service>
+	    </Transportstream>
+    </Root>
+     */
+    ServiceId serviceId = 1;
+    uchar_t eitScheduleFlag = 1; 
+    uchar_t eitPresentFollowingFlag = 1; 
+    uint16_t runningStatus = 4;
+    uint16_t freeCaMode = 0;
+    siTable->AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
+    size = siTable->GetCodesSize(SdtActualTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == sizeof(service_description_section) + sizeof(service_description_section_detail));
+
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="1">
+		    <Service ServiceID="1" EIT_schedule_flag="1" EIT_present_following_flag="1" 
+                     running_status="4" free_CA_mode="0">
+			    <Descriptors Sum="0">
+				    <Item1 Tag="0xFE" Data="FE30000102030405060708091011121314151617181920212223242526272829303132333435363738394041424344454647"/>
+			    </Descriptors>
+		    </Service>
+	    </Transportstream>
+    </Root>
+     */    
+    size_t descriptorSize = 50;
+    siTable->AddServiceDescriptor(serviceId, GetDescriptorString(descriptorSize));
+    size = siTable->GetCodesSize(SdtActualTableId, tsIds, 0);
+    CPPUNIT_ASSERT(size == sizeof(service_description_section) 
+                           + sizeof(service_description_section_detail)
+                           + descriptorSize);
+}
+
+void SiTable::TestSdtGetKey()
+{
+}
+
+void SiTable::TestSdtGetSecNumber()
+{
+}
+
+void SiTable::TestSdtGetTableId()
+{
+}
+
+void SiTable::TestSdtMakeCodes()
+{
+    
+    BouquetId bouquetId = 1;
+    Version   version = 1;
+    TsId      tsId = 1;
+    OnId      onId = 1;
+    size_t    size;
+
+    TsIds tsIds;
+    tsIds.push_back(tsId);
+
+    static uchar_t buffer[1024];
+
+    auto_ptr<SdtTableInterface> siTable(SdtTableInterface::CreateInstance(SdtActualTableId, tsId, version, onId));
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="0">
+		    <Nothing />
+	    </Transportstream>
+    </Root>
+     */
+    uchar_t code1[] = 
+    { 
+        0x42, 0xf0, 0x0c, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0xff, 0x32, 0x21, 0xb1, 0x33
+    };
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);   
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);    
+
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="1">
+		    <Service ServiceID="1" EIT_schedule_flag="1" EIT_present_following_flag="1" 
+                     running_status="4" free_CA_mode="0">
+			    <Descriptors Sum="0">
+			    </Descriptors>
+		    </Service>
+	    </Transportstream>
+    </Root>
+     */
+    ServiceId serviceId = 1;
+    uchar_t eitScheduleFlag = 1; 
+    uchar_t eitPresentFollowingFlag = 1; 
+    uint16_t runningStatus = 4;
+    uint16_t freeCaMode = 0;
+    siTable->AddService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, runningStatus, freeCaMode);
+    uchar_t code2[] = 
+    { 
+        0x42, 0xf0, 0x11, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x01, 0xff, 0x80, 0x00,
+        0x42, 0x41, 0x3d, 0x04
+    };
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code2, size) == 0); 
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code2, size) == 0); 
+
+    /*
+    <?xml version='1.0'  encoding='gb2312' ?>
+    <Root TableType="SDT" TableID="0x42">
+	    <Transportstream TSID="1" ONID="1" Version="1">
+		    <Service ServiceID="1" EIT_schedule_flag="1" EIT_present_following_flag="1" 
+                     running_status="4" free_CA_mode="0">
+			    <Descriptors Sum="0">
+				    <Item1 Tag="0xFE" Data="FE30000102030405060708091011121314151617181920212223242526272829303132333435363738394041424344454647"/>
+			    </Descriptors>
+		    </Service>
+	    </Transportstream>
+    </Root>
+     */
+    size_t descriptorSize = 50;
+    siTable->AddServiceDescriptor(serviceId, GetDescriptorString(descriptorSize));   
+    uchar_t code3[] = 
+    { 
+        0x42, 0xf0, 0x43, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x01, 0xff, 0x80, 0x32,
+        0xfe, 0x30, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13,
+        0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
+        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45,
+        0x46, 0x47, 0xc4, 0x9e, 0xb2, 0x05
+    }; 
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code3, size) == 0); 
+    size = siTable->MakeCodes(SdtActualTableId, tsIds, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == siTable->GetCodesSize(SdtActualTableId, tsIds, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code3, size) == 0); 
 }
 
 CxxEndNameSpace
