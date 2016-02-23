@@ -10,6 +10,7 @@
 #include "Include/Controller/ControllerInterface.h"
 #include "TimerRepository.h"
 
+/**********************class FileSummary**********************/
 struct FileSummary
 {
     FileSummary(const std::string &fileName, TableId tableId, const std::list<SiTableKey> &keys)
@@ -62,7 +63,7 @@ public:
 
     int handle_signal(int signum, siginfo_t *, ucontext_t *);
     int handle_timeout(const ACE_Time_Value &currentTime, const void *act);
-    void Start(ACE_Reactor *reactor);
+    void Start(ACE_Reactor *reactor, const char *cfgPath);
 
 private:
     void AddMonitoredDir(const char *directory);

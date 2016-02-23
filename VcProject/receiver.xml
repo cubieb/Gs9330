@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
-    <network netid="200">
+    <network netid="1">
         <receiver ip="10.0.0.10" port="5001">
             <tsid>1</tsid>
             <tsid>2</tsid>

@@ -123,7 +123,7 @@ size_t TransportPacket::MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsI
                            uchar_t *buffer, size_t bufferSize)
 {
     uchar_t *ptr = buffer;
-    assert(GetCodesSize(BatTableId, tsIds) <= bufferSize);
+    assert(GetCodesSize(tableId, tsIds) <= bufferSize);
 
     map<uint_t, uchar_t>::iterator ccIter = continuityCounters.find(ccId);
     if (ccIter == continuityCounters.end())

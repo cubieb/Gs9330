@@ -70,23 +70,6 @@ Controller::Controller()
     tableIdToPid.insert(make_pair(EitOtherPfTableId, EitPid));
     tableIdToPid.insert(make_pair(EitActualSchTableId, EitPid));
     tableIdToPid.insert(make_pair(EitOtherSchTableId, EitPid));
-    
-    /* dir configuration */
-    dirCfg = DirCfgInterface::CreateInstance();
-    DirCfgWrapperInterface<DirCfgInterface> dirCfgWrapper;
-    dirCfgWrapper.Select(*dirCfg, "Gs9330SoapClient.xml");
-    
-    /* networks configuration */
-    string receiverCfgPath = string(dirCfg->GetCfgDir()) + string("\\receiver.xml");
-    networkCfgs = NetworkCfgsInterface::CreateInstance();
-    NetworkCfgWrapperInterface<NetworkCfgsInterface, NetworkCfgInterface, ReceiverInterface> networkCfgWrapper;
-    networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
-
-    /* timer configuration */
-    string senderCfgPath = string(dirCfg->GetCfgDir()) + string("\\sender.xml");
-    timerCfg = TimerCfgInterface::CreateInstance();
-    TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
-    timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());    
 }
 
 Controller::~Controller()
@@ -178,10 +161,30 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
 }
 
 #define TestReadXmlPerformance
-void Controller::Start(ACE_Reactor *reactor)
+void Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
 {
-    this->reactor (reactor);
+    /********* Step 1: Init Configuration *********/
+    /* dir configuration */
+    dirCfg = DirCfgInterface::CreateInstance();
+    DirCfgWrapperInterface<DirCfgInterface> dirCfgWrapper;
+    dirCfgWrapper.Select(*dirCfg, cfgPath);
+    
+    /* networks configuration */
+    string receiverCfgPath = string(dirCfg->GetCfgDir()) + string("\\receiver.xml");
+    networkCfgs = NetworkCfgsInterface::CreateInstance();
+    NetworkCfgWrapperInterface<NetworkCfgsInterface, NetworkCfgInterface, ReceiverInterface> networkCfgWrapper;
+    networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
 
+    /* timer configuration */
+    string senderCfgPath = string(dirCfg->GetCfgDir()) + string("\\sender.xml");
+    timerCfg = TimerCfgInterface::CreateInstance();
+    TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
+    timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());
+
+    /********* Step 2: Init Reactor *********/
+    this->reactor (reactor);    
+
+    /********* Step 3: Setup Runtime Information *********/
     /* this->tsPackets */
     tsPackets = TransportPacketsInterface::CreateInstance();    
 

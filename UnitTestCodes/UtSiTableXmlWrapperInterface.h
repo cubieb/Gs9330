@@ -10,6 +10,9 @@ class SiTableXmlWrapper : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE(SiTableXmlWrapper);
     CPPUNIT_TEST(TestBatXmlWrapperSelect);
+    CPPUNIT_TEST(TestEitXmlWrapperSelect);
+    CPPUNIT_TEST(TestNitXmlWrapperSelect);
+    CPPUNIT_TEST(TestSdtXmlWrapperSelect);
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -18,6 +21,9 @@ public:
 
 protected:
     void TestBatXmlWrapperSelect();
+    void TestEitXmlWrapperSelect();
+    void TestNitXmlWrapperSelect();
+    void TestSdtXmlWrapperSelect();
 
 private:
     void TestBatXmlWrapperSelect01();
