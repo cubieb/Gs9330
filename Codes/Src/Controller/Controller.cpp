@@ -32,16 +32,16 @@ using namespace std;
 
 /**********************SiTableXmlWrapperRepository**********************/
 static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> batWrapper
-    (string("bat"), new BatXmlWrapper<TransportPacketInterface, BatTableInterface>);
+    (string("bat"), new BatXmlWrapper<TransportPacketInterface, SiTableInterface>);
 
 static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> eitWrapper
-    (string("eit"), new EitXmlWrapper<TransportPacketInterface, EitTableInterface>);
+    (string("eit"), new EitXmlWrapper<TransportPacketInterface, SiTableInterface>);
 
 static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> nitWrapper
-    (string("nit"), new NitXmlWrapper<TransportPacketInterface, NitTableInterface>);
+    (string("nit"), new NitXmlWrapper<TransportPacketInterface, SiTableInterface>);
 
 static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> sdtWrapper
-    (string("sdt"), new SdtXmlWrapper<TransportPacketInterface, SdtTableInterface>);
+    (string("sdt"), new SdtXmlWrapper<TransportPacketInterface, SiTableInterface>);
 
 ControllerInterface &ControllerInterface::GetInstance()
 {
@@ -116,7 +116,7 @@ int Controller::handle_signal(int signum, siginfo_t *, ucontext_t *)
     }
 
     string ok = string(dirCfg->GetXmlDir()) + string("\\ok");
-	while((ACE_OS::access(ok.c_str(), F_OK)) != 0 )
+	while((ACE_OS::access(ok.c_str(), F_OK)) != 0)
     {
         Sleep(10);
     }
@@ -161,25 +161,41 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
 }
 
 #define TestReadXmlPerformance
-void Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
+bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
 {
+    std::error_code errCode;
     /********* Step 1: Init Configuration *********/
     /* dir configuration */
     dirCfg = DirCfgInterface::CreateInstance();
     DirCfgWrapperInterface<DirCfgInterface> dirCfgWrapper;
-    dirCfgWrapper.Select(*dirCfg, cfgPath);
+    errCode = dirCfgWrapper.Select(*dirCfg, cfgPath);
+    if (errCode)
+    {
+        cout << "Error when reading " << cfgPath << ", error message: " << errCode.message() << endl;
+        return false;
+    }
     
     /* networks configuration */
     string receiverCfgPath = string(dirCfg->GetCfgDir()) + string("\\receiver.xml");
     networkCfgs = NetworkCfgsInterface::CreateInstance();
     NetworkCfgWrapperInterface<NetworkCfgsInterface, NetworkCfgInterface, ReceiverInterface> networkCfgWrapper;
-    networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
+    errCode = networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
+    if (errCode)
+    {
+        cout << "Error when reading " << receiverCfgPath << ", error message: " << errCode.message() << endl;
+        return false;
+    }
 
     /* timer configuration */
     string senderCfgPath = string(dirCfg->GetCfgDir()) + string("\\sender.xml");
     timerCfg = TimerCfgInterface::CreateInstance();
     TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
-    timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());
+    errCode = timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());
+    if (errCode)
+    {
+        cout << "Error when reading " << senderCfgPath << ", error message: " << errCode.message() << endl;
+        return false;
+    }
 
     /********* Step 2: Init Reactor *********/
     this->reactor (reactor);    
@@ -205,6 +221,7 @@ void Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
 
     AddMonitoredDir(dirCfg->GetXmlDir());
     //AddMonitoredDir(dirCfg->GetTsDir()); 
+    return true;
 }
 
 /* private function */
@@ -362,20 +379,26 @@ void Controller::ReadDir(const char *dir)
     
     newPathes.sort();
     oldPathes.sort();
-    set_difference(newPathes.begin(), newPathes.end(), oldPathes.begin(), oldPathes.end(), std::back_inserter(added));
+    set_difference(newPathes.begin(), newPathes.end(), 
+                   oldPathes.begin(), oldPathes.end(), 
+                   std::back_inserter(added));
     for (vector<string>::iterator iter = added.begin(); iter != added.end(); ++iter)
     {
         AddSiTable(iter->c_str());
     }
 
-    set_difference(oldPathes.begin(), oldPathes.end(), newPathes.begin(), newPathes.end(), std::back_inserter(deled));
+    set_difference(oldPathes.begin(), oldPathes.end(), 
+                   newPathes.begin(), newPathes.end(), 
+                   std::back_inserter(deled));
     for (vector<string>::iterator iter = deled.begin(); iter != deled.end(); ++iter)
     {
         DelSiTable(iter->c_str());
     }
 }
 
-void Controller::SendUdp(NetworkCfgInterface *network, TransportPacketInterface *tsPacket, TableId tableId)
+void Controller::SendUdp(NetworkCfgInterface *network, 
+                         TransportPacketInterface *tsPacket, 
+                         TableId tableId)
 {
     static size_t bufferSize = 1024 * 1024 * 16;
     static uchar_t *buffer = new uchar_t[bufferSize];
@@ -387,15 +410,20 @@ void Controller::SendUdp(NetworkCfgInterface *network, TransportPacketInterface 
          receiverIter != network->End(); 
          ++receiverIter)
     {
-        TsIds tsIds;
         ReceiverInterface *receiver = *receiverIter;
-        ReceiverInterface::iterator tsIdIter;
-        for (tsIdIter = receiver->Begin(); tsIdIter != receiver->End(); ++tsIdIter)
+        if (receiverIter != network->Begin())
         {
-            tsIds.push_back(*tsIdIter);
+            /* bat and sdt will only be sent to center frequency. */
+            if (tableId == BatTableId 
+                || tableId == NitActualTableId || tableId == NitOtherTableId)
+            {
+                break;
+            }
         }
 
-        size_t size = tsPacket->GetCodesSize(tableId, tsIds);    
+        TsId tsId = receiver->GetTsId();
+        size_t size = tsPacket->GetCodesSize(tableId, tsId); 
+        
         if (size > bufferSize)
         {
             bufferSize = bufferSize * 2;
@@ -403,7 +431,10 @@ void Controller::SendUdp(NetworkCfgInterface *network, TransportPacketInterface 
             buffer = new uchar_t[bufferSize];
             assert(bufferSize <= 1024*1024*512);
         }
-        tsPacket->MakeCodes(receiver->GetReceiverId(), tableId, tsIds, buffer, size);
+        /* Ts is is unique for every receiver, 
+           So we use Receiver's tsId as ccId index.
+         */
+        tsPacket->MakeCodes(tsId, tableId, tsId, buffer, size);
 
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;
         struct sockaddr_in socketAddr = receiver->GetSocketAddr();

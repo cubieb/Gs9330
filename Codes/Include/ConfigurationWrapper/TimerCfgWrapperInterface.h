@@ -16,14 +16,25 @@ public:
     TimerCfgWrapperInterface() {};
     virtual ~TimerCfgWrapperInterface() {};
 
-    void Select(TimerCfg &timerCfg, const char *xmlPath)
+    std::error_code Select(TimerCfg &timerCfg, const char *xmlPath)
     {
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
+
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         for (node = xmlFirstElementChild(xmlFirstElementChild(node)); 
              node != nullptr; 
@@ -66,6 +77,8 @@ public:
                 timerCfg.SetInterval(EitOtherSchTableId, GetXmlContent<time_t>(node));
             }
         }
+
+        return std::error_code();
     }
 };
 

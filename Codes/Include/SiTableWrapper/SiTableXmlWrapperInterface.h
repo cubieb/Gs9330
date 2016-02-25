@@ -33,13 +33,7 @@ public:
     {
         cout << "Reading " << xmlPath << endl;
 
-        shared_ptr<xmlDoc> doc;
-        for (int i = 0; i < 10 && doc == nullptr; ++i)
-        {
-            if (i != 0)
-                SleepEx(10, true);
-            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
-        }
+        shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
         assert(doc != nullptr);
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -58,7 +52,7 @@ public:
             node = nodes->nodeTab[i];
             BouquetId bouquetId = GetXmlAttrValue<BouquetId>(node, (const xmlChar*)"BouquetID");
             Version versionNumber = GetXmlAttrValue<Version>(node, (const xmlChar*)"Version");
-            SiTable *siTable = SiTable::CreateInstance(tableId, bouquetId, versionNumber);
+            SiTable *siTable = SiTable::CreateBatInstance(tableId, bouquetId, versionNumber);
             keys.push_back((SiTableKey)bouquetId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
@@ -128,13 +122,7 @@ public:
     void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
-        shared_ptr<xmlDoc> doc;
-        for (int i = 0; i < 10 && doc == nullptr; ++i)
-        {
-            if (i != 0)
-                SleepEx(10, true);
-            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
-        }
+        shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
         assert(doc != nullptr);
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -161,7 +149,7 @@ public:
             Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
             ServiceId serviceId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ServiceID");
 
-            SiTable *siTable = SiTable::CreateInstance(tableId, serviceId, versionNumber, tsId, onId);
+            SiTable *siTable = SiTable::CreateEitInstance(tableId, serviceId, versionNumber, tsId, onId);
             SiTableKey key = (tsId << 16) | serviceId;
             keys.push_back(key);
 
@@ -210,13 +198,7 @@ public:
     {
         cout << "Reading " << xmlPath << endl;
 
-        shared_ptr<xmlDoc> doc;
-        for (int i = 0; i < 10 && doc == nullptr; ++i)
-        {
-            if (i != 0)
-                SleepEx(10, true);
-            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
-        }
+        shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
         assert(doc != nullptr);
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
@@ -235,7 +217,7 @@ public:
             node = nodes->nodeTab[i];
             NetId networkId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ID");
             Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
-            SiTable *siTable = SiTable::CreateInstance(tableId, networkId, versionNumber);
+            SiTable *siTable = SiTable::CreateNitInstance(tableId, networkId, versionNumber);
             keys.push_back((SiTableKey)networkId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
@@ -333,7 +315,7 @@ public:
             TsId tsId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"TSID");
             NetId onId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"ONID");
             Version versionNumber = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"Version");
-            SiTable *siTable = SiTable::CreateInstance(tableId, tsId, versionNumber, onId);
+            SiTable *siTable = SiTable::CreateSdtInstance(tableId, tsId, versionNumber, onId);
             keys.push_back((SiTableKey)tsId);
 
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))

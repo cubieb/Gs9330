@@ -8,98 +8,19 @@
 #include "Include/Foundation/ContainerBase.h"
 
 /**********************class ReceiverInterface**********************/
-/* Example:
-    struct sockaddr_in socketAddr;
-    ReceiverInterface *receiver = CreateReceiverInterface(socketAddr);
-    receiver->Add(1);
-    receiver->Add(2);
-
-    ReceiverInterface::iterator iter;
-    for (iter = receiver->Begin(); iter != receiver->End(); ++iter)
-    {
-        cout << *iter << endl;
-    }
-*/
-class ReceiverInterface: public ContainerBase
+class ReceiverInterface
 {
 public:
-    typedef std::list<TsId> Repository;
-    class NodePtr
-    {
-    public:
-        typedef Repository::iterator InerIter;
-        NodePtr(): myIter()
-        {}
-        NodePtr(const InerIter& iter): myIter(iter)
-        {}
-
-        operator void*() const
-        {
-            return myIter._Ptr;
-        }
-
-        InerIter myIter;
-    };
-
-    typedef Repository::value_type value_type;
-    typedef Repository::size_type size_type;
-    typedef Repository::difference_type difference_type;
-    typedef Repository::pointer pointer;
-    typedef Repository::const_pointer const_pointer;
-    typedef Repository::reference reference;
-    typedef Repository::const_reference const_reference;
-    
-    typedef Iterator<ReceiverInterface>::MyIter      iterator;
-    typedef ConstIterator<ReceiverInterface>::MyIter const_iterator;
-
     ReceiverInterface() {};
     virtual ~ReceiverInterface() {}
 
-    virtual void Add(TsId tsId) = 0;
-    // ContainerBase function. construct proxy from _Alnod
-    void AllocProxy()
-    {
-        myProxy = new ContainerProxy;
-        myProxy->myContainer = this;
-    } 
-
-    virtual iterator Begin() = 0;
-    virtual void Delete(TsId tsId) = 0;
-    virtual iterator End() = 0;
-    virtual iterator Find(TsId tsId) = 0;
-
-    // ContainerBase function, destroy proxy.
-    void FreeProxy()
-    {
-        OrphanAll();
-        delete myProxy;
-        myProxy = nullptr;
-    }
-
-    // ContainerBase function, work with Iterator.
-    virtual NodePtr GetMyHead() = 0;
-
-    //static function
-    // ContainerBase function.
-    static NodePtr GetNextNodePtr(NodePtr ptr)
-    {   // return reference to successor pointer in node
-        ++ptr.myIter;
-        return ptr;
-    }
-    
-    virtual uint_t GetReceiverId() const = 0;
     virtual struct sockaddr_in GetSocketAddr() const = 0;
+    virtual TsId GetTsId() const = 0;
 
-    // ContainerBase function.
-    static reference GetValue(NodePtr ptr)
-    {
-        return ((reference)*ptr.myIter);
-    }
-    
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 
-    static ReceiverInterface * CreateInstance(uint_t receiverId, const struct sockaddr_in &socketAddr);
+    static ReceiverInterface * CreateInstance(TsId tsId, const struct sockaddr_in &socketAddr);
 };
 
 inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& value) 

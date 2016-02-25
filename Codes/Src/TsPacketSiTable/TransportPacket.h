@@ -30,10 +30,10 @@ public:
     void DelSiTable(TableId tableId, SiTableKey key);
 
     SiTableInterface * FindSiTable(TableId tableId, SiTableKey key);
-    size_t GetCodesSize(TableId tableId, const TsIds &tsIds) const;
+    size_t GetCodesSize(TableId tableId, TsId tsId) const;
     NetId  GetNetId() const;
     Pid    GetPid() const;
-    size_t MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
+    size_t MakeCodes(CcId ccId, TableId tableId, TsId tsId, 
                      uchar_t *buffer, size_t bufferSize);
 
     void RefreshCatch();
@@ -49,7 +49,7 @@ private:
      * we need save one continuity_counter per socket-addr.
      * map<continuity-counter-id, continuity-counter>
     */
-    std::map<uint_t, uchar_t> continuityCounters;
+    std::map<CcId, uchar_t> continuityCounters;
 
     NetId    netId;
     Pid      pid;

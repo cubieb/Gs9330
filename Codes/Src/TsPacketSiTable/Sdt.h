@@ -3,6 +3,7 @@
 
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
+#include "SiTableTemplate.h"
 
 /*
 uimsbf:  unsigned integer most significant bit first
@@ -16,10 +17,12 @@ bslbf :  bit string, left bit first
 struct service_description_section
 {
     uchar_t  table_id:                 8;       //uimsbf  -
+
     uint16_t section_syntax_indicator: 1;       //bslbf
     uint16_t reserved_future_use1:     1;       //bslbf
     uint16_t reserved1:                2;       //bslbf
     uint16_t section_length:          12;       //uimsbf  --
+
     uint16_t transport_stream_id:     16;       //uimsbf  --
     uchar_t  reserved2:                2;       //bslbf
     uchar_t  version_number:           5;       //uimsbf
@@ -65,7 +68,8 @@ struct service_description_section_detail
     //}
 };
 #pragma pack(pop)
-#define MaxSdtServiceContentSize (MaxSdtSectionLength - sizeof(service_description_section))
+#define SdtFixedFieldSize sizeof(service_description_section)
+#define MaxSdtServiceContentSize (MaxSdtSectionLength - SdtFixedFieldSize)
 
 /**********************class SdtService**********************/
 class SdtService
@@ -129,24 +133,26 @@ private:
 };
 
 /**********************class SdtTable**********************/
-class SdtTable: public SdtTableInterface
+class SdtTable: public SiTableTemplate<VarHelper, SdtServices, SdtFixedFieldSize, MaxSdtServiceContentSize>
 {
 public:
-    friend class SdtTableInterface;
+    friend class SiTableInterface;
     ~SdtTable();    
 
     void AddService(ServiceId serviceId, uchar_t eitScheduleFlag, 
                     uchar_t eitPresentFollowingFlag, uint16_t runningStatus, uint16_t freeCaMode);
     void AddServiceDescriptor(ServiceId serviceId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
-                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
-                     uchar_t *buffer, size_t bufferSize,
-                     SectionNumber secIndex) const;
+
+protected:
+    bool CheckTableId(TableId tableId) const;
+    bool CheckTsId(TsId tsid) const;
+    size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                      SectionNumber secNumber, SectionNumber lastSecNumber) const;    
+    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+                      size_t var2MaxSize, size_t var2Offset) const;  
 
 private:
     SdtTable(TableId tableId, TsId transportStreamId, Version versionNumber, NetId originalNetworkId);
@@ -156,8 +162,6 @@ private:
     TsId transportStreamId;
     Version  versionNumber;
     NetId originalNetworkId;
-
-    SdtServices sdtServices;
 };
 
 #endif

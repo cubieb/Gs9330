@@ -2,6 +2,11 @@
 #define _NetworkCfgWrapperInterface_h_
 
 #include "Include/Foundation/SystemInclude.h"
+#pragma warning(push)
+#pragma warning(disable:702)   //disable warning caused by ACE library.
+#pragma warning(disable:4251)  //disable warning caused by ACE library.
+#pragma warning(disable:4996)  //disable warning caused by ACE library.
+#include "ace/OS.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -24,19 +29,33 @@ public:
     NetworkCfgWrapperInterface() {};
     virtual ~NetworkCfgWrapperInterface() {};
 
-    void Select(Networks &networks, const char *xmlPath)
+    std::error_code Select(Networks &networks, const char *xmlPath)
     {
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
+
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlChar *xpathExpr = (xmlChar*)"/root/network[*]";
         shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr);
+        if (nodes == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         uint_t recieverId = 0;
         for (int i = 0; i < nodes->nodeNr; ++i)
@@ -53,23 +72,20 @@ public:
                 socketAddr.sin_family = AF_INET;
                 socketAddr.sin_addr.s_addr = inet_addr((char *)ip.get());
                 socketAddr.sin_port = htons(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"port"));
-                Receiver *receiver = Receiver::CreateInstance(recieverId++, socketAddr);
 
-                xmlNodePtr tsIdNode;
-                for (tsIdNode = xmlFirstElementChild(node); 
-                     tsIdNode != nullptr; 
-                     tsIdNode = xmlNextElementSibling(tsIdNode))
-                {
-                    TsId tsId = GetXmlContent<TsId>(tsIdNode);
-                    receiver->Add(tsId);
-                }
-
+                xmlNodePtr tsIdNode = xmlFirstElementChild(node);
+                TsId tsId = GetXmlContent<TsId>(tsIdNode);
+                
+                Receiver *receiver = Receiver::CreateInstance(tsId, socketAddr);
                 network->Add(receiver);
             }
 
             networks.Add(network);
         }
+
+        return std::error_code();
     }
 };
 
+#pragma warning(pop)
 #endif

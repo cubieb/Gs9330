@@ -8,9 +8,9 @@
 #include "NetworksCfg.h"
 using namespace std;
 
-ReceiverInterface * ReceiverInterface::CreateInstance(uint_t receiverId, const struct sockaddr_in &socketAddr)
+ReceiverInterface * ReceiverInterface::CreateInstance(TsId tsId, const struct sockaddr_in &socketAddr)
 {
-    return new Receiver(receiverId, socketAddr);
+    return new Receiver(tsId, socketAddr);
 }
 
 NetworkCfgInterface * NetworkCfgInterface::CreateInstance(NetId netId)
@@ -25,52 +25,13 @@ NetworkCfgsInterface * NetworkCfgsInterface::CreateInstance()
 
 /**********************class Receiver**********************/
 /* public function */
-Receiver::Receiver(uint_t receiverId, const struct sockaddr_in &socketAddr)
-    : receiverId(receiverId), socketAddr(socketAddr)
+Receiver::Receiver(TsId tsId, const struct sockaddr_in &socketAddr)
+    : tsId(tsId), socketAddr(socketAddr)
 {
-    AllocProxy();
 }
 
 Receiver::~Receiver()
 {
-    FreeProxy();
-}
-
-void Receiver::Add(TsId tsId)
-{
-    tsIds.push_back(tsId);
-}
-
-Receiver::iterator Receiver::Begin()
-{
-    return iterator(this, NodePtr(tsIds.begin()));
-}
- 
-void Receiver::Delete(TsId tsId)
-{
-    remove(tsIds.begin(), tsIds.end(), tsId);
-}
-
-Receiver::iterator Receiver::End()
-{
-    return iterator(this, NodePtr(tsIds.end()));
-}
-
-Receiver::iterator Receiver::Find(TsId tsId)
-{
-    list<TsId>::iterator iter;
-    iter = find(tsIds.begin(), tsIds.end(), tsId);
-    return iterator(this, iter);
-}
-
-Receiver::NodePtr Receiver::GetMyHead()
-{
-    return NodePtr(tsIds.end());
-}
-
-uint_t Receiver::GetReceiverId() const
-{
-    return receiverId;
 }
 
 struct sockaddr_in Receiver::GetSocketAddr() const
@@ -78,15 +39,16 @@ struct sockaddr_in Receiver::GetSocketAddr() const
     return socketAddr;
 }
 
+TsId Receiver::GetTsId() const
+{
+    return tsId;
+};
+
 void Receiver::Put(std::ostream& os) const
 {
     os << "  ip = " << inet_ntoa(socketAddr.sin_addr) 
-       << ", port = " << ntohs(socketAddr.sin_port) << endl;
-    list<TsId>::const_iterator iter;
-    for (iter = tsIds.begin(); iter != tsIds.end(); ++iter)
-    {
-        os << "    " << *iter << endl;
-    }
+       << ", port = " << ntohs(socketAddr.sin_port) 
+       << ", tsId = " << tsId << endl;
 }
 
 /**********************class NetworkCfg**********************/

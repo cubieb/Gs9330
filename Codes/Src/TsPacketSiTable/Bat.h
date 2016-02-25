@@ -3,6 +3,7 @@
 
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
+#include "SiTableTemplate.h"
 
 #pragma pack(push, 1)
 struct bouquet_association_section
@@ -47,27 +48,30 @@ struct bouquet_association_section
     uint32_t CRC_32:32;
 };
 #pragma pack(pop)
-#define MaxBatDesAndTsContentSize (MaxBatSectionLength - sizeof(bouquet_association_section))
+#define BatFixedFieldSize sizeof(bouquet_association_section)
+#define MaxBatDesAndTsContentSize (MaxBatSectionLength - BatFixedFieldSize)
 
 /**********************class BatTable**********************/
-class BatTable: public BatTableInterface
+class BatTable: public SiTableTemplate<Descriptors, TransportStreams, BatFixedFieldSize, MaxBatDesAndTsContentSize>
 {
 public:
-    friend class BatTableInterface;
+    friend class SiTableInterface;
     ~BatTable();
 
     void AddDescriptor(std::string &data);
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
-                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
-                     uchar_t *buffer, size_t bufferSize,
-                     SectionNumber secIndex) const;
+
+protected:
+    bool CheckTableId(TableId tableId) const;
+    bool CheckTsId(TsId tsid) const;
+    size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                      SectionNumber secNumber, SectionNumber lastSecNumber) const;    
+    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+                      size_t var2MaxSize, size_t var2Offset) const;
 
 private:
     BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber);
@@ -76,8 +80,6 @@ private:
     TableId tableId;
     BouquetId bouquetId;
     Version versionNumber;
-    Descriptors descriptors;
-    TransportStreams transportStreams;
 };
 
 #endif

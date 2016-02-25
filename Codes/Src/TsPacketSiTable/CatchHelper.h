@@ -6,12 +6,12 @@ class CatchIdHelper
 {
 public:
     CatchIdHelper();
-    CatchId GetCatchId(TableId tableId, const TsIds &tsIds);
-    CatchId GetCatchId(TableId tableId, const TsIds &tsIds, SectionNumber secIndex);
+    CatchId GetCatchId(TableId tableId, TsId tsId);
+    CatchId GetCatchId(TableId tableId, TsId tsId, SectionNumber secIndex);
 
 private:
     uint_t index;
-    std::map<TableId, std::map<TsIds, CatchId>> catchIds;
+    std::map<TableId, std::map<TsId, CatchId>> catchIds;
 };
 
 #endif

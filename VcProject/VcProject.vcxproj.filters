@@ -149,6 +149,9 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportPacket.h">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
+    <ClInclude Include="..\Codes\Src\TsPacketSiTable\SiTableTemplate.h">
+      <Filter>源文件\TsPacketSiTable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Foundation\Delete.cpp">

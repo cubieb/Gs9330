@@ -9,12 +9,16 @@ typedef uint16_t Pid;
 typedef uchar_t  SectionNumber;
 typedef uint16_t ServiceId;
 typedef uchar_t  TableId;
+typedef uint16_t TableSize;
 typedef uint16_t TsId;  //Transport Stream Id
 typedef uchar_t  Version;
 typedef uint32_t SiTableKey;
+typedef uint32_t CcId;  //continuity counter ID, used by Transport Packet
+
+#define AllTsId  0xFFFF
 
 typedef std::list<TsId> TsIds;
-typedef uint64_t CatchId;
+typedef uint32_t CatchId;
 
 #define TsPacketSize 188
 
@@ -23,6 +27,7 @@ typedef uint64_t CatchId;
 #define MaxSdtSectionLength     1024
 #define MaxEitSectionLength     4096
 
+#define SectionSyntaxIndicator  0x1
 #define NitSectionSyntaxIndicator  0x1
 #define SdtSectionSyntaxIndicator  0x1
 #define BatSectionSyntaxIndicator  0x1

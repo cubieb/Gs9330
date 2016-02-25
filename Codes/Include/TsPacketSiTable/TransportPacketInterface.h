@@ -21,10 +21,10 @@ public:
     virtual void DelSiTable(TableId tableId, SiTableKey key) = 0;
 
     virtual SiTableInterface * FindSiTable(TableId tableId, SiTableKey key) = 0;
-    virtual size_t GetCodesSize(TableId tableId, const TsIds &tsIds) const = 0;
+    virtual size_t GetCodesSize(TableId tableId, TsId tsId) const = 0;
     virtual NetId  GetNetId() const = 0;
     virtual Pid    GetPid() const = 0;
-    virtual size_t MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
+    virtual size_t MakeCodes(CcId ccId, TableId tableId, TsId tsId, 
                              uchar_t *buffer, size_t bufferSize) = 0;
     virtual void RefreshCatch() = 0;
 

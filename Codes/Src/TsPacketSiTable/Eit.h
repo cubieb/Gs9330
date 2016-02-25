@@ -55,6 +55,8 @@ struct event_information_section_detail
 #define MaxEitEventContentSize (MaxEitSectionLength - sizeof(event_information_section))
 //sizeof(event_information_section_detail) = 12
 #define MaxEitEventDescriptorSize (MaxEitEventContentSize - sizeof(event_information_section_detail))
+#define MaxEventNumberIn1EitPfTable   1
+#define MaxEventNumberInAllEitPfTable 2
 
 #define UseCatchOptimization
 
@@ -151,26 +153,29 @@ public:
     bool RemoveOutOfDateEvent();
 
 private:
+    std::list<EitEvent *>::const_iterator Seek(size_t offset, uint_t maxLoopNumber) const;
+
+private:
     std::list<EitEvent *> eitEvents;
 };
 
 /**********************class EitTable**********************/
-class EitTable: public EitTableInterface
+class EitTable: public SiTableInterface
 {
 public:
-    friend class EitTableInterface;
+    friend class SiTableInterface;
     ~EitTable(); 
 
     void AddEvent(EventId eventId, const char *startTime, 
                   time_t duration, uint16_t runningStatus, uint16_t freeCaMode);
     void AddEventDescriptor(EventId eventId, std::string &data);
     
-    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
+    size_t GetCodesSize(TableId tableId, TsId tsId, 
                         SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
+    uint_t GetSecNumber(TableId tableId, TsId tsId) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
+    size_t MakeCodes(TableId tableId, TsId tsId, 
                      uchar_t *buffer, size_t bufferSize,
                      SectionNumber secIndex) const;
       

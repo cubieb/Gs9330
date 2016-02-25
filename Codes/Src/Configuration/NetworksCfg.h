@@ -7,24 +7,16 @@
 class Receiver: public ReceiverInterface
 {
 public:
-    Receiver(uint_t receiverId, const struct sockaddr_in &socketAddr);
+    Receiver(TsId tsId, const struct sockaddr_in &socketAddr);
     ~Receiver();
-
-    void Add(TsId tsId);
-    iterator Begin();
-    void Delete(TsId tsId);
-    iterator End();
-    iterator Find(TsId tsId);
-    NodePtr GetMyHead();
-
-    uint_t GetReceiverId() const;
-    struct sockaddr_in GetSocketAddr() const;    
+    
+    struct sockaddr_in GetSocketAddr() const;
+    TsId GetTsId() const;   
     void Put(std::ostream& os) const;
 
 private:
-    uint_t receiverId;
+    TsId tsId;
     struct sockaddr_in socketAddr;
-    std::list<TsId> tsIds;
 };
 
 /**********************class NetworkCfg**********************/

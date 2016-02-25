@@ -10,7 +10,7 @@ public:
     virtual ~ControllerInterface() {};
 
     static ControllerInterface &GetInstance();
-    virtual void Start(ACE_Reactor *reactor, const char *cfgPath) = 0;
+    virtual bool Start(ACE_Reactor *reactor, const char *cfgPath) = 0;
 };
 
 

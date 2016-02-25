@@ -12,7 +12,7 @@
 #include "Nit.h"
 using namespace std;
 
-NitTableInterface * NitTableInterface::CreateInstance(TableId tableId, NetId networkId, Version versionNumber)
+SiTableInterface * SiTableInterface::CreateNitInstance(TableId tableId, NetId networkId, Version versionNumber)
 {
     if (tableId != NitActualTableId && tableId != NitOtherTableId)
         return nullptr;
@@ -22,8 +22,7 @@ NitTableInterface * NitTableInterface::CreateInstance(TableId tableId, NetId net
 
 /**********************class NitTable**********************/
 NitTable::NitTable(TableId tableId, NetId networkId, Version versionNumber)
-    : tableId(tableId), networkId(networkId), versionNumber(versionNumber), 
-      sectionNumber(0), lastSectionNumber(0)
+    : tableId(tableId), networkId(networkId), versionNumber(versionNumber)
 {
 }
 
@@ -41,12 +40,12 @@ void NitTable::AddDescriptor(std::string &data)
         return;
     }
 
-    descriptors.AddDescriptor(descriptor);
+    var1.AddDescriptor(descriptor);
 }
 
 void NitTable::AddTs(TsId tsId, OnId onId)
 {
-    transportStreams.AddTransportStream(tsId, onId);
+    var2.AddTransportStream(tsId, onId);
 }
 
 void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
@@ -59,33 +58,7 @@ void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
         return;
     }
 
-    transportStreams.AddTsDescriptor(tsId, descriptor);
-}
-
-size_t NitTable::GetCodesSize(TableId tableId, const TsIds &tsIds, 
-                              SectionNumber secIndex) const
-{    
-    if (this->tableId != tableId)
-        return 0;
-
-    //we assume all descriptor to be packed in first section.
-    assert(descriptors.GetCodesSize() <= MaxNitDesAndTsContentSize);
-    //check secIndex is valid.
-    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
-
-    size_t desSize = descriptors.GetCodesSize();
-    size_t maxSize = MaxNitDesAndTsContentSize - desSize;
-    size_t tsOffset = 0;
-    
-    for (SectionNumber i = 0; i < secIndex; ++i)
-    {
-        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-        desSize = 0;
-        maxSize = MaxNitDesAndTsContentSize;
-    }
-    
-    size_t size = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-    return (sizeof(network_information_section) + desSize + size); 
+    var2.AddTsDescriptor(tsId, descriptor);
 }
 
 SiTableKey NitTable::GetKey() const
@@ -93,65 +66,32 @@ SiTableKey NitTable::GetKey() const
     return networkId;
 }
 
-uint_t NitTable::GetSecNumber(TableId tableId, const TsIds &tsIds) const
-{
-    if (this->tableId != tableId)
-        return 0;
-
-    uint_t secNumber = 1;
-    size_t maxSize = MaxNitDesAndTsContentSize - descriptors.GetCodesSize();
-    size_t tsOffset = 0;
-    transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-    
-    size_t tsSize;
-    maxSize = MaxNitDesAndTsContentSize;
-    for (tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-         tsSize != 0;
-         tsSize = transportStreams.GetCodesSize(tsIds, maxSize, tsOffset))
-    {
-        ++secNumber;
-    }
-
-    return secNumber;
-}
-
 TableId NitTable::GetTableId() const
 {
     return tableId;
 }
 
-size_t NitTable::MakeCodes(TableId tableId, const TsIds &tsIds, 
-                           uchar_t *buffer, size_t bufferSize, 
-                           SectionNumber secIndex) const
+/* protected function */
+bool NitTable::CheckTableId(TableId tableId) const
+{
+    return (tableId == this->tableId);
+}
+
+bool NitTable::CheckTsId(TsId tsid) const
+{
+    return true;
+}
+
+size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                            SectionNumber secNumber, SectionNumber lastSecNumber) const
 {
     uchar_t *ptr = buffer;
-    size_t size = GetCodesSize(tableId, tsIds, secIndex);
-    assert(size <= bufferSize);
-    if (size == 0)
-        return 0;
 
-    //we assume all descriptor to be packed in first section.
-    assert(descriptors.GetCodesSize() <= MaxNitDesAndTsContentSize);
-    //check secIndex is valid.
-    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsIds));
-
-    size_t desSize = descriptors.GetCodesSize();
-    size_t maxSize = MaxNitDesAndTsContentSize - desSize;
-    size_t tsOffset = 0;
-    
-    SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsIds);
-    for (SectionNumber i = 0; i < secIndex; ++i)
-    {
-        transportStreams.GetCodesSize(tsIds, maxSize, tsOffset);
-        desSize = 0;
-        maxSize = MaxNitDesAndTsContentSize;
-    }
-
-    ptr = ptr + Write8(ptr, tableId);
-    WriteHelper<uint16_t> siHelper(ptr, ptr+2);
     //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
-    ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + Write16(ptr, networkId);  //network_id
+    TableSize pseudoSize = 0;
+    ptr = ptr + WriteBuffer(ptr, tableId);
+    ptr = ptr + WriteBuffer(ptr, pseudoSize); 
+    ptr = ptr + WriteBuffer(ptr, networkId);  //network_id
 
     /* current_next_indicator: This 1-bit indicator, when set to "1" indicates that the sub_table is the 
     currently applicable sub_table. When the bit is set to "0", it indicates that the sub_table sent 
@@ -159,34 +99,40 @@ size_t NitTable::MakeCodes(TableId tableId, const TsIds &tsIds,
     */
     uchar_t currentNextIndicator = 1;
     ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator);
-    ptr = ptr + Write8(ptr, secIndex);     //section_number
-    ptr = ptr + Write8(ptr, secNumber - 1); //last_section_number
+    /* The section_number shall be incremented by 1 with each additional section with the same
+       table_id and network_id. 
+     */
+    ptr = ptr + WriteBuffer(ptr, secNumber);     //section_number
+    ptr = ptr + WriteBuffer(ptr, lastSecNumber); //last_section_number    
 
     //we assume all descriptor to be packed in first section.
-    if (desSize == 0)
+    if (var1Size == 0)
     {
-        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | desSize); 
+        ptr = ptr + Write16(ptr, (Reserved4Bit << 12) | var1Size); 
     }
     else
     {
-        WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
+        WriteHelper<uint16_t> descriptorHelper(ptr, ptr + 2);
         //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
         ptr = ptr + Write16(ptr, 0);  
-        ptr = ptr + descriptors.MakeCodes(ptr, MaxNitDesAndTsContentSize);
+        ptr = ptr + var1.MakeCodes(ptr, var1Size);
         //rewrite reserved_future_use + network_descriptors_length.
-        desHelper.Write(Reserved4Bit << 12, ptr); 
+        descriptorHelper.Write(Reserved4Bit << 12, ptr); 
     }
 
+    return (ptr - buffer);
+}
+
+size_t NitTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+                            size_t var2MaxSize, size_t var2Offset) const
+{
+    uchar_t *ptr = buffer;
     WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + transportStreams.MakeCodes(tsIds, ptr, maxSize, tsOffset);
+    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
-
-    siHelper.Write((NitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
-    ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
-
-    assert(size == ptr - buffer);
+    
     return (ptr - buffer);
 }

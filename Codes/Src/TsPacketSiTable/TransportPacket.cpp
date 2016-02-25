@@ -81,16 +81,16 @@ SiTableInterface * TransportPacket::FindSiTable(TableId tableId, SiTableKey key)
     return iter == siTables.end()? nullptr: *iter;
 }
 
-size_t TransportPacket::GetCodesSize(TableId tableId, const TsIds &tsIds) const
+size_t TransportPacket::GetCodesSize(TableId tableId, TsId tsId) const
 {
     uint_t packetNumber = 0; 
 
     for (auto iter: siTables)
     {
-        uint_t secNumber = iter->GetSecNumber(tableId, tsIds);
+        uint_t secNumber = iter->GetSecNumber(tableId, tsId);
         for (uint_t i = 0; i < secNumber; ++i)
         {            
-            size_t tableSize = iter->GetCodesSize(tableId, tsIds, i);
+            size_t tableSize = iter->GetCodesSize(tableId, tsId, i);
             if (tableSize == 0)
             {
                 continue;
@@ -119,11 +119,11 @@ uint_t TransportPacket::GetPacketNumber(size_t codesSize) const
     return (codesSize + MaxTsPacketPayloadSize - 1) / MaxTsPacketPayloadSize;
 }
 
-size_t TransportPacket::MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsIds, 
-                           uchar_t *buffer, size_t bufferSize)
+size_t TransportPacket::MakeCodes(CcId ccId, TableId tableId, TsId tsId, 
+                                  uchar_t *buffer, size_t bufferSize)
 {
     uchar_t *ptr = buffer;
-    assert(GetCodesSize(tableId, tsIds) <= bufferSize);
+    assert(GetCodesSize(tableId, tsId) <= bufferSize);
 
     map<uint_t, uchar_t>::iterator ccIter = continuityCounters.find(ccId);
     if (ccIter == continuityCounters.end())
@@ -136,14 +136,11 @@ size_t TransportPacket::MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsI
 
     for (auto iter: siTables)
     {
-        uint_t secNumber = iter->GetSecNumber(tableId, tsIds);
-        for (uint_t i = 0; i < secNumber; ++i)
+        SectionNumber secNumber = (SectionNumber)iter->GetSecNumber(tableId, tsId);
+        for (SectionNumber i = 0; i < secNumber; ++i)
         { 
-            size_t tablePlainSize = iter->GetCodesSize(tableId, tsIds, i);
-            if (tablePlainSize == 0)
-            {
-                continue;
-            }
+            size_t tablePlainSize = iter->GetCodesSize(tableId, tsId, i);
+            assert(tablePlainSize != 0);
 
             //+1 for pointer_field
             uint_t packetNumber = GetPacketNumber(tablePlainSize + 1); 
@@ -152,7 +149,7 @@ size_t TransportPacket::MakeCodes(uint_t ccId, TableId tableId, const TsIds &tsI
 
             shared_ptr<uchar_t> tableCodes(new uchar_t[tableExtSize], ArrayDeleter());
             Write8(tableCodes.get(), 0x0); //pointer_field
-            iter->MakeCodes(tableId, tsIds, tableCodes.get() + 1, tablePlainSize, i);
+            iter->MakeCodes(tableId, tsId, tableCodes.get() + 1, tablePlainSize, i);
             memset(tableCodes.get() + 1 + tablePlainSize, 0xff, tableExtSize - 1 - tablePlainSize);
 
             for (uint_t i = 0; i < packetNumber; ++i)

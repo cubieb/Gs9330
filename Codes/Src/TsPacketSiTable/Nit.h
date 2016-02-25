@@ -3,6 +3,7 @@
 
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
+#include "SiTableTemplate.h"
 
 /*
     uimsbf:  unsigned integer most significant bit first
@@ -23,10 +24,12 @@ sub_table: collection of sections with the same value of table_id and:
 struct network_information_section
 {
     uchar_t  table_id:8;                        // 8 uimsbf  -
+
     uint16_t section_syntax_indicator:1;        // 1 bslbf    
     uint16_t reserved_future_use1:1;            // 1 bslbf    
     uint16_t reserved1:2;                       // 2 bslbf    
     uint16_t section_length:12;                 // 12 uimsbf -- 
+
     uint16_t network_id:16;                     // 16 uimsbf -- 
     uchar_t  reserved2:2;                       // 2 bslbf     
     uchar_t  version_number:5;                  // 5 uimsbf    
@@ -56,27 +59,30 @@ struct network_information_section
     uint32_t CRC_32;                           //32 rpchof  ----
 };
 #pragma pack(pop)
-#define MaxNitDesAndTsContentSize (MaxNitSectionLength - sizeof(network_information_section))
+#define NitFixedFieldSize sizeof(network_information_section)
+#define MaxNitDesAndTsContentSize (MaxNitSectionLength - NitFixedFieldSize)
 
 /**********************class NitTable**********************/
-class NitTable: public NitTableInterface
+class NitTable: public SiTableTemplate<Descriptors, TransportStreams, NitFixedFieldSize, MaxNitDesAndTsContentSize>
 {
 public:
-    friend class NitTableInterface;
+    friend class SiTableInterface;
     ~NitTable();    
 
     void AddDescriptor(std::string &data);
     void AddTs(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, std::string &data);
 
-    size_t GetCodesSize(TableId tableId, const TsIds &tsIds, 
-                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, const TsIds &tsIds) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, const TsIds &tsIds, 
-                     uchar_t *buffer, size_t bufferSize,
-                     SectionNumber secIndex) const;
+
+protected:
+    bool CheckTableId(TableId tableId) const;
+    bool CheckTsId(TsId tsid) const;
+    size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                      SectionNumber secNumber, SectionNumber lastSecNumber) const;    
+    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+                      size_t var2MaxSize, size_t var2Offset) const;    
 
 private:
     NitTable(TableId tableId, NetId networkId, Version versionNumber);
@@ -85,10 +91,6 @@ private:
     TableId tableId;
     NetId networkId;
     Version versionNumber;
-    SectionNumber sectionNumber;
-    SectionNumber lastSectionNumber;
-    TransportStreams transportStreams;
-    Descriptors descriptors;
 };
 
 #endif

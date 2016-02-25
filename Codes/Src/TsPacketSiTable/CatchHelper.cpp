@@ -12,35 +12,35 @@ CatchIdHelper::CatchIdHelper()
     index = 0;
 }
 
-CatchId CatchIdHelper::GetCatchId(TableId tableId, const TsIds &tsIds)
+CatchId CatchIdHelper::GetCatchId(TableId tableId, TsId tsId)
 {
-    map<TableId, map<TsIds, CatchId>>::iterator tableIdIter;
+    map<TableId, map<TsId, CatchId>>::iterator tableIdIter;
     tableIdIter = catchIds.find(tableId);
     if (tableIdIter == catchIds.end())
     {
-        CatchId id = ((CatchId)tableId << 56) | (CatchId)index;
+        CatchId id = ((CatchId)tableId << 24) | (CatchId)index;
         ++index;
-        map<TsIds, CatchId> tsIdsToCatchId;
-        tsIdsToCatchId.insert(make_pair(tsIds, id));
+        map<TsId, CatchId> tsIdsToCatchId;
+        tsIdsToCatchId.insert(make_pair(tsId, id));
         catchIds.insert(make_pair(tableId, tsIdsToCatchId));
 
         return id;
     }
 
-    map<TsIds, CatchId> &tsIdsToCatchId = tableIdIter->second;
-    map<TsIds, CatchId>::iterator tsIdsIter = tsIdsToCatchId.find(tsIds);
+    map<TsId, CatchId> &tsIdsToCatchId = tableIdIter->second;
+    map<TsId, CatchId>::iterator tsIdsIter = tsIdsToCatchId.find(tsId);
     if (tsIdsIter == tsIdsToCatchId.end())
     {
-        CatchId id = ((CatchId)tableId << 56) | (CatchId)index;
+        CatchId id = ((CatchId)tableId << 24) | (CatchId)index;
         ++index;
-        tsIdsToCatchId.insert(make_pair(tsIds, id));
+        tsIdsToCatchId.insert(make_pair(tsId, id));
         return id;
     }
         
     return tsIdsIter->second;
 }
 
-CatchId CatchIdHelper::GetCatchId(TableId tableId, const TsIds &tsIds, SectionNumber secIndex)
+CatchId CatchIdHelper::GetCatchId(TableId tableId, TsId tsId, SectionNumber secIndex)
 {
-    return GetCatchId(tableId, tsIds) | ((CatchId)secIndex << 48);
+    return GetCatchId(tableId, tsId) | ((CatchId)secIndex << 16);
 }
