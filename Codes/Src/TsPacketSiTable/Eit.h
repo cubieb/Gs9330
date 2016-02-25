@@ -5,6 +5,7 @@
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
 #include "CatchHelper.h"
+#include "SiTableTemplate.h"
 
 #pragma pack(push, 1)
 struct event_information_section
@@ -51,14 +52,11 @@ struct event_information_section_detail
     //}
 };
 #pragma pack(pop)
+#define EitFixedFieldSize sizeof(event_information_section)
 //MaxEitEventContentSize = 4078
-#define MaxEitEventContentSize (MaxEitSectionLength - sizeof(event_information_section))
+#define MaxEitEventContentSize (MaxEitSectionLength - EitFixedFieldSize)
 //sizeof(event_information_section_detail) = 12
 #define MaxEitEventDescriptorSize (MaxEitEventContentSize - sizeof(event_information_section_detail))
-#define MaxEventNumberIn1EitPfTable   1
-#define MaxEventNumberInAllEitPfTable 2
-
-#define UseCatchOptimization
 
 /**********************class EitEvent**********************/
 class EitEvent
@@ -142,7 +140,7 @@ public:
     void AddEvent(EitEvent *eitEvent);
     void AddEventDescriptor(uint16_t eventId, Descriptor *descriptor);
 
-    size_t GetCodesSize(TableId tableId, size_t maxSize, size_t &offset) const;
+    size_t GetCodesSize(TableId tableId, size_t maxSize, size_t offset) const;
     size_t MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
     
     /* remove out-of-date event 
@@ -153,6 +151,7 @@ public:
     bool RemoveOutOfDateEvent();
 
 private:
+    uint_t GetMaxEventNumber(TableId tableId) const;
     std::list<EitEvent *>::const_iterator Seek(size_t offset, uint_t maxLoopNumber) const;
 
 private:
@@ -160,7 +159,7 @@ private:
 };
 
 /**********************class EitTable**********************/
-class EitTable: public SiTableInterface
+class EitTable: public SiTableTemplate<VarHelper, EitEvents, EitFixedFieldSize, MaxEitEventContentSize>
 {
 public:
     friend class SiTableInterface;
@@ -170,22 +169,20 @@ public:
                   time_t duration, uint16_t runningStatus, uint16_t freeCaMode);
     void AddEventDescriptor(EventId eventId, std::string &data);
     
-    size_t GetCodesSize(TableId tableId, TsId tsId, 
-                        SectionNumber secIndex) const;
     SiTableKey GetKey() const;
-    uint_t GetSecNumber(TableId tableId, TsId tsId) const;
     TableId GetTableId() const;
-    size_t MakeCodes(TableId tableId, TsId tsId, 
-                     uchar_t *buffer, size_t bufferSize,
-                     SectionNumber secIndex) const;
-      
-    void RefreshCatch();
+    
+protected:
+    bool CheckTableId(TableId tableId) const;
+    bool CheckTsId(TsId tsid) const;
+    size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                      SectionNumber secNumber, SectionNumber lastSecNumber) const;    
+    size_t MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+                      size_t var2MaxSize, size_t var2Offset) const; 
 
 private:
     EitTable(TableId tableId, ServiceId serviceId, Version versionNumber, 
              TsId transportStreamId, NetId originalNetworkId);
-    bool CheckTableId(TableId tableId) const;
-    void ClearCatch();
 
 private:    
     TableId tableId;
@@ -193,15 +190,6 @@ private:
     Version versionNumber;
     TsId    transportStreamId;
     NetId   originalNetworkId;
-    EitEvents eitEvents;
-
-private:
-#ifdef UseCatchOptimization
-    mutable CatchIdHelper catchIdHelper;
-    mutable std::map<CatchId, size_t> codeSizeCatches;
-    mutable std::map<CatchId, uchar_t*> codeCatches;
-    mutable std::map<CatchId, uint_t> secNumberCatches;
-#endif
 };
 
 #endif

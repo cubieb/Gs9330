@@ -17,7 +17,6 @@ typedef uint32_t CcId;  //continuity counter ID, used by Transport Packet
 
 #define AllTsId  0xFFFF
 
-typedef std::list<TsId> TsIds;
 typedef uint32_t CatchId;
 
 #define TsPacketSize 188
@@ -28,10 +27,6 @@ typedef uint32_t CatchId;
 #define MaxEitSectionLength     4096
 
 #define SectionSyntaxIndicator  0x1
-#define NitSectionSyntaxIndicator  0x1
-#define SdtSectionSyntaxIndicator  0x1
-#define BatSectionSyntaxIndicator  0x1
-#define EitSectionSyntaxIndicator  0x1
 
 #define Reserved1Bit               0x1
 #define Reserved2Bit               0x3
@@ -54,6 +49,9 @@ typedef uint32_t CatchId;
 #define NitOtherTableId            0x41
 #define SdtActualTableId           0x42
 #define SdtOtherTableId            0x46
+
+#define MaxEventNumberIn1EitPfTable   1
+#define MaxEventNumberInAllEitPfTable 2
 
 #define UdpPayloadSize (188*7)
 

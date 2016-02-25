@@ -48,12 +48,12 @@ public:
 
         for (SectionNumber i = 0; i < secIndex; ++i)
         {
-            offset = offset + var2.GetCodesSize(maxSize, offset);
+            offset = offset + var2.GetCodesSize(tableId, maxSize, offset);
             var1Size = 0;
             maxSize = VarSize;
         }
 
-        size_t var2Size = var2.GetCodesSize(maxSize, offset);
+        size_t var2Size = var2.GetCodesSize(tableId, maxSize, offset);
         return (FixedSize + var1Size + var2Size);
     }
 
@@ -65,11 +65,11 @@ public:
         uint_t secNumber = 1;
         size_t maxSize = VarSize - var1.GetCodesSize();
         size_t offset = 0;
-        offset = var2.GetCodesSize(maxSize, offset);
+        offset = var2.GetCodesSize(tableId, maxSize, offset);
     
         size_t size;
         maxSize = VarSize;
-        while ((size = var2.GetCodesSize(maxSize, offset)) != 0)
+        while ((size = var2.GetCodesSize(tableId, maxSize, offset)) != 0)
         {
             offset = offset + size;
             ++secNumber;
@@ -101,7 +101,7 @@ public:
         /* calculate offset */
         for (SectionNumber i = 0; i < secIndex; ++i)
         {
-            offset = offset + var2.GetCodesSize(maxSize, offset);
+            offset = offset + var2.GetCodesSize(tableId, maxSize, offset);
             var1Size = 0;
             maxSize = VarSize;
         }
@@ -110,9 +110,11 @@ public:
         WriteHelper<uint16_t> writeHelper(ptr + sizeof(TableId), ptr + sizeof(TableId) + sizeof(TableSize));
         ptr = ptr + MakeCodes1(tableId, ptr, buffer + bufferSize - ptr, var1Size, 
                                secIndex, secNumber - 1);        
-        ptr = ptr + MakeCodes2(ptr, buffer + bufferSize - ptr, maxSize, offset); 
+        ptr = ptr + MakeCodes2(tableId, ptr, buffer + bufferSize - ptr, maxSize, offset); 
         writeHelper.Write((SectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
         ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
+
+        assert(size == ptr - buffer);
         return ptr - buffer;
     }
 
@@ -121,7 +123,7 @@ protected:
     virtual bool CheckTsId(TsId tsid) const = 0;
     virtual size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                               SectionNumber secNumber, SectionNumber lastSecNumber) const = 0;    
-    virtual size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    virtual size_t MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
                               size_t var2MaxSize, size_t var2Offset) const = 0;    
 protected:
     Var1 var1;

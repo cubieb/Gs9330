@@ -41,7 +41,7 @@ void TransportPacket::TestTransportPacketAddSiTable()
     auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
 
     SiTableInterface *siTable;
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     tsPacket->AddSiTable(siTable);
     CPPUNIT_ASSERT(tsPacket->FindSiTable(BatTableId, bouquetId) != nullptr);
 }
@@ -56,9 +56,9 @@ void TransportPacket::TestTransportPacketDelSiTable()
     auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
 
     SiTableInterface *siTable;
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId1, version);
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId1, version);
     tsPacket->AddSiTable(siTable);    
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId2, version);
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId2, version);
     tsPacket->AddSiTable(siTable);
 
     tsPacket->DelSiTable(BatTableId, bouquetId1);
@@ -83,25 +83,22 @@ void TransportPacket::TestTransportPacketGetCodesSize()
     Version   version = 1;
     TsId      tsId = 1;
     OnId      onId = 0;
-
-    TsIds tsIds;
-    tsIds.push_back(tsId);
-
+    
     auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
-    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == 0);
+    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsId) == 0);
 
-    BatTableInterface *siTable;
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    SiTableInterface *siTable;
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     tsPacket->AddSiTable(siTable);
-    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == TsPacketSize);
+    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsId) == TsPacketSize);
 
     //-1 for pointer_field
     size_t size = MaxTsPacketPayloadSize - 1 - sizeof(bouquet_association_section);
     siTable->AddDescriptor(GetDescriptorString(size));
-    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == TsPacketSize);
+    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsId) == TsPacketSize);
 
     siTable->AddDescriptor(GetDescriptorString(2));
-    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsIds) == TsPacketSize * 2);
+    CPPUNIT_ASSERT(tsPacket->GetCodesSize(BatTableId,tsId) == TsPacketSize * 2);
 }
 
 void TransportPacket::TestTransportPacketGetNetId()
@@ -132,24 +129,21 @@ void TransportPacket::TestTransportPacketMakeCodes1()
     Version   version = 3;
     TsId      tsId = 1;
     OnId      onId = 0;
-
-    TsIds tsIds;
-    tsIds.push_back(tsId);
     
     auto_ptr<TransportPacketInterface> tsPacket(TransportPacketInterface::CreateInstance(netId, BatPid));
     static uchar_t buffer[2048];
 
-    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, 2048) == 0);
+    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsId, buffer, 2048) == 0);
 
-    BatTableInterface *siTable;
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    SiTableInterface *siTable;
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     tsPacket->AddSiTable(siTable);
 
-    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, 2048) == TsPacketSize);
+    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsId, buffer, 2048) == TsPacketSize);
     uchar_t code1[] = { 0x47, 0x40, 0x11, 0x10 };
     CPPUNIT_ASSERT(memcmp(buffer, code1, 4) == 0);
 
-    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, 2048) == TsPacketSize);
+    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsId, buffer, 2048) == TsPacketSize);
     uchar_t code2[] = { 0x47, 0x40, 0x11, 0x11 };
     CPPUNIT_ASSERT(memcmp(buffer, code2, 4) == 0);
 
@@ -157,7 +151,7 @@ void TransportPacket::TestTransportPacketMakeCodes1()
     size_t size = MaxTsPacketPayloadSize - 1 - sizeof(bouquet_association_section);
     siTable->AddDescriptor(GetDescriptorString(size));
     siTable->AddDescriptor(GetDescriptorString(2));
-    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, 2048) == TsPacketSize * 2);
+    CPPUNIT_ASSERT(tsPacket->MakeCodes(0, BatTableId, tsId, buffer, 2048) == TsPacketSize * 2);
     uchar_t code3[] = { 0x47, 0x40, 0x11, 0x12 };
     uchar_t code4[] = { 0x47, 0x00, 0x11, 0x13 };
     CPPUNIT_ASSERT(memcmp(buffer, code3, 4) == 0);
@@ -176,39 +170,37 @@ void TransportPacket::TestTransportPacketMakeCodes2()
     static uchar_t buffer[MaxBufferSize];
 
     uchar_t code[] = { 0x47, 0x40, 0x11, 0x10, 0x00 };
-    BatTableInterface *siTable;
-    siTable = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    SiTableInterface *siTable;
+    siTable = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     tsPacket->AddSiTable(siTable);
 
-    uint_t tsNumber = 200;  //1300
+    uint_t tansportStreamNumber = 200;  //1300
     uint_t sectionUnitTsNumber = MaxBatDesAndTsContentSize / sizeof(transport_stream);
-    uint_t headSectionNumber = tsNumber / sectionUnitTsNumber;
-    uint_t tailSectionNumber = (tsNumber % sectionUnitTsNumber) == 0 ? 0 : 1;
+    uint_t headSectionNumber = tansportStreamNumber / sectionUnitTsNumber;
+    uint_t tailSectionNumber = (tansportStreamNumber % sectionUnitTsNumber) == 0 ? 0 : 1;
     size_t headSectionUnitSize = sizeof(transport_stream) * sectionUnitTsNumber
                              + sizeof(bouquet_association_section)
                              + 1;  //+1 for pointer_field
-    size_t tailSectionSize = (tsNumber - sectionUnitTsNumber * headSectionNumber) * sizeof(transport_stream)
+    size_t tailSectionSize = (tansportStreamNumber - sectionUnitTsNumber * headSectionNumber) * sizeof(transport_stream)
                              + sizeof(bouquet_association_section);
     uint_t headSectionUnitPacketNumber = (headSectionUnitSize + TsPacketSize - 1) / TsPacketSize;
     uint_t tailSectionUnitPacketNumber = (tailSectionSize + TsPacketSize - 1) / TsPacketSize;
     size_t tsPacketNumber = headSectionUnitPacketNumber * headSectionNumber + tailSectionUnitPacketNumber;
     
+    TsId      tsId = 1;
     OnId      onId = 0;
-    TsIds tsIds;
 
-    uint_t i;
-    for (i = 0; i < tsNumber; ++i)
+    for (uint_t i = 0; i < tansportStreamNumber; ++i)
     {
         TsId tsId = i + 1;
-        tsIds.push_back(tsId);
         siTable->AddTs(tsId, onId);
     }
 
-    size_t codeSize = tsPacket->GetCodesSize(BatTableId, tsIds);
+    size_t codeSize = tsPacket->GetCodesSize(BatTableId, tsId);
     CPPUNIT_ASSERT(codeSize == TsPacketSize * tsPacketNumber);
-    CPPUNIT_ASSERT(codeSize == tsPacket->MakeCodes(0, BatTableId, tsIds, buffer, MaxBufferSize));
+    CPPUNIT_ASSERT(codeSize == tsPacket->MakeCodes(0, BatTableId, tsId, buffer, MaxBufferSize));
         
-    for (i = 1; i < tsPacketNumber; ++i)
+    for (uint_t i = 1; i < tsPacketNumber; ++i)
     {
         size_t cmpSize;
         if (i % headSectionUnitPacketNumber == 0)

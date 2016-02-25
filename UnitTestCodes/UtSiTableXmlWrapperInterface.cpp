@@ -146,18 +146,15 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect01()
     uint_t    ccid = 0;
     const size_t BufferSize = 1024;
     size_t    size;
-
-    TsIds tsIds;
-    tsIds.push_back(tsId);
-
+    
     uchar_t bufferL[BufferSize], bufferR[BufferSize]; 
     auto_ptr<TransportPacketInterface> tsPacketR(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatTableInterface *siTableR;
-    siTableR = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    SiTableInterface *siTableR;
+    siTableR = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     siTableR->AddTs(tsId, onId);
     tsPacketR->AddSiTable(siTableR);
-    size = tsPacketR->GetCodesSize(BatTableId, tsIds);
-    tsPacketR->MakeCodes(ccid, BatTableId, tsIds, bufferR, BufferSize);
+    size = tsPacketR->GetCodesSize(BatTableId, tsId);
+    tsPacketR->MakeCodes(ccid, BatTableId, tsId, bufferR, BufferSize);
 
     char *xmlString = 
         "<?xml version='1.0'  encoding='gb2312' ?> \n"
@@ -179,12 +176,12 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect01()
     list<SiTableKey> keysL, keysR;    
     keysR.push_back(1);
     auto_ptr<TransportPacketInterface> tsPacketL(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatXmlWrapper<TransportPacketInterface, BatTableInterface> wrapper;
+    BatXmlWrapper<TransportPacketInterface, SiTableInterface> wrapper;
     wrapper.Select(*tsPacketL, "bat.xml", tableId, keysL);
     CPPUNIT_ASSERT(tableId == 0x4A);
     CPPUNIT_ASSERT(keysL == keysR);
-    CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsIds) == size);
-    tsPacketL->MakeCodes(ccid, BatTableId, tsIds, bufferL, BufferSize);
+    CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsId) == size);
+    tsPacketL->MakeCodes(ccid, BatTableId, tsId, bufferL, BufferSize);
     CPPUNIT_ASSERT(memcmp(bufferL, bufferR, size) == 0);
     remove("bat.xml");
 }
@@ -200,19 +197,16 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect02()
     const size_t BufferSize = 1024;
     size_t    size;
 
-    TsIds tsIds;
-    tsIds.push_back(tsId);
-
     uchar_t bufferL[BufferSize], bufferR[BufferSize]; 
     auto_ptr<TransportPacketInterface> tsPacketR(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatTableInterface *siTableR;
-    siTableR = BatTableInterface::CreateInstance(BatTableId, bouquetId, version);
+    SiTableInterface *siTableR;
+    siTableR = SiTableInterface::CreateBatInstance(BatTableId, bouquetId, version);
     siTableR->AddDescriptor(string("4704Yule"));
     siTableR->AddTs(tsId, onId);
     siTableR->AddTsDescriptor(tsId, string("410F001501001401001301001601001201"));
     tsPacketR->AddSiTable(siTableR);
-    size = tsPacketR->GetCodesSize(BatTableId, tsIds);
-    tsPacketR->MakeCodes(ccid, BatTableId, tsIds, bufferR, BufferSize);
+    size = tsPacketR->GetCodesSize(BatTableId, tsId);
+    tsPacketR->MakeCodes(ccid, BatTableId, tsId, bufferR, BufferSize);
 
     char *xmlString = 
         "<?xml version='1.0'  encoding='gb2312' ?> \n"
@@ -236,12 +230,12 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect02()
     list<SiTableKey> keysL, keysR;    
     keysR.push_back(1);
     auto_ptr<TransportPacketInterface> tsPacketL(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatXmlWrapper<TransportPacketInterface, BatTableInterface> wrapper;
+    BatXmlWrapper<TransportPacketInterface, SiTableInterface> wrapper;
     wrapper.Select(*tsPacketL, "bat.xml", tableId, keysL);
     CPPUNIT_ASSERT(tableId == 0x4A);
     CPPUNIT_ASSERT(keysL == keysR);
-    CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsIds) == size);
-    tsPacketL->MakeCodes(ccid, BatTableId, tsIds, bufferL, BufferSize);
+    CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsId) == size);
+    tsPacketL->MakeCodes(ccid, BatTableId, tsId, bufferL, BufferSize);
     CPPUNIT_ASSERT(memcmp(bufferL, bufferR, size) == 0);
     remove("bat.xml");
 }

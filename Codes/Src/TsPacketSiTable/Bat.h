@@ -70,7 +70,7 @@ protected:
     bool CheckTsId(TsId tsid) const;
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const;
 
 private:

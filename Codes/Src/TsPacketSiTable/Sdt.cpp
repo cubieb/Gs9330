@@ -93,7 +93,7 @@ void SdtServices::AddServiceDescriptor(ServiceId serviceId, Descriptor *descript
     (*iter)->AddDescriptor(descriptor);
 }
 
-size_t SdtServices::GetCodesSize(size_t maxSize, size_t &offset) const
+size_t SdtServices::GetCodesSize(TableId, size_t maxSize, size_t &offset) const
 {    
     size_t size = 0;
     size_t curOffset = 0;
@@ -120,7 +120,7 @@ size_t SdtServices::GetCodesSize(size_t maxSize, size_t &offset) const
     return size; 
 }
 
-size_t SdtServices::MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
+size_t SdtServices::MakeCodes(TableId, uchar_t *buffer, size_t bufferSize, size_t offset) const
 {
     uchar_t *ptr = buffer;  
 
@@ -226,12 +226,12 @@ size_t SdtTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t SdtTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+size_t SdtTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
 
-    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
+    ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
 
     return (ptr - buffer);
 }

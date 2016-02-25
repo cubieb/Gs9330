@@ -152,13 +152,13 @@ TableId     offset                                   return value
 ...
 ...
  */
-size_t EitEvents::GetCodesSize(TableId tableId, size_t maxSize, size_t &offset) const
+size_t EitEvents::GetCodesSize(TableId tableId, size_t maxSize, size_t offset) const
 {
     size_t size = 0;
     uint_t number = 0;
-
+    
     list<EitEvent *>::const_iterator iter; 
-    for (iter = Seek(offset, MaxEventNumberInAllEitPfTable); iter != eitEvents.end(); ++iter)
+    for (iter = Seek(offset, GetMaxEventNumber(tableId)); iter != eitEvents.end(); ++iter)
     {
         if (size + (*iter)->GetCodesSize() > maxSize)
         {
@@ -178,7 +178,6 @@ size_t EitEvents::GetCodesSize(TableId tableId, size_t maxSize, size_t &offset) 
         }
     }
 
-    offset = offset + size;
     return size; 
 }
 
@@ -189,7 +188,7 @@ size_t EitEvents::MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize,
     uint_t number = 0;
 
     list<EitEvent *>::const_iterator iter;
-    for (iter = Seek(offset, MaxEventNumberInAllEitPfTable); iter != eitEvents.end(); ++iter)
+    for (iter = Seek(offset, GetMaxEventNumber(tableId)); iter != eitEvents.end(); ++iter)
     {
         if (ptr + (*iter)->GetCodesSize() > buffer + bufferSize)
         {
@@ -248,14 +247,22 @@ bool EitEvents::RemoveOutOfDateEvent()
 }
 
 /* private function */
-list<EitEvent *>::const_iterator EitEvents::Seek(size_t offset, uint_t maxLoopNumber) const
+uint_t EitEvents::GetMaxEventNumber(TableId tableId) const
+{
+    if (tableId == EitActualPfTableId || tableId == EitOtherPfTableId)
+        return MaxEventNumberInAllEitPfTable;
+
+    return UINT_MAX;
+}
+
+list<EitEvent *>::const_iterator EitEvents::Seek(size_t offset, uint_t maxEventNumber) const
 {
     size_t curOffset = 0;
 
     list<EitEvent *>::const_iterator iter;
-    for (iter = eitEvents.cbegin(); iter != eitEvents.cend(); ++iter, --maxLoopNumber)
+    for (iter = eitEvents.cbegin(); iter != eitEvents.cend(); ++iter, --maxEventNumber)
     {   
-        if (maxLoopNumber == 0)
+        if (maxEventNumber == 0)
         {
             return eitEvents.cend();
         }
@@ -280,16 +287,13 @@ EitTable::EitTable(TableId tableId, ServiceId serviceId, Version versionNumber,
 
 EitTable::~EitTable()
 {
-    ClearCatch();
 }
 
 void EitTable::AddEvent(EventId eventId, const char *startTime, 
                 time_t duration, uint16_t  runningStatus, uint16_t freeCaMode)
 {
     EitEvent *eitEvent = new EitEvent(eventId, startTime, duration, runningStatus, freeCaMode);
-    eitEvents.AddEvent(eitEvent);
-
-    ClearCatch();
+    var2.AddEvent(eitEvent);
 }
 
 void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
@@ -302,44 +306,9 @@ void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
         return;
     }
 
-    eitEvents.AddEventDescriptor(eventId, descriptor);
-    ClearCatch();
+    var2.AddEventDescriptor(eventId, descriptor);
 }
 
-size_t EitTable::GetCodesSize(TableId tableId, TsId tsId,
-                              SectionNumber secIndex) const
-{
-    SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsId);
-    if (secNumber == 0)
-        return 0;
-    
-    //check secIndex is valid.
-    assert(secIndex < secNumber);
-
-#ifdef UseCatchOptimization
-    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId, secIndex);
-    map<CatchId, size_t>::iterator catchIter = codeSizeCatches.find(catchId);
-    if (catchIter != codeSizeCatches.end())
-    {
-        return catchIter->second;
-    }
-#endif
-
-    size_t eventOffset = 0;
-    for (SectionNumber i = 0; i < secIndex; ++i)
-    {
-        eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
-    }
-
-    size_t size = eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset)
-                  + sizeof(event_information_section); 
-
-#ifdef UseCatchOptimization
-    codeSizeCatches.insert(make_pair(catchId, size));
-#endif
-
-    return size;
-}
 
 SiTableKey EitTable::GetKey() const
 {
@@ -347,126 +316,12 @@ SiTableKey EitTable::GetKey() const
     return key;
 }
 
-uint_t EitTable::GetSecNumber(TableId tableId, TsId tsId) const
-{
-    if (!CheckTableId(tableId))
-    {
-        return 0;
-    }
-    
-    if (tsId != transportStreamId)
-    {
-        return 0;
-    }
-
-#ifdef UseCatchOptimization
-    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId);
-    map<CatchId, uint_t>::iterator catchIter = secNumberCatches.find(catchId);
-    if (catchIter != secNumberCatches.end())
-    {
-        return catchIter->second;
-    }
-#endif
-
-    uint_t secNumber = 1;
-    size_t eventOffset = 0;
-    eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
-
-    size_t tsSize;
-    for (tsSize = eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
-         tsSize != 0;
-         tsSize = eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset))
-    {
-        ++secNumber;
-    }
-
-#ifdef UseCatchOptimization
-    secNumberCatches.insert(make_pair(catchId, secNumber));
-#endif
-
-    return secNumber;
-}
-
 TableId EitTable::GetTableId() const
 {
     return tableId;
 }
 
-size_t EitTable::MakeCodes(TableId tableId, TsId tsId, 
-						   uchar_t *buffer, size_t bufferSize,
-                           SectionNumber secIndex) const
-{
-    uchar_t *ptr = buffer;
-    SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsId);
-    if (secNumber == 0)
-        return 0;
-
-    size_t  size = GetCodesSize(tableId, tsId, secIndex);
-    assert(size <= bufferSize && size != 0);
-
-    //check if secIndex is valid.
-    assert(secIndex < (SectionNumber)GetSecNumber(tableId, tsId));
-
-#ifdef UseCatchOptimization
-    CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId, secIndex);
-    map<CatchId, uchar_t*>::iterator catchIter = codeCatches.find(catchId);
-    if (catchIter != codeCatches.end())
-    {
-        memcpy(buffer, catchIter->second, size);
-        return size;
-    }
-#endif
-
-    size_t eventOffset = 0;
-    for (SectionNumber i = 0; i < secIndex; ++i)
-    {
-        eitEvents.GetCodesSize(tableId, MaxEitEventContentSize, eventOffset);
-    }
-
-    ptr = ptr + Write8(ptr, tableId);
-    WriteHelper<uint16_t> siHelper(ptr, ptr + 2);
-    ptr = ptr + Write16(ptr, 0); 
-    ptr = ptr + Write16(ptr, serviceId);    //service_id
-
-    uchar_t currentNextIndicator = 1;
-    ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator); //version_number
-    /* The section_number shall be incremented by 1 with each additional section with the same
-       table_id, service_id, transport_stream_id, and original_network_id. In this case, the sub_table may be 
-       structured as a number of segments.
-     */
-    ptr = ptr + Write8(ptr, secIndex);      //section_number
-    ptr = ptr + Write8(ptr, secNumber - 1);  //last_section_number
-    ptr = ptr + Write16(ptr, transportStreamId); //transport_stream_id
-    ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
-    ptr = ptr + Write8(ptr, secNumber - 1);  //segment_last_section_number
-    ptr = ptr + Write8(ptr, tableId);       //????
-    
-    ptr = ptr + eitEvents.MakeCodes(tableId, ptr, MaxEitEventContentSize, eventOffset);
-    
-    siHelper.Write((EitSectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
-    ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
-
-#ifdef UseCatchOptimization
-    uchar_t *codeCatch = new uchar_t[size];
-    memcpy(codeCatch, buffer, size);
-
-    codeCatches.insert(make_pair(catchId, codeCatch));
-#endif
-
-    assert(ptr - buffer == size);
-    return size;
-}
-
-void EitTable::RefreshCatch()
-{
-    if (eitEvents.RemoveOutOfDateEvent())
-    {
-        return;
-    }
-    ClearCatch();
-}
-
-/* private function */
+/* protected function */
 bool EitTable::CheckTableId(TableId tableId) const
 {
     if (this->tableId == EitActualSchTableId)
@@ -487,16 +342,45 @@ bool EitTable::CheckTableId(TableId tableId) const
     return true;
 }
 
-void EitTable::ClearCatch()
+bool EitTable::CheckTsId(TsId tsid) const
 {
-#ifdef UseCatchOptimization
-    codeSizeCatches.clear();
-    map<CatchId, uchar_t*>::iterator iter;
-    for (iter = codeCatches.begin(); iter != codeCatches.end(); ++iter)
-    {
-        delete[] iter->second;
-    }
-    codeCatches.clear();
-    secNumberCatches.clear();
-#endif
+    return (tsid == this->transportStreamId);
 }
+
+size_t EitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
+                            SectionNumber secNumber, SectionNumber lastSecNumber) const
+{
+    uchar_t *ptr = buffer;
+    
+    //section_syntax_indicator:1 + reserved_future_use1:1 + reserved1:2 + section_length:12
+    TableSize pseudoSize = 0;
+    ptr = ptr + WriteBuffer(ptr, tableId);
+    ptr = ptr + WriteBuffer(ptr, pseudoSize); 
+    ptr = ptr + WriteBuffer(ptr, serviceId); //service_id
+
+    uchar_t currentNextIndicator = 1;
+    ptr = ptr + Write8(ptr, (Reserved2Bit << 6) | (versionNumber << 1) | currentNextIndicator); //version_number
+    /* The section_number shall be incremented by 1 with each additional section with the same
+       table_id, service_id, transport_stream_id, and original_network_id. In this case, the sub_table may be 
+       structured as a number of segments.
+     */
+    ptr = ptr + Write8(ptr, secNumber);      //section_number
+    ptr = ptr + Write8(ptr, lastSecNumber);  //last_section_number
+    ptr = ptr + Write16(ptr, transportStreamId); //transport_stream_id
+    ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
+    ptr = ptr + Write8(ptr, lastSecNumber);  //segment_last_section_number
+    ptr = ptr + Write8(ptr, tableId);       //????
+
+    return (ptr - buffer);
+}
+
+size_t EitTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+                            size_t var2MaxSize, size_t var2Offset) const
+{
+    uchar_t *ptr = buffer;
+
+    ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
+
+    return (ptr - buffer);
+}
+

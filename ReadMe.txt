@@ -25,6 +25,7 @@ ver.2.8:  对读取xml文件的效率做了优化, 优化后读取32个ts 一周的eit信息只需要3~4秒
           在ver.2.8的基础上, 创建了一个ver.Debug.2.8. 用于测试多线程是否对读取xml文件的效率有明显的提升。 效果不理想。
           Ver.Debug.2.8 可用于将来做其他性能测试的基础版本。
 ver.2.9:  增加对中心频点的支持, receiver.xml每个网络的第一条receiver 就是中心频点.
+          新增模板类 SiTableTemplate 做为sdt, bat, nit, eit的基类, 利用SiTableTemplate, 4张表可以在GetCodeSize(), GetSecNumber()上清除掉很多荣誉的代码.
           
 4 实测数据
     983,116字节的xml编码后的Ts为178,788字节.
