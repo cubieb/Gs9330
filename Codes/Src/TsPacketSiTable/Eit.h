@@ -171,7 +171,8 @@ public:
     
     SiTableKey GetKey() const;
     TableId GetTableId() const;
-    
+    void RefreshCatch();
+
 protected:
     bool CheckTableId(TableId tableId) const;
     bool CheckTsId(TsId tsid) const;

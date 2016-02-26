@@ -2,6 +2,11 @@
 #define _NetworkRelationWrapperInterface_h_
 
 #include "Include/Foundation/SystemInclude.h"
+#pragma warning(push)
+#pragma warning(disable:702)   //disable warning caused by ACE library.
+#pragma warning(disable:4251)  //disable warning caused by ACE library.
+#pragma warning(disable:4996)  //disable warning caused by ACE library.
+#include "ace/OS.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -24,8 +29,13 @@ public:
     NetworkRelationWrapperInterface() {};
     virtual ~NetworkRelationWrapperInterface() {};
 
-    void Select(Networks &networks, const char *xmlPath)
+    std::error_code Select(Networks &networks, const char *xmlPath)
     {
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
+
         Networks::iterator iter;
         for (iter = networks.Begin(); iter != networks.End(); ++iter)
         {
@@ -33,10 +43,16 @@ public:
         }
 
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
     
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         //xpathExpr cant be "/Root/NetNode[*], because Network has no child node."
         xmlChar *xpathExpr = (xmlChar*)"/Root/NetNode";
@@ -56,7 +72,9 @@ public:
         }
 
         xmlCleanupParser();
+        return std::error_code();
     }
 };
 
+#pragma warning(pop)
 #endif

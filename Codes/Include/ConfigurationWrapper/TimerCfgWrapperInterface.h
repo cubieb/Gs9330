@@ -22,7 +22,7 @@ public:
         {
             return  make_error_code(std::errc::no_such_file_or_directory);
         }
-
+        
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
         if (doc == nullptr)
         {
@@ -76,10 +76,11 @@ public:
             {
                 timerCfg.SetInterval(EitOtherSchTableId, GetXmlContent<time_t>(node));
             }
-        }
+        } //for (node = xmlFirstElementChild(xmlFirstElementChild(node));  ...
 
+        xmlCleanupParser();
         return std::error_code();
-    }
+    } 
 };
 
 #endif

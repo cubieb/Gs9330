@@ -50,7 +50,8 @@ public:
         }
 
         xmlChar *xpathExpr = (xmlChar*)"/root/network[*]";
-        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), 
+                                            xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes == nullptr)
         {
@@ -81,8 +82,9 @@ public:
             }
 
             networks.Add(network);
-        }
+        } //for (int i = 0; i < nodes->nodeNr; ++i)
 
+        xmlCleanupParser();
         return std::error_code();
     }
 };

@@ -91,10 +91,8 @@ size_t TransportPacket::GetCodesSize(TableId tableId, TsId tsId) const
         for (uint_t i = 0; i < secNumber; ++i)
         {            
             size_t tableSize = iter->GetCodesSize(tableId, tsId, i);
-            if (tableSize == 0)
-            {
-                continue;
-            }
+            assert(tableSize != 0);
+
             //+1 for pointer_field
             packetNumber = packetNumber + GetPacketNumber(tableSize + 1); 
         }        

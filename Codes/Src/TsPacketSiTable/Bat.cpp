@@ -29,6 +29,7 @@ BatTable::BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber)
 
 BatTable::~BatTable()
 {
+    ClearCatch();
 }
 
 void BatTable::AddDescriptor(std::string &data)
@@ -45,11 +46,13 @@ void BatTable::AddDescriptor(std::string &data)
     //in order to packet all descriptor into single one section, we
     //demand descriptor size less than MaxBatDesAndTsContentSize.
     assert(var1.GetCodesSize() <= MaxBatDesAndTsContentSize);
+    ClearCatch();
 }
 
 void BatTable::AddTs(TsId tsId, OnId onId)
 {
     var2.AddTransportStream(tsId, onId);
+    ClearCatch();
 }
 
 void BatTable::AddTsDescriptor(TsId tsId, std::string &data)
@@ -63,6 +66,7 @@ void BatTable::AddTsDescriptor(TsId tsId, std::string &data)
     }
 
     var2.AddTsDescriptor(tsId, descriptor);
+    ClearCatch();
 }
 
 
@@ -125,6 +129,7 @@ size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
         desHelper.Write(Reserved4Bit << 12, ptr); 
     }
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 
@@ -138,6 +143,8 @@ size_t BatTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
     ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
+
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 

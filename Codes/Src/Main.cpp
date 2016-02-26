@@ -19,14 +19,20 @@ using namespace std;
 
 int main(int argc, char **argv)
 {    
+    bool ret;
     ControllerInterface &controller = ControllerInterface::GetInstance();
     if (argc == 1)
     {
-        controller.Start(ACE_Reactor::instance(), "Gs9330SoapClient.xml");
+        ret = controller.Start(ACE_Reactor::instance(), "Gs9330SoapClient.xml");
     }
     else
     {
-        controller.Start(ACE_Reactor::instance(), argv[1]);
+        ret = controller.Start(ACE_Reactor::instance(), argv[1]);
+    }
+
+    if (!ret)
+    {
+        errstrm << "controller.Start() failed. " << endl;
     }
 
     ACE_Reactor::instance()->run_reactor_event_loop();

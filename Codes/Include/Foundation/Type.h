@@ -55,6 +55,8 @@ typedef uint32_t CatchId;
 
 #define UdpPayloadSize (188*7)
 
+#define UseCatchOptimization
+
 /*
  * From boost documentation:
  * The following piece of macro magic joins the two 

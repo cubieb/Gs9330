@@ -163,7 +163,7 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
 #define TestReadXmlPerformance
 bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
 {
-    std::error_code errCode;
+    error_code errCode;
     /********* Step 1: Init Configuration *********/
     /* dir configuration */
     dirCfg = DirCfgInterface::CreateInstance();
@@ -171,7 +171,7 @@ bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
     errCode = dirCfgWrapper.Select(*dirCfg, cfgPath);
     if (errCode)
     {
-        cout << "Error when reading " << cfgPath << ", error message: " << errCode.message() << endl;
+        errstrm << "Error when reading " << cfgPath << ", error message: " << errCode.message() << endl;
         return false;
     }
     
@@ -193,7 +193,7 @@ bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
     errCode = timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());
     if (errCode)
     {
-        cout << "Error when reading " << senderCfgPath << ", error message: " << errCode.message() << endl;
+        errstrm << "Error when reading " << senderCfgPath << ", error message: " << errCode.message() << endl;
         return false;
     }
 
@@ -287,7 +287,13 @@ void Controller::AddSiTable(const char *path)
     /* network relation */
     NetworkRelationWrapperInterface<NetworkCfgsInterface> netRelationWrapper;
     string relationXmlPath = string(dirCfg->GetXmlDir()) + string("\\NetWorkNode.xml");
-    netRelationWrapper.Select(*networkCfgs, relationXmlPath.c_str());
+    error_code errCode = netRelationWrapper.Select(*networkCfgs, relationXmlPath.c_str());
+    if (errCode)
+    {
+        errstrm << "Error when reading " << relationXmlPath 
+             << ", error message: " << errCode.message() << endl;
+        return;
+    }
         
     /* Add SiSable to TsPacket */
     TransportPacketInterface *tsPacket;
@@ -307,7 +313,13 @@ void Controller::AddSiTable(const char *path)
         SiTableXmlWrapperRepository<TransportPacketInterface>::GetInstance();
     SiTableXmlWrapperInterface<TransportPacketInterface> &siTableWrapper = 
         siTableWrapperRepository.GetWrapperInstance(type);
-    siTableWrapper.Select(*tsPacket, path, tableId, keys);
+    errCode = siTableWrapper.Select(*tsPacket, path, tableId, keys);
+    if (errCode)
+    {
+        errstrm << "Error when reading " << path 
+             << ", error message: " << errCode.message() << endl;
+        return;
+    }
     
     /* save {file name, table id, key list} relation ship */
     fileSummaries.push_back(FileSummary(string(path), tableId, keys));

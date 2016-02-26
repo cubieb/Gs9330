@@ -64,6 +64,7 @@ struct transport_stream
     //}
 };
 
+//sizeof(event_information_section) is 18
 struct event_information_section
 {
     uchar_t table_id: 8;
@@ -89,6 +90,7 @@ struct event_information_section
     uint32_t CRC_32: 32; 
 };
 
+//sizeof(event_information_section_detail) is 12
 struct event_information_section_detail
 {
     //for (i=0;i<N;i++)
@@ -168,7 +170,6 @@ struct service_description_section_detail
 #define MaxBatDesAndTsContentSize (MaxBatSectionLength - sizeof(bouquet_association_section))
 //MaxEitEventContentSize = 4078
 #define MaxEitEventContentSize (MaxEitSectionLength - sizeof(event_information_section))
-//sizeof(event_information_section_detail) = 12
 #define MaxEitEventDescriptorSize (MaxEitEventContentSize - sizeof(event_information_section_detail))
 #define MaxSdtServiceContentSize (MaxSdtSectionLength - sizeof(service_description_section))
 
@@ -188,7 +189,9 @@ class SiTable : public CPPUNIT_NS::TestFixture
     /* Eit */
     CPPUNIT_TEST(TestEitGetCodesSize);
     CPPUNIT_TEST(TestEitMakeCodes1);
-    CPPUNIT_TEST(TestEitMakeCodes2);
+    CPPUNIT_TEST(TestEitMakeCodes2);    
+    /* Nit */
+    CPPUNIT_TEST(TestNitMakeCodes);
     /* Sdt */
     CPPUNIT_TEST(TestSdtConstruct);
     CPPUNIT_TEST(TestSdtGetCodesSize);
@@ -214,6 +217,8 @@ protected:
     void TestEitGetCodesSize();
     void TestEitMakeCodes1();
     void TestEitMakeCodes2();
+    /* Nit */
+    void TestNitMakeCodes();
     /* Sdt */
     void TestSdtConstruct();
     void TestSdtGetCodesSize();

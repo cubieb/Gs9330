@@ -2,6 +2,11 @@
 #define _SiTableXmlWrapperInterface_h_
 
 #include "Include/Foundation/SystemInclude.h"
+#pragma warning(push)
+#pragma warning(disable:702)   //disable warning caused by ACE library.
+#pragma warning(disable:4251)  //disable warning caused by ACE library.
+#pragma warning(disable:4996)  //disable warning caused by ACE library.
+#include "ace/OS.h"
 
 /* Foundation */
 #include "Include/Foundation/Type.h"
@@ -18,7 +23,8 @@ public:
     virtual ~SiTableXmlWrapperInterface() {};
 
     //tableId and keys are used to record operation history */
-    virtual void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys) = 0;
+    virtual std::error_code Select(TsPacket &tsPacket, const char *xmlPath, 
+                                   TableId &tableId, std::list<SiTableKey> &keys) = 0;
 };
 
 /**********************class NitXmlWrapper**********************/
@@ -29,23 +35,38 @@ public:
     BatXmlWrapper() {};
     virtual ~BatXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
+    std::error_code Select(TsPacket &tsPacket, const char *xmlPath, 
+                           TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
 
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
 
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlChar *xpathExpr = (xmlChar*)"/Root/Bouquet[*]";
-        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), 
+                                            xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr);
+        if (nodes == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
@@ -76,6 +97,7 @@ public:
         }
 
         xmlCleanupParser(); 
+        return std::error_code();
     }
 
 private:
@@ -119,11 +141,20 @@ public:
     EitXmlWrapper() {};
     virtual ~EitXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
+    std::error_code Select(TsPacket &tsPacket, const char *xmlPath, 
+                           TableId &tableId, std::list<SiTableKey> &keys)
     {
-        cout << "Reading " << xmlPath << endl;
+        cout << "Reading " << xmlPath << endl;        
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
+
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
@@ -133,12 +164,19 @@ public:
             tableId = 0x60;
 
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
-        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), 
+                                            xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr);
+        if (nodes == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
     
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
@@ -161,6 +199,7 @@ public:
         }
 
         xmlCleanupParser();
+        return std::error_code();
     }
 
     void AddEvent(SiTable& siTable, xmlNodePtr& node) const
@@ -194,23 +233,38 @@ public:
     NitXmlWrapper() {};
     virtual ~NitXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
+    std::error_code Select(TsPacket &tsPacket, const char *xmlPath, 
+                           TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
+        {
+            return  make_error_code(std::errc::no_such_file_or_directory);
+        }
 
         shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
-        assert(doc != nullptr);
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
 
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlChar *xpathExpr = (xmlChar*)"/Root/Network[*]";
-        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), 
+                                            xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr);
+        if (nodes == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
         
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
@@ -242,6 +296,7 @@ public:
         }
 
         xmlCleanupParser(); 
+        return std::error_code();
     }
 
 private:
@@ -285,29 +340,38 @@ public:
     SdtXmlWrapper() {};
     virtual ~SdtXmlWrapper() {};
 
-    void Select(TsPacket &tsPacket, const char *xmlPath, TableId &tableId, std::list<SiTableKey> &keys)
+    std::error_code Select(TsPacket &tsPacket, const char *xmlPath, 
+                           TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
-
-        shared_ptr<xmlDoc> doc;
-        for (int i = 0; i < 10 && doc == nullptr; ++i)
+        cout << "Reading " << xmlPath << endl;
+        if ((ACE_OS::access(xmlPath, F_OK)) != 0)
         {
-            if (i != 0)
-                SleepEx(10, true);
-            doc.reset(xmlParseFile(xmlPath), XmlDocDeleter());
+            return  make_error_code(std::errc::no_such_file_or_directory);
         }
-        assert(doc != nullptr);
+
+        shared_ptr<xmlDoc> doc(xmlParseFile(xmlPath), XmlDocDeleter());
+        if (doc == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlNodePtr node = xmlDocGetRootElement(doc.get());
         tableId = GetXmlAttrValue<uchar_t>(node, (const xmlChar*)"TableID");
-
         shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathContextDeleter());
-        assert(xpathCtx != nullptr);
+        if (xpathCtx == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
 
         xmlChar *xpathExpr = (xmlChar*)"/Root/Transportstream[*]";
-        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), xmlXPathObjectDeleter()); 
+        shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(xpathExpr, xpathCtx.get()), 
+                                            xmlXPathObjectDeleter()); 
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
-        assert(nodes != nullptr);
+        if (nodes == nullptr)
+        {
+            return  make_error_code(std::errc::io_error);
+        }
         
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
@@ -324,9 +388,10 @@ public:
             }
 
             tsPacket.AddSiTable(siTable);
-        }
+        } //for (int i = 0; i < nodes->nodeNr; ++i)
 
         xmlCleanupParser();
+        return std::error_code();
     }
 
     void AddService(SiTable& siTable, xmlNodePtr& node, xmlChar* child) const
@@ -406,4 +471,5 @@ public:
     }
 };
 
+#pragma warning(pop)
 #endif

@@ -1,5 +1,5 @@
-#ifndef _Bat_h_
-#define _Bat_h_
+#ifndef _CatchIdHelper_h_
+#define _CatchIdHelper_h_
 
 /**********************class CatchIdHelper**********************/
 class CatchIdHelper

@@ -157,6 +157,7 @@ SdtTable::SdtTable(TableId tableId, TsId transportStreamId, Version versionNumbe
 
 SdtTable::~SdtTable()
 {
+    ClearCatch();
 }
 
 void SdtTable::AddService(ServiceId serviceId, uchar_t eitScheduleFlag, 
@@ -165,6 +166,7 @@ void SdtTable::AddService(ServiceId serviceId, uchar_t eitScheduleFlag,
     SdtService *sdtService = new SdtService(serviceId, eitScheduleFlag, eitPresentFollowingFlag, 
                                             runningStatus, freeCaMode);
     var2.AddSdtService(sdtService);
+    ClearCatch();
 }
 
 void SdtTable::AddServiceDescriptor(ServiceId serviceId, std::string &data)
@@ -178,6 +180,7 @@ void SdtTable::AddServiceDescriptor(ServiceId serviceId, std::string &data)
     }
 
     var2.AddServiceDescriptor(serviceId, descriptor);
+    ClearCatch();
 }
 
 SiTableKey SdtTable::GetKey() const
@@ -223,6 +226,7 @@ size_t SdtTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     ptr = ptr + Write16(ptr, originalNetworkId); //original_network_id
     ptr = ptr + Write8(ptr, Reserved8Bit);
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 
@@ -233,5 +237,6 @@ size_t SdtTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
 
     ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }

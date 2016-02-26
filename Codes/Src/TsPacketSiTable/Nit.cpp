@@ -28,6 +28,7 @@ NitTable::NitTable(TableId tableId, NetId networkId, Version versionNumber)
 
 NitTable::~NitTable()
 {
+    ClearCatch();
 }    
 
 void NitTable::AddDescriptor(std::string &data)
@@ -41,11 +42,13 @@ void NitTable::AddDescriptor(std::string &data)
     }
 
     var1.AddDescriptor(descriptor);
+    ClearCatch();
 }
 
 void NitTable::AddTs(TsId tsId, OnId onId)
 {
     var2.AddTransportStream(tsId, onId);
+    ClearCatch();
 }
 
 void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
@@ -59,6 +62,7 @@ void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
     }
 
     var2.AddTsDescriptor(tsId, descriptor);
+    ClearCatch();
 }
 
 SiTableKey NitTable::GetKey() const
@@ -120,6 +124,7 @@ size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
         descriptorHelper.Write(Reserved4Bit << 12, ptr); 
     }
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 
@@ -134,5 +139,6 @@ size_t NitTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
     
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }

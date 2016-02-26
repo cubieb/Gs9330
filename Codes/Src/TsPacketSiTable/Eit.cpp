@@ -286,7 +286,8 @@ EitTable::EitTable(TableId tableId, ServiceId serviceId, Version versionNumber,
 }
 
 EitTable::~EitTable()
-{
+{    
+    ClearCatch();
 }
 
 void EitTable::AddEvent(EventId eventId, const char *startTime, 
@@ -294,6 +295,7 @@ void EitTable::AddEvent(EventId eventId, const char *startTime,
 {
     EitEvent *eitEvent = new EitEvent(eventId, startTime, duration, runningStatus, freeCaMode);
     var2.AddEvent(eitEvent);
+    ClearCatch();
 }
 
 void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
@@ -307,6 +309,7 @@ void EitTable::AddEventDescriptor(EventId eventId, std::string &data)
     }
 
     var2.AddEventDescriptor(eventId, descriptor);
+    ClearCatch();
 }
 
 
@@ -319,6 +322,15 @@ SiTableKey EitTable::GetKey() const
 TableId EitTable::GetTableId() const
 {
     return tableId;
+}
+
+void EitTable::RefreshCatch()
+{
+    if (var2.RemoveOutOfDateEvent())
+    {
+        return;
+    }
+    ClearCatch();
 }
 
 /* protected function */
@@ -371,6 +383,7 @@ size_t EitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     ptr = ptr + Write8(ptr, lastSecNumber);  //segment_last_section_number
     ptr = ptr + Write8(ptr, tableId);       //????
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 
@@ -381,6 +394,7 @@ size_t EitTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
 
     ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
 
+    assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);
 }
 
