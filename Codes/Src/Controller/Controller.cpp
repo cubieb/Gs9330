@@ -349,20 +349,13 @@ void Controller::DelSiTable(const char *path)
     TransportPacketInterface *tsPacket = *iter;
 
     std::list<FileSummary>::iterator summaryIter;
-    for (summaryIter = fileSummaries.begin(); summaryIter != fileSummaries.end(); ++summaryIter)
+    summaryIter = find_if(fileSummaries.begin(), fileSummaries.end(), CompareSummaryFileName(path));
+    assert (summaryIter != fileSummaries.end());
+    list<SiTableKey>::iterator keyIter;
+    for (keyIter = summaryIter->keys.begin(); keyIter != summaryIter->keys.end(); ++keyIter)
     {
-        if (summaryIter->fileName.compare(path) != 0)
-        {
-            continue;
-        }
-
-        list<SiTableKey>::iterator keyIter;
-        for (keyIter = summaryIter->keys.begin(); keyIter != summaryIter->keys.end(); ++keyIter)
-        {
-            tsPacket->DelSiTable(summaryIter->tableId, *keyIter);
-        }
+        tsPacket->DelSiTable(summaryIter->tableId, *keyIter);
     }
-
     fileSummaries.remove_if(CompareSummaryFileName(path));
 }
 

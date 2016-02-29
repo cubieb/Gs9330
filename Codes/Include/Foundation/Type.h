@@ -2,22 +2,26 @@
 #define _Type_h_
 
 typedef uint16_t BouquetId;
+typedef uint32_t CcId;  //continuity counter ID, used by Transport Packet
 typedef uint16_t EventId;
 typedef uint16_t NetId;
 typedef uint16_t OnId;
 typedef uint16_t Pid;
 typedef uchar_t  SectionNumber;
 typedef uint16_t ServiceId;
+typedef uint32_t SiTableKey;
 typedef uchar_t  TableId;
 typedef uint16_t TableSize;
 typedef uint16_t TsId;  //Transport Stream Id
 typedef uchar_t  Version;
-typedef uint32_t SiTableKey;
-typedef uint32_t CcId;  //continuity counter ID, used by Transport Packet
-
-#define AllTsId  0xFFFF
 
 typedef uint32_t CatchId;
+#define SectionNumberBits     (8 * sizeof(SectionNumber))
+#define TsIdBits              (8 * sizeof(TsId))
+#define MaxTableId            std::numeric_limits<TableId>::max()
+#define MaxTsId               std::numeric_limits<TsId>::max()
+#define MaxSectionNumber      std::numeric_limits<SectionNumber>::max()
+#define ReservedSectionNumber MaxSectionNumber
 
 #define TsPacketSize 188
 

@@ -15,10 +15,12 @@
 
 /* ControllerInterface */
 #include "Include/Controller/ControllerInterface.h"
+#include "Version.h"
 using namespace std;
 
 int main(int argc, char **argv)
 {    
+    cout << "interal version: " << ExeVersion << endl;
     bool ret;
     ControllerInterface &controller = ControllerInterface::GetInstance();
     if (argc == 1)

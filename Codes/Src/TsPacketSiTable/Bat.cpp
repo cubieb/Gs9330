@@ -29,7 +29,6 @@ BatTable::BatTable(TableId tableId, BouquetId bouquetId, Version versionNumber)
 
 BatTable::~BatTable()
 {
-    ClearCatch();
 }
 
 void BatTable::AddDescriptor(std::string &data)

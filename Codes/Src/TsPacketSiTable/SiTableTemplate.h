@@ -33,6 +33,9 @@ template <typename Var1, typename Var2, size_t FixedSize, size_t VarSize>
 class SiTableTemplate: public SiTableInterface
 {
 public:
+    SiTableTemplate() { InitCatch(); }
+    virtual ~SiTableTemplate() { ClearCatch(); }
+
     virtual size_t GetCodesSize(TableId tableId, TsId tsId, SectionNumber secIndex) const
     {
         SectionNumber secNumber = (SectionNumber)GetSecNumber(tableId, tsId);
@@ -40,7 +43,7 @@ public:
             return 0;
 
 #ifdef UseCatchOptimization
-        CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId, secIndex);
+        CatchId catchId = CatchIdHelper::GetCatchId(tableId, tsId, secIndex);
         map<CatchId, size_t>::iterator catchIter = codeSizeCatches.find(catchId);
         if (catchIter != codeSizeCatches.end())
         {
@@ -79,7 +82,7 @@ public:
             return 0;
 
 #ifdef UseCatchOptimization
-        CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId);
+        CatchId catchId = CatchIdHelper::GetCatchId(tableId, tsId);
         map<CatchId, uint_t>::iterator catchIter = secNumberCatches.find(catchId);
         if (catchIter != secNumberCatches.end())
         {
@@ -118,7 +121,7 @@ public:
         assert(size <= bufferSize && size != 0);
 
 #ifdef UseCatchOptimization
-        CatchId catchId = catchIdHelper.GetCatchId(tableId, tsId, secIndex);
+        CatchId catchId = CatchIdHelper::GetCatchId(tableId, tsId, secIndex);
         map<CatchId, uchar_t*>::iterator catchIter = codeCatches.find(catchId);
         if (catchIter != codeCatches.end())
         {
@@ -164,6 +167,11 @@ public:
     }
 
 protected:
+    void InitCatch()
+    {
+        ClearCatch();
+    }
+
     void ClearCatch()
     {
 #ifdef UseCatchOptimization
@@ -190,7 +198,6 @@ protected:
 
 private:
 #ifdef UseCatchOptimization
-    mutable CatchIdHelper catchIdHelper;
     mutable std::map<CatchId, size_t> codeSizeCatches;
     mutable std::map<CatchId, uchar_t*> codeCatches;
     mutable std::map<CatchId, uint_t> secNumberCatches;

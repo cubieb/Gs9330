@@ -287,7 +287,6 @@ EitTable::EitTable(TableId tableId, ServiceId serviceId, Version versionNumber,
 
 EitTable::~EitTable()
 {    
-    ClearCatch();
 }
 
 void EitTable::AddEvent(EventId eventId, const char *startTime, 

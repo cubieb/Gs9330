@@ -4,7 +4,6 @@
 #include "Include/Foundation/Time.h"
 #include "Descriptor.h"       //Descriptor 
 #include "TransportStream.h"  //TransportStream
-#include "CatchHelper.h"
 #include "SiTableTemplate.h"
 
 #pragma pack(push, 1)

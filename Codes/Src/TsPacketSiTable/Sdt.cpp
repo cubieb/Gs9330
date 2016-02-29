@@ -157,7 +157,6 @@ SdtTable::SdtTable(TableId tableId, TsId transportStreamId, Version versionNumbe
 
 SdtTable::~SdtTable()
 {
-    ClearCatch();
 }
 
 void SdtTable::AddService(ServiceId serviceId, uchar_t eitScheduleFlag, 

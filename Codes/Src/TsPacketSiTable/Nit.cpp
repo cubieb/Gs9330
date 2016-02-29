@@ -28,7 +28,6 @@ NitTable::NitTable(TableId tableId, NetId networkId, Version versionNumber)
 
 NitTable::~NitTable()
 {
-    ClearCatch();
 }    
 
 void NitTable::AddDescriptor(std::string &data)
