@@ -100,14 +100,14 @@ size_t BatTable::GetVarSize() const
     return MaxBatDesAndTsContentSize;
 }
 
-const Descriptors& BatTable::GetVar1() const
+const BatTable::Var1& BatTable::GetVar1() const
 {
     return descriptors;
 }
 
-const TransportStreams& BatTable::GetVar2(TableId tableId) const
+BatTable::Var2 BatTable::GetVar2(TableId tableId) const
 {
-    return transportStreams;
+    return Var2(transportStreams);
 }
 
 size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -152,14 +152,14 @@ size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t BatTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+size_t BatTable::MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
     WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + transportStreams.MakeCodes(ptr, var2MaxSize, var2Offset);
+    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
 

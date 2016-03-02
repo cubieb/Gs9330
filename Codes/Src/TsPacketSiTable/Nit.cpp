@@ -95,14 +95,14 @@ size_t NitTable::GetVarSize() const
     return MaxNitDesAndTsContentSize;
 }
 
-const Descriptors& NitTable::GetVar1() const
+const NitTable::Var1& NitTable::GetVar1() const
 {
     return descriptors;
 }
 
-const TransportStreams& NitTable::GetVar2(TableId tableId) const
+NitTable::Var2 NitTable::GetVar2(TableId tableId) const
 {
-    return transportStreams;
+    return Var2(transportStreams);
 }
 
 size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -147,14 +147,14 @@ size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t NitTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+size_t NitTable::MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
     WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + transportStreams.MakeCodes(ptr, var2MaxSize, var2Offset);
+    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
     

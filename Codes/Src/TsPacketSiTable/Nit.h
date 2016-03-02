@@ -63,7 +63,7 @@ struct network_information_section
 #define MaxNitDesAndTsContentSize (MaxNitSectionLength - NitFixedFieldSize)
 
 /**********************class NitTable**********************/
-class NitTable: public SiTableTemplate<Descriptors, TransportStreams>
+class NitTable: public SiTableTemplate<Descriptors, TransportStreamsBinder<TransportStreams>>
 {
 public:
     friend class SiTableInterface;
@@ -81,11 +81,11 @@ protected:
     bool CheckTsId(TsId tsid) const;
     size_t GetFixedSize() const;
     size_t GetVarSize() const;
-    const Descriptors& GetVar1() const;
-    const TransportStreams& GetVar2(TableId tableId) const;
+    const Var1& GetVar1() const;
+    Var2 GetVar2(TableId tableId) const;
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const;    
 
 private:

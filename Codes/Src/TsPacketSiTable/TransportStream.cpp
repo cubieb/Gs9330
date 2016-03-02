@@ -71,11 +71,14 @@ size_t TransportStream::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 /**********************class TransportStreams**********************/
 TransportStreams::TransportStreams()
 {
+    AllocProxy();
 }
 
 TransportStreams::~TransportStreams()
 {
     for_each(transportStreams.begin(), transportStreams.end(), ScalarDeleter());
+    transportStreams.clear();
+    FreeProxy();
 }
 
 void TransportStreams::AddTransportStream(TsId tsId, OnId onId)

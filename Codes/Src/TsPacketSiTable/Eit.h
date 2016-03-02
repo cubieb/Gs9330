@@ -130,17 +130,33 @@ private:
 
 
 /**********************class EitEvents**********************/
-class EitEvents
+class EitEvents: public ContainerBase
 {
 public:
     EitEvents();
     ~EitEvents();
     
     void AddEvent(EitEvent *eitEvent);
-    void AddEventDescriptor(uint16_t eventId, Descriptor *descriptor);
+    void AddEventDescriptor(uint16_t eventId, Descriptor *descriptor);    
+    
+    // ContainerBase function. construct proxy from _Alnod
+    void AllocProxy()
+    {
+        myProxy = new ContainerProxy;
+        myProxy->myContainer = this;
+    }
+    // ContainerBase function, destroy proxy.
+    void FreeProxy()
+    {
+        OrphanAll();
+        delete myProxy;
+        myProxy = nullptr;
+    }
 
-    size_t GetCodesSize(size_t maxSize, size_t offset) const;
-    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
+    size_t GetCodesSize(size_t maxSize, size_t offset, 
+                        uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset,
+                     uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const;
     
     /* remove out-of-date event 
        Return Values:  
@@ -148,19 +164,51 @@ public:
            false if some out-of-date event was deleted.
      */
     bool RemoveOutOfDateEvent();
-    void SetMaxSectionNumber(uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const;
 
 private:
-    std::list<EitEvent *>::const_iterator Seek(size_t offset) const;
+    std::list<EitEvent *>::const_iterator Seek(size_t offset, uint_t maxEventNumberInAllSection) const;
 
 private:
-    mutable uint_t maxEventNumberIn1Section;
-    mutable uint_t maxEventNumberInAllSection;
     std::list<EitEvent *> eitEvents;
 };
 
+template<typename EitEvents>
+class EitEventsBinder: public IteratorBase 
+{
+public:
+    EitEventsBinder(const EitEvents &eitEvents, uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection)
+        : eitEvents(eitEvents),
+          maxEventNumberIn1Section(maxEventNumberIn1Section),
+          maxEventNumberInAllSection(maxEventNumberInAllSection)
+    {
+        const ContainerBase *container = &eitEvents;
+        this->Adopt(container); 
+    }
+
+    size_t GetCodesSize(size_t maxSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return eitEvents.GetCodesSize(maxSize, offset, maxEventNumberIn1Section, maxEventNumberInAllSection);
+    }
+
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return eitEvents.MakeCodes(buffer, bufferSize, offset, maxEventNumberIn1Section, maxEventNumberInAllSection);
+    }
+
+private:
+    const EitEvents &eitEvents;
+    uint_t maxEventNumberIn1Section;
+    uint_t maxEventNumberInAllSection;
+};
+
 /**********************class EitTable**********************/
-class EitTable: public SiTableTemplate<VarHelper, EitEvents>
+class EitTable: public SiTableTemplate<VarHelper, EitEventsBinder<EitEvents>>
 {
 public:
     friend class SiTableInterface;
@@ -179,12 +227,11 @@ protected:
     bool CheckTsId(TsId tsid) const;
     size_t GetFixedSize() const;
     size_t GetVarSize() const;
-    const VarHelper& GetVar1() const;
-    const EitEvents& GetVar2(TableId tableId) const;
-
+    const Var1& GetVar1() const;
+    Var2 GetVar2(TableId tableId) const;
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const; 
 
 private:

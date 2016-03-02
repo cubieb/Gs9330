@@ -29,10 +29,12 @@ public:
 };
 
 /**********************class SiTableTemplate**********************/
-template <typename Var1, typename Var2>
+template <typename Var1Type, typename Var2Type>
 class SiTableTemplate: public SiTableInterface
 {
 public:
+    typedef Var1Type Var1;
+    typedef Var2Type Var2;
     SiTableTemplate() { InitCatch(); }
     virtual ~SiTableTemplate() { ClearCatch(); }
 
@@ -43,7 +45,7 @@ public:
             return 0;
 
         const Var1 &var1 = GetVar1();
-        const Var2 &var2 = GetVar2(tableId);
+        Var2 var2 = GetVar2(tableId);
 
 #ifdef UseCatchOptimization
         CatchId catchId = CatchIdHelper::GetCatchId(tableId, tsId, secIndex);
@@ -85,7 +87,7 @@ public:
             return 0;
 
         const Var1 &var1 = GetVar1();
-        const Var2 &var2 = GetVar2(tableId);
+        Var2 var2 = GetVar2(tableId);
 
 #ifdef UseCatchOptimization
         CatchId catchId = CatchIdHelper::GetCatchId(tableId, tsId);
@@ -124,7 +126,7 @@ public:
             return 0;        
 
         const Var1 &var1 = GetVar1();
-        const Var2 &var2 = GetVar2(tableId);
+        Var2 var2 = GetVar2(tableId);
 
         size_t size = GetCodesSize(tableId, tsId, secIndex);
         assert(size <= bufferSize && size != 0);
@@ -160,7 +162,7 @@ public:
         WriteHelper<uint16_t> writeHelper(ptr + sizeof(TableId), ptr + sizeof(TableId) + sizeof(TableSize));
         ptr = ptr + MakeCodes1(tableId, ptr, buffer + bufferSize - ptr, var1Size, 
                                secIndex, secNumber - 1);        
-        ptr = ptr + MakeCodes2(ptr, buffer + bufferSize - ptr, maxSize, offset); 
+        ptr = ptr + MakeCodes2(var2, ptr, buffer + bufferSize - ptr, maxSize, offset); 
         writeHelper.Write((SectionSyntaxIndicator << 15) | (Reserved1Bit << 14) | (Reserved2Bit << 12), ptr + 4); 
         ptr = ptr + Write32(ptr, Crc32::CalculateCrc(buffer, ptr - buffer));
 
@@ -200,10 +202,10 @@ protected:
     virtual size_t GetFixedSize() const = 0;
     virtual size_t GetVarSize() const = 0;
     virtual const Var1& GetVar1() const = 0;
-    virtual const Var2& GetVar2(TableId tableId) const = 0;
+    virtual Var2 GetVar2(TableId tableId) const = 0;
     virtual size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                               SectionNumber secNumber, SectionNumber lastSecNumber) const = 0;    
-    virtual size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    virtual size_t MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                               size_t var2MaxSize, size_t var2Offset) const = 0;    
 
 private:

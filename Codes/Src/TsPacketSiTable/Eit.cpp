@@ -124,11 +124,14 @@ size_t EitEvent::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 /**********************class EitEvents**********************/
 EitEvents::EitEvents()
 {
+    AllocProxy();
 }
 
 EitEvents::~EitEvents()
 {
     for_each(eitEvents.begin(), eitEvents.end(), ScalarDeleter());
+    eitEvents.clear();
+    FreeProxy();
 }
 
 void EitEvents::AddEvent(EitEvent *eitEvent)
@@ -152,13 +155,14 @@ TableId     offset                                   return value
 ...
 ...
  */
-size_t EitEvents::GetCodesSize(size_t maxSize, size_t offset) const
+size_t EitEvents::GetCodesSize(size_t maxSize, size_t offset, 
+                               uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const
 {
     size_t size = 0;
     uint_t eventNumber = 0;
     
     list<EitEvent *>::const_iterator iter; 
-    for (iter = Seek(offset); iter != eitEvents.end(); ++iter)
+    for (iter = Seek(offset, maxEventNumberInAllSection); iter != eitEvents.end(); ++iter)
     {
         if (size + (*iter)->GetCodesSize() > maxSize)
         {
@@ -177,14 +181,14 @@ size_t EitEvents::GetCodesSize(size_t maxSize, size_t offset) const
     return size; 
 }
 
-size_t EitEvents::MakeCodes(uchar_t *buffer, size_t bufferSize,
-                            size_t offset) const
+size_t EitEvents::MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset,
+                            uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const
 {
     uchar_t *ptr = buffer;  
     uint_t eventNumber = 0;
 
     list<EitEvent *>::const_iterator iter;
-    for (iter = Seek(offset); iter != eitEvents.end(); ++iter)
+    for (iter = Seek(offset, maxEventNumberInAllSection); iter != eitEvents.end(); ++iter)
     {
         if (ptr + (*iter)->GetCodesSize() > buffer + bufferSize)
         {
@@ -237,14 +241,8 @@ bool EitEvents::RemoveOutOfDateEvent()
     return false;
 }
 
-void EitEvents::SetMaxSectionNumber(uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const
-{
-    this->maxEventNumberIn1Section = maxEventNumberIn1Section;
-    this->maxEventNumberInAllSection = maxEventNumberInAllSection;
-}
-
 /* private function */
-list<EitEvent *>::const_iterator EitEvents::Seek(size_t offset) const
+list<EitEvent *>::const_iterator EitEvents::Seek(size_t offset, uint_t maxEventNumberInAllSection) const
 {
     size_t curOffset = 0;
     uint_t eventNumber = 0;
@@ -358,22 +356,19 @@ size_t EitTable::GetVarSize() const
     return MaxEitEventContentSize;
 }
 
-const VarHelper& EitTable::GetVar1() const
+const EitTable::Var1& EitTable::GetVar1() const
 {
     return varHelper;
 }
 
-const EitEvents& EitTable::GetVar2(TableId tableId) const
+EitTable::Var2 EitTable::GetVar2(TableId tableId) const
 {
     if (tableId == EitActualPfTableId || tableId == EitOtherPfTableId)
     {
-        eitEvents.SetMaxSectionNumber(MaxEventNumberIn1EitPfSection, MaxEventNumberInAllEitPfSection);
+        return Var2(eitEvents, MaxEventNumberIn1EitPfSection, MaxEventNumberInAllEitPfSection);
     }
-    else
-    {
-        eitEvents.SetMaxSectionNumber(UINT_MAX, UINT_MAX);
-    }
-    return eitEvents;
+
+    return Var2(eitEvents, UINT_MAX, UINT_MAX);
 }
 
 size_t EitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -404,12 +399,12 @@ size_t EitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t EitTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+size_t EitTable::MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
 
-    ptr = ptr + eitEvents.MakeCodes(ptr, var2MaxSize, var2Offset);
+    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
 
     assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);

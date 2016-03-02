@@ -1,6 +1,7 @@
 #ifndef _TransportStream_h_
 #define _TransportStream_h_
 
+#include "Include/Foundation/ContainerBase.h"
 #include "Descriptor.h"       //Descriptor 
 
 #pragma pack(push, 1)
@@ -66,7 +67,7 @@ private:
 };
 
 /**********************class TransportStreams**********************/
-class TransportStreams
+class TransportStreams: public ContainerBase
 {
 public:
     TransportStreams();
@@ -75,6 +76,20 @@ public:
     void AddTransportStream(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, Descriptor *discriptor);
     
+    // ContainerBase function. construct proxy from _Alnod
+    void AllocProxy()
+    {
+        myProxy = new ContainerProxy;
+        myProxy->myContainer = this;
+    }
+    // ContainerBase function, destroy proxy.
+    void FreeProxy()
+    {
+        OrphanAll();
+        delete myProxy;
+        myProxy = nullptr;
+    }
+
     size_t GetCodesSize(size_t maxSize, size_t offset) const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
 
@@ -82,6 +97,37 @@ public:
     //void Put(std::ostream& os) const;
 private:
     std::list<TransportStream*> transportStreams;
+};
+
+template<typename TransportStreams>
+class TransportStreamsBinder: public IteratorBase 
+{
+public:
+    TransportStreamsBinder(const TransportStreams &transportStreams)
+        : transportStreams(transportStreams)
+    { 
+        const ContainerBase *container = &transportStreams;
+        this->Adopt(container);
+    }
+
+    size_t GetCodesSize(size_t maxSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return transportStreams.GetCodesSize(maxSize, offset);
+    }
+
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return transportStreams.MakeCodes(buffer, bufferSize, offset);
+    }
+
+private:
+    const TransportStreams &transportStreams;
 };
 
 #endif

@@ -74,11 +74,14 @@ size_t SdtService::MakeCodes(uchar_t *buffer, size_t bufferSize) const
 /* public function */
 SdtServices::SdtServices()
 {
+    AllocProxy();
 }
 
 SdtServices::~SdtServices()
 {
     for_each(sdtServices.begin(), sdtServices.end(), ScalarDeleter());
+    sdtServices.clear();
+    FreeProxy();
 }
 
 void SdtServices::AddSdtService(SdtService* service)
@@ -213,14 +216,14 @@ size_t SdtTable::GetVarSize() const
     return MaxSdtServiceContentSize;
 }
 
-const VarHelper& SdtTable::GetVar1() const
+const SdtTable::Var1& SdtTable::GetVar1() const
 {
     return varHelper;
 }
 
-const SdtServices& SdtTable::GetVar2(TableId tableId) const
+SdtTable::Var2 SdtTable::GetVar2(TableId tableId) const
 {
-    return sdtServices;
+    return Var2(sdtServices);
 }
 
 size_t SdtTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -249,12 +252,12 @@ size_t SdtTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t SdtTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
+size_t SdtTable::MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
 
-    ptr = ptr + sdtServices.MakeCodes(ptr, var2MaxSize, var2Offset);
+    ptr = ptr + var2.MakeCodes(ptr, var2MaxSize, var2Offset);
 
     assert(ptr <= buffer + bufferSize);
     return (ptr - buffer);

@@ -116,7 +116,7 @@ private:
 };
 
 /**********************class SdtServices**********************/
-class SdtServices
+class SdtServices: public ContainerBase
 {
 public:
     SdtServices();
@@ -124,6 +124,20 @@ public:
     
     void AddSdtService(SdtService* service);
     void AddServiceDescriptor(ServiceId serviceId, Descriptor *descriptor);
+    
+    // ContainerBase function. construct proxy from _Alnod
+    void AllocProxy()
+    {
+        myProxy = new ContainerProxy;
+        myProxy->myContainer = this;
+    }
+    // ContainerBase function, destroy proxy.
+    void FreeProxy()
+    {
+        OrphanAll();
+        delete myProxy;
+        myProxy = nullptr;
+    }
 
     size_t GetCodesSize(size_t maxSize, size_t &offset) const;
     size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
@@ -132,8 +146,39 @@ private:
     std::list<SdtService*> sdtServices;
 };
 
+template<typename SdtServices>
+class SdtServicesBinder: public IteratorBase 
+{
+public:
+    SdtServicesBinder(const SdtServices &sdtServices)
+        : sdtServices(sdtServices)
+    {
+        const ContainerBase *container = &sdtServices;
+        this->Adopt(container);
+    }
+
+    size_t GetCodesSize(size_t maxSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return sdtServices.GetCodesSize(maxSize, offset);
+    }
+
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
+    {
+#ifdef _DEBUG
+        assert(this->GetContainer() != nullptr);
+#endif
+        return sdtServices.MakeCodes(buffer, bufferSize, offset);
+    }
+
+private:
+    const SdtServices &sdtServices;
+};
+
 /**********************class SdtTable**********************/
-class SdtTable: public SiTableTemplate<VarHelper, SdtServices>
+class SdtTable: public SiTableTemplate<VarHelper, SdtServicesBinder<SdtServices>>
 {
 public:
     friend class SiTableInterface;
@@ -151,11 +196,11 @@ protected:
     bool CheckTsId(TsId tsid) const;
     size_t GetFixedSize() const;
     size_t GetVarSize() const;
-    const VarHelper& GetVar1() const;
-    const SdtServices& GetVar2(TableId tableId) const;
+    const Var1& GetVar1() const;
+    Var2 GetVar2(TableId tableId) const;
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(Var2 &var2, uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const;  
 
 private:
