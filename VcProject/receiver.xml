@@ -40,5 +40,14 @@
         <receiver ip="10.0.0.10" port="5013">
             <tsid>13</tsid>
         </receiver>	
+        <receiver ip="10.0.0.10" port="5014">
+            <tsid>14</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5015">
+            <tsid>15</tsid>
+        </receiver>	
+        <receiver ip="10.0.0.10" port="5016">
+            <tsid>16</tsid>
+        </receiver>	
     </network>    
 </root>

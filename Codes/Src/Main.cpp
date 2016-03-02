@@ -15,11 +15,15 @@
 
 /* ControllerInterface */
 #include "Include/Controller/ControllerInterface.h"
+#include "resource.h"
 #include "Version.h"
 using namespace std;
 
 int main(int argc, char **argv)
 {    
+    HWND hwnd=GetConsoleWindow();
+    SendMessage(hwnd,WM_SETICON,ICON_SMALL,( LPARAM )LoadIcon(GetModuleHandle(NULL),MAKEINTRESOURCE(IDI_ICON1)));
+
     cout << "interal version: " << ExeVersion << endl;
     bool ret;
     ControllerInterface &controller = ControllerInterface::GetInstance();

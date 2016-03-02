@@ -46,6 +46,7 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\SiTableTemplate.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h" />
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportPacket.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Configuration\DirCfg.cpp" />
@@ -69,6 +70,9 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\Sdt.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportStream.cpp" />
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportPacket.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VcProject.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7370CBCE-A25C-4EAE-A2AC-7D4B2039FF85}</ProjectGuid>

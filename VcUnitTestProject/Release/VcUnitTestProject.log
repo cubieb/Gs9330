@@ -1,0 +1,68 @@
+﻿生成启动时间为 2016/3/1 13:57:58。
+     1>项目“D:\Backup\Gs9330.Git\VcUnitTestProject\VcUnitTestProject.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ..\Codes\Src\Configuration\DirCfg.cpp ..\Codes\Src\Configuration\NetworksCfg.cpp ..\Codes\Src\Configuration\TimerCfg.cpp ..\Codes\Src\Controller\Controller.cpp ..\Codes\Src\Controller\TimerRepository.cpp ..\Codes\Src\Foundation\Converter.cpp ..\Codes\Src\Foundation\Crc32.cpp ..\Codes\Src\Foundation\Debug.cpp ..\Codes\Src\Foundation\Delete.cpp ..\Codes\Src\Foundation\LibLinking.cpp ..\Codes\Src\Foundation\PacketHelper.cpp ..\Codes\Src\Foundation\Time.cpp ..\Codes\Src\TsPacketSiTable\Bat.cpp ..\Codes\Src\TsPacketSiTable\CatchHelper.cpp ..\Codes\Src\TsPacketSiTable\Descriptor.cpp ..\Codes\Src\TsPacketSiTable\Eit.cpp ..\Codes\Src\TsPacketSiTable\Nit.cpp ..\Codes\Src\TsPacketSiTable\Sdt.cpp ..\Codes\Src\TsPacketSiTable\TransportPacket.cpp ..\Codes\Src\TsPacketSiTable\TransportStream.cpp ..\UnitTestCodes\DescriptorHelper.cpp ..\UnitTestCodes\UtConverter.cpp ..\UnitTestCodes\Main.cpp ..\UnitTestCodes\UtSiTableXmlWrapperInterface.cpp ..\UnitTestCodes\UtTransportPacket.cpp ..\UnitTestCodes\UtSiTable.cpp ..\UnitTestCodes\UnitTestLibLinking.cpp
+         DirCfg.cpp
+         NetworksCfg.cpp
+         TimerCfg.cpp
+         Controller.cpp
+         TimerRepository.cpp
+         Converter.cpp
+         Crc32.cpp
+         Debug.cpp
+         Delete.cpp
+         LibLinking.cpp
+         PacketHelper.cpp
+         Time.cpp
+         Bat.cpp
+         CatchHelper.cpp
+         Descriptor.cpp
+         Eit.cpp
+         Nit.cpp
+         Sdt.cpp
+         TransportPacket.cpp
+         TransportStream.cpp
+         正在编译...
+         DescriptorHelper.cpp
+         UtConverter.cpp
+         Main.cpp
+         UtSiTableXmlWrapperInterface.cpp
+         UtTransportPacket.cpp
+         UtSiTable.cpp
+         UnitTestLibLinking.cpp
+       Link:
+         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Backup\Gs9330.Git\Release\UnitTestR.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Backup\Gs9330.Git\Release\UnitTestR.pdb" /SUBSYSTEM:CONSOLE,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Backup\Gs9330.Git\Release\UnitTestR.lib" /MACHINE:X86 /SAFESEH Release\DirCfg.obj
+         Release\NetworksCfg.obj
+         Release\TimerCfg.obj
+         Release\Controller.obj
+         Release\TimerRepository.obj
+         Release\Converter.obj
+         Release\Crc32.obj
+         Release\Debug.obj
+         Release\Delete.obj
+         Release\LibLinking.obj
+         Release\PacketHelper.obj
+         Release\Time.obj
+         Release\Bat.obj
+         Release\CatchHelper.obj
+         Release\Descriptor.obj
+         Release\Eit.obj
+         Release\Nit.obj
+         Release\Sdt.obj
+         Release\TransportPacket.obj
+         Release\TransportStream.obj
+         Release\DescriptorHelper.obj
+         Release\UtConverter.obj
+         Release\Main.obj
+         Release\UtSiTableXmlWrapperInterface.obj
+         Release\UtTransportPacket.obj
+         Release\UtSiTable.obj
+         Release\UnitTestLibLinking.obj
+         正在生成代码
+         已完成代码的生成
+         VcUnitTestProject.vcxproj -> D:\Backup\Gs9330.Git\Release\UnitTestR.exe
+     1>已完成生成项目“D:\Backup\Gs9330.Git\VcUnitTestProject\VcUnitTestProject.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:39.90

@@ -232,7 +232,6 @@ bool EitEvents::RemoveOutOfDateEvent()
         eventTime = ConvertStrToTime((*end)->GetStartTime().c_str()) + (*end)->GetDuration();
         if (eventTime > curTime)
         {
-            ++end;
             break;
         }
     }

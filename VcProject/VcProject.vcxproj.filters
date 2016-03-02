@@ -152,6 +152,7 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\SiTableTemplate.h">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Codes\Src\Foundation\Delete.cpp">
@@ -217,5 +218,10 @@
     <ClCompile Include="..\Codes\Src\TsPacketSiTable\TransportPacket.cpp">
       <Filter>源文件\TsPacketSiTable</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VcProject.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
