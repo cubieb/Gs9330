@@ -75,8 +75,8 @@ public:
     void AddTransportStream(TsId tsId, OnId onId);
     void AddTsDescriptor(TsId tsId, Descriptor *discriptor);
     
-    size_t GetCodesSize(TableId, size_t maxSize, size_t offset) const;
-    size_t MakeCodes(TableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
+    size_t GetCodesSize(size_t maxSize, size_t offset) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
 
     /* the following function is provided just for debug */
     //void Put(std::ostream& os) const;

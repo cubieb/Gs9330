@@ -125,15 +125,15 @@ public:
     void AddSdtService(SdtService* service);
     void AddServiceDescriptor(ServiceId serviceId, Descriptor *descriptor);
 
-    size_t GetCodesSize(TableId, size_t maxSize, size_t &offset) const;
-    size_t MakeCodes(TableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
+    size_t GetCodesSize(size_t maxSize, size_t &offset) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
 
 private:
     std::list<SdtService*> sdtServices;
 };
 
 /**********************class SdtTable**********************/
-class SdtTable: public SiTableTemplate<VarHelper, SdtServices, SdtFixedFieldSize, MaxSdtServiceContentSize>
+class SdtTable: public SiTableTemplate<VarHelper, SdtServices>
 {
 public:
     friend class SiTableInterface;
@@ -149,9 +149,13 @@ public:
 protected:
     bool CheckTableId(TableId tableId) const;
     bool CheckTsId(TsId tsid) const;
+    size_t GetFixedSize() const;
+    size_t GetVarSize() const;
+    const VarHelper& GetVar1() const;
+    const SdtServices& GetVar2(TableId tableId) const;
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const;  
 
 private:
@@ -162,6 +166,9 @@ private:
     TsId transportStreamId;
     Version  versionNumber;
     NetId originalNetworkId;
+
+    VarHelper varHelper;
+    SdtServices sdtServices;
 };
 
 #endif

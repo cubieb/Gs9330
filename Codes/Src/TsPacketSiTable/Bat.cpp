@@ -41,16 +41,16 @@ void BatTable::AddDescriptor(std::string &data)
         return;
     }
 
-    var1.AddDescriptor(descriptor);
+    descriptors.AddDescriptor(descriptor);
     //in order to packet all descriptor into single one section, we
     //demand descriptor size less than MaxBatDesAndTsContentSize.
-    assert(var1.GetCodesSize() <= MaxBatDesAndTsContentSize);
+    assert(descriptors.GetCodesSize() <= MaxBatDesAndTsContentSize);
     ClearCatch();
 }
 
 void BatTable::AddTs(TsId tsId, OnId onId)
 {
-    var2.AddTransportStream(tsId, onId);
+    transportStreams.AddTransportStream(tsId, onId);
     ClearCatch();
 }
 
@@ -64,7 +64,7 @@ void BatTable::AddTsDescriptor(TsId tsId, std::string &data)
         return;
     }
 
-    var2.AddTsDescriptor(tsId, descriptor);
+    transportStreams.AddTsDescriptor(tsId, descriptor);
     ClearCatch();
 }
 
@@ -88,6 +88,26 @@ bool BatTable::CheckTableId(TableId tableId) const
 bool BatTable::CheckTsId(TsId tsid) const
 {
     return true;
+}
+
+size_t BatTable::GetFixedSize() const
+{
+    return BatFixedFieldSize;
+}
+
+size_t BatTable::GetVarSize() const
+{
+    return MaxBatDesAndTsContentSize;
+}
+
+const Descriptors& BatTable::GetVar1() const
+{
+    return descriptors;
+}
+
+const TransportStreams& BatTable::GetVar2(TableId tableId) const
+{
+    return transportStreams;
 }
 
 size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -123,7 +143,7 @@ size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
         WriteHelper<uint16_t> desHelper(ptr, ptr + 2);
         //fill "reserved_future_use + bouquet_descriptors_length" to 0 temporarily.
         ptr = ptr + Write16(ptr, 0);  
-        ptr = ptr + var1.MakeCodes(ptr, var1Size);
+        ptr = ptr + descriptors.MakeCodes(ptr, var1Size);
         //rewrite reserved_future_use + network_descriptors_length.
         desHelper.Write(Reserved4Bit << 12, ptr); 
     }
@@ -132,14 +152,14 @@ size_t BatTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t BatTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+size_t BatTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
     WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
+    ptr = ptr + transportStreams.MakeCodes(ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
 

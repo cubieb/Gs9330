@@ -284,7 +284,7 @@ void SiTable::TestEitGetCodesSize()
 
     uint_t eventNumber = 1;
     uint_t desciptorNumber = 50;
-    if (MaxEventNumberIn1EitPfTable != 1)
+    if (MaxEventNumberIn1EitPfSection != 1)
     {
         eventNumber = 2;
         desciptorNumber = 96;        

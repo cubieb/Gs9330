@@ -54,8 +54,8 @@ typedef uint32_t CatchId;
 #define SdtActualTableId           0x42
 #define SdtOtherTableId            0x46
 
-#define MaxEventNumberIn1EitPfTable   1
-#define MaxEventNumberInAllEitPfTable 2
+#define MaxEventNumberIn1EitPfSection   1
+#define MaxEventNumberInAllEitPfSection 2
 
 #define UdpPayloadSize (188*7)
 

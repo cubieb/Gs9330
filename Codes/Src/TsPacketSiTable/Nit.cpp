@@ -40,13 +40,13 @@ void NitTable::AddDescriptor(std::string &data)
         return;
     }
 
-    var1.AddDescriptor(descriptor);
+    descriptors.AddDescriptor(descriptor);
     ClearCatch();
 }
 
 void NitTable::AddTs(TsId tsId, OnId onId)
 {
-    var2.AddTransportStream(tsId, onId);
+    transportStreams.AddTransportStream(tsId, onId);
     ClearCatch();
 }
 
@@ -60,7 +60,7 @@ void NitTable::AddTsDescriptor(TsId tsId, std::string &data)
         return;
     }
 
-    var2.AddTsDescriptor(tsId, descriptor);
+    transportStreams.AddTsDescriptor(tsId, descriptor);
     ClearCatch();
 }
 
@@ -83,6 +83,26 @@ bool NitTable::CheckTableId(TableId tableId) const
 bool NitTable::CheckTsId(TsId tsid) const
 {
     return true;
+}
+
+size_t NitTable::GetFixedSize() const
+{
+    return NitFixedFieldSize;
+}
+
+size_t NitTable::GetVarSize() const
+{
+    return MaxNitDesAndTsContentSize;
+}
+
+const Descriptors& NitTable::GetVar1() const
+{
+    return descriptors;
+}
+
+const TransportStreams& NitTable::GetVar2(TableId tableId) const
+{
+    return transportStreams;
 }
 
 size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
@@ -118,7 +138,7 @@ size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
         WriteHelper<uint16_t> descriptorHelper(ptr, ptr + 2);
         //fill "reserved_future_use + network_descriptors_length" to 0 temporarily.
         ptr = ptr + Write16(ptr, 0);  
-        ptr = ptr + var1.MakeCodes(ptr, var1Size);
+        ptr = ptr + descriptors.MakeCodes(ptr, var1Size);
         //rewrite reserved_future_use + network_descriptors_length.
         descriptorHelper.Write(Reserved4Bit << 12, ptr); 
     }
@@ -127,14 +147,14 @@ size_t NitTable::MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize,
     return (ptr - buffer);
 }
 
-size_t NitTable::MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+size_t NitTable::MakeCodes2(uchar_t *buffer, size_t bufferSize,
                             size_t var2MaxSize, size_t var2Offset) const
 {
     uchar_t *ptr = buffer;
     WriteHelper<uint16_t> tsHelper(ptr, ptr + 2);
     //fill "reserved_future_use + transport_stream_loop_length" to 0 temporarily.
     ptr = ptr + Write16(ptr, 0);  
-    ptr = ptr + var2.MakeCodes(tableId, ptr, var2MaxSize, var2Offset);
+    ptr = ptr + transportStreams.MakeCodes(ptr, var2MaxSize, var2Offset);
     //rewrite reserved_future_use + transport_stream_loop_length.
     tsHelper.Write(Reserved4Bit << 12, ptr); 
     

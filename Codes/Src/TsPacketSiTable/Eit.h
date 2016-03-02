@@ -139,8 +139,8 @@ public:
     void AddEvent(EitEvent *eitEvent);
     void AddEventDescriptor(uint16_t eventId, Descriptor *descriptor);
 
-    size_t GetCodesSize(TableId tableId, size_t maxSize, size_t offset) const;
-    size_t MakeCodes(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t offset) const;
+    size_t GetCodesSize(size_t maxSize, size_t offset) const;
+    size_t MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const;
     
     /* remove out-of-date event 
        Return Values:  
@@ -148,17 +148,19 @@ public:
            false if some out-of-date event was deleted.
      */
     bool RemoveOutOfDateEvent();
+    void SetMaxSectionNumber(uint_t maxEventNumberIn1Section, uint_t maxEventNumberInAllSection) const;
 
 private:
-    uint_t GetMaxEventNumber(TableId tableId) const;
-    std::list<EitEvent *>::const_iterator Seek(size_t offset, uint_t maxLoopNumber) const;
+    std::list<EitEvent *>::const_iterator Seek(size_t offset) const;
 
 private:
+    mutable uint_t maxEventNumberIn1Section;
+    mutable uint_t maxEventNumberInAllSection;
     std::list<EitEvent *> eitEvents;
 };
 
 /**********************class EitTable**********************/
-class EitTable: public SiTableTemplate<VarHelper, EitEvents, EitFixedFieldSize, MaxEitEventContentSize>
+class EitTable: public SiTableTemplate<VarHelper, EitEvents>
 {
 public:
     friend class SiTableInterface;
@@ -175,9 +177,14 @@ public:
 protected:
     bool CheckTableId(TableId tableId) const;
     bool CheckTsId(TsId tsid) const;
+    size_t GetFixedSize() const;
+    size_t GetVarSize() const;
+    const VarHelper& GetVar1() const;
+    const EitEvents& GetVar2(TableId tableId) const;
+
     size_t MakeCodes1(TableId tableId, uchar_t *buffer, size_t bufferSize, size_t var1Size,
                       SectionNumber secNumber, SectionNumber lastSecNumber) const;    
-    size_t MakeCodes2(TableId tableId, uchar_t *buffer, size_t bufferSize,
+    size_t MakeCodes2(uchar_t *buffer, size_t bufferSize,
                       size_t var2MaxSize, size_t var2Offset) const; 
 
 private:
@@ -190,6 +197,9 @@ private:
     Version versionNumber;
     TsId    transportStreamId;
     NetId   originalNetworkId;
+
+    VarHelper varHelper;
+    EitEvents eitEvents;
 };
 
 #endif

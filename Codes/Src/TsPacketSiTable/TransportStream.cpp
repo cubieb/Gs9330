@@ -93,7 +93,7 @@ void TransportStreams::AddTsDescriptor(TsId tsId, Descriptor *descriptor)
     (*iter)->AddDescriptor(descriptor);
 }
 
-size_t TransportStreams::GetCodesSize(TableId, size_t maxSize, size_t offset) const
+size_t TransportStreams::GetCodesSize(size_t maxSize, size_t offset) const
 {   
     size_t size = 0;
     size_t curOffset = 0;
@@ -117,7 +117,7 @@ size_t TransportStreams::GetCodesSize(TableId, size_t maxSize, size_t offset) co
     return size;
 }
 
-size_t TransportStreams::MakeCodes(TableId, uchar_t *buffer, size_t bufferSize, size_t offset) const
+size_t TransportStreams::MakeCodes(uchar_t *buffer, size_t bufferSize, size_t offset) const
 {
     uchar_t *ptr = buffer;
 
