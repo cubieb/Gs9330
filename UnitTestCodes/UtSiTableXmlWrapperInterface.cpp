@@ -173,13 +173,22 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect01()
     batXml.close();
 
     TableId tableId;
-    list<SiTableKey> keysL, keysR;    
-    keysR.push_back(1);
+    SiTableKey keysL, keysR = 1;    
     auto_ptr<TransportPacketInterface> tsPacketL(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatXmlWrapper<TransportPacketInterface, SiTableInterface> wrapper;
-    wrapper.Select(*tsPacketL, "bat.xml", tableId, keysL);
-    CPPUNIT_ASSERT(tableId == 0x4A);
-    CPPUNIT_ASSERT(keysL == keysR);
+    BatXmlWrapper<SiTableInterface> wrapper;
+    list<SiTableInterface*> siTables = wrapper.Select("bat.xml");
+    list<SiTableInterface*>::iterator ii;
+    for (ii = siTables.begin(); ii != siTables.end(); ++ii)
+    {
+        tableId = (*ii)->GetTableId();
+        CPPUNIT_ASSERT(tableId == 0x4A);
+
+        keysL = (*ii)->GetKey();
+        CPPUNIT_ASSERT(keysL == keysR);
+
+        tsPacketL->AddSiTable(*ii);
+    }
+    
     CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsId) == size);
     tsPacketL->MakeCodes(ccid, BatTableId, tsId, bufferL, BufferSize);
     CPPUNIT_ASSERT(memcmp(bufferL, bufferR, size) == 0);
@@ -227,13 +236,22 @@ void SiTableXmlWrapper::TestBatXmlWrapperSelect02()
     batXml.close();
 
     TableId tableId;
-    list<SiTableKey> keysL, keysR;    
-    keysR.push_back(1);
+    SiTableKey keysL, keysR = 1;   
     auto_ptr<TransportPacketInterface> tsPacketL(TransportPacketInterface::CreateInstance(netId, BatPid));
-    BatXmlWrapper<TransportPacketInterface, SiTableInterface> wrapper;
-    wrapper.Select(*tsPacketL, "bat.xml", tableId, keysL);
-    CPPUNIT_ASSERT(tableId == 0x4A);
-    CPPUNIT_ASSERT(keysL == keysR);
+    BatXmlWrapper<SiTableInterface> wrapper;
+    list<SiTableInterface*> siTables = wrapper.Select("bat.xml");
+    list<SiTableInterface*>::iterator ii;
+    for (ii = siTables.begin(); ii != siTables.end(); ++ii)
+    {
+        tableId = (*ii)->GetTableId();
+        CPPUNIT_ASSERT(tableId == 0x4A);
+
+        keysL = (*ii)->GetKey();
+        CPPUNIT_ASSERT(keysL == keysR);
+
+        tsPacketL->AddSiTable(*ii);
+    }
+
     CPPUNIT_ASSERT(tsPacketL->GetCodesSize(BatTableId, tsId) == size);
     tsPacketL->MakeCodes(ccid, BatTableId, tsId, bufferL, BufferSize);
     CPPUNIT_ASSERT(memcmp(bufferL, bufferR, size) == 0);

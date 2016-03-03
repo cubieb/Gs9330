@@ -10,6 +10,7 @@ typedef uint16_t Pid;
 typedef uchar_t  SectionNumber;
 typedef uint16_t ServiceId;
 typedef uint32_t SiTableKey;
+typedef uint64_t SiTableIdAndKey;
 typedef uchar_t  TableId;
 typedef uint16_t TableSize;
 typedef uint16_t TsId;  //Transport Stream Id
@@ -17,10 +18,12 @@ typedef uchar_t  Version;
 
 typedef uint32_t CatchId;
 #define SectionNumberBits     (8 * sizeof(SectionNumber))
+#define SiTableKeyBits        (8 * sizeof(SiTableKey))
 #define TsIdBits              (8 * sizeof(TsId))
-#define MaxTableId            std::numeric_limits<TableId>::max()
-#define MaxTsId               std::numeric_limits<TsId>::max()
-#define MaxSectionNumber      std::numeric_limits<SectionNumber>::max()
+#define MaxTableId            (std::numeric_limits<TableId>::max())
+#define MaxTsId               (std::numeric_limits<TsId>::max())
+#define MaxSectionNumber      (std::numeric_limits<SectionNumber>::max())
+#define MaxSiTableKey         (std::numeric_limits<SiTableKey>::max())
 #define ReservedSectionNumber MaxSectionNumber
 
 #define TsPacketSize 188

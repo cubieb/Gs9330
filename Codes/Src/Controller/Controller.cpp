@@ -31,17 +31,17 @@
 using namespace std;
 
 /**********************SiTableXmlWrapperRepository**********************/
-static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> batWrapper
-    (string("bat"), new BatXmlWrapper<TransportPacketInterface, SiTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<SiTableInterface> batWrapper
+    (string("bat"), new BatXmlWrapper<SiTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> eitWrapper
-    (string("eit"), new EitXmlWrapper<TransportPacketInterface, SiTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<SiTableInterface> eitWrapper
+    (string("eit"), new EitXmlWrapper<SiTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> nitWrapper
-    (string("nit"), new NitXmlWrapper<TransportPacketInterface, SiTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<SiTableInterface> nitWrapper
+    (string("nit"), new NitXmlWrapper<SiTableInterface>);
 
-static SiTableXmlWrapperAutoRegisterSuite<TransportPacketInterface> sdtWrapper
-    (string("sdt"), new SdtXmlWrapper<TransportPacketInterface, SiTableInterface>);
+static SiTableXmlWrapperAutoRegisterSuite<SiTableInterface> sdtWrapper
+    (string("sdt"), new SdtXmlWrapper<SiTableInterface>);
 
 ControllerInterface &ControllerInterface::GetInstance()
 {
@@ -307,33 +307,39 @@ void Controller::AddSiTable(const char *path)
     {
         tsPacket = *iter;
     }
-    TableId tableId;
-    list<SiTableKey> keys;    
-    SiTableXmlWrapperRepository<TransportPacketInterface> &siTableWrapperRepository =
-        SiTableXmlWrapperRepository<TransportPacketInterface>::GetInstance();
-    SiTableXmlWrapperInterface<TransportPacketInterface> &siTableWrapper = 
-        siTableWrapperRepository.GetWrapperInstance(type);
-    errCode = siTableWrapper.Select(*tsPacket, path, tableId, keys);
-    if (errCode)
-    {
-        errstrm << "Error when reading " << path 
-             << ", error message: " << errCode.message() << endl;
-        return;
-    }
+
+    typedef SiTableXmlWrapperRepository<SiTableInterface> Repository;
+    typedef SiTableXmlWrapperInterface<SiTableInterface> Wrapper;
+
+    Repository &repository = Repository::GetInstance();
+    Wrapper &siTableWrapper = repository.GetWrapperInstance(type);
+    list<SiTableInterface*> siTables = siTableWrapper.Select(path);
     
     /* save {file name, table id, key list} relation ship */
-    fileSummaries.push_back(FileSummary(string(path), tableId, keys));
+    FileSummary summary(path);
+    list<SiTableInterface*>::iterator ii;
+    for (ii = siTables.begin(); ii != siTables.end(); ++ii)
+    {
+        TableId    tableId  = (*ii)->GetTableId();
+        SiTableKey tableKey = (*ii)->GetKey();
+        SiTableIdAndKey tableIdAndKey = FileSummary::AssembleTableIdAndKey(tableId, tableKey);
+        summary.tableIdAndKeys.push_back(tableIdAndKey);
         
-    /* schedule timer for {NetId, TableId} */
-    ScheduleTimer(netId, tableId);
-    if (tableId == EitActualSchTableId)
-    {
-        ScheduleTimer(netId, EitActualPfTableId);
+        /* schedule timer for {NetId, TableId} */
+        ScheduleTimer(netId, tableId);
+        if (tableId == EitActualSchTableId)
+        {
+            ScheduleTimer(netId, EitActualPfTableId);
+        }
+        else if (tableId == EitOtherSchTableId)
+        {
+            ScheduleTimer(netId, EitOtherPfTableId);
+        }
+                
+        tsPacket->AddSiTable(*ii);
     }
-    else if (tableId == EitOtherSchTableId)
-    {
-        ScheduleTimer(netId, EitOtherPfTableId);
-    }
+    fileSummaries.push_back(move(summary));
+
 }
 
 void Controller::DelSiTable(const char *path)
@@ -351,10 +357,13 @@ void Controller::DelSiTable(const char *path)
     std::list<FileSummary>::iterator summaryIter;
     summaryIter = find_if(fileSummaries.begin(), fileSummaries.end(), CompareSummaryFileName(path));
     assert (summaryIter != fileSummaries.end());
-    list<SiTableKey>::iterator keyIter;
-    for (keyIter = summaryIter->keys.begin(); keyIter != summaryIter->keys.end(); ++keyIter)
+    list<SiTableIdAndKey>::iterator ii;
+    for (ii = summaryIter->tableIdAndKeys.begin(); ii != summaryIter->tableIdAndKeys.end(); ++ii)
     {
-        tsPacket->DelSiTable(summaryIter->tableId, *keyIter);
+        TableId tableId = FileSummary::GetTableId(*ii);
+        SiTableKey tableKey = FileSummary::GetTableKey(*ii);
+
+        tsPacket->DelSiTable(tableId, tableKey);
     }
     fileSummaries.remove_if(CompareSummaryFileName(path));
 }

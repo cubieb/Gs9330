@@ -13,24 +13,33 @@
 /**********************class FileSummary**********************/
 struct FileSummary
 {
-    FileSummary(const std::string &fileName, TableId tableId, const std::list<SiTableKey> &keys)
-        : fileName(fileName), tableId(tableId), keys(keys)
-    {}
-
-    FileSummary(const FileSummary &value)
-        : fileName(value.fileName), tableId(value.tableId), keys(value.keys)
+    FileSummary(const std::string &fileName)
+        : fileName(fileName)
     {}
 
     FileSummary(FileSummary &&value)
     {
         fileName = move(value.fileName);
-        tableId = value.tableId;
-        keys = move(value.keys);
+        tableIdAndKeys = move(value.tableIdAndKeys);
     }
 
-    std::string        fileName;
-    TableId            tableId;
-    std::list<SiTableKey> keys;
+    static SiTableIdAndKey AssembleTableIdAndKey(TableId tableId, SiTableKey tableKey)
+    {
+        return ((SiTableIdAndKey)tableId << SiTableKeyBits) | ((SiTableIdAndKey)tableKey & MaxSiTableKey);
+    }
+
+    static TableId GetTableId(SiTableIdAndKey tableIdAndKey)
+    {
+        return (TableId)(tableIdAndKey >> SiTableKeyBits);
+    }
+    
+    static SiTableKey GetTableKey(SiTableIdAndKey tableIdAndKey)
+    {
+        return (SiTableKey)(tableIdAndKey & MaxSiTableKey);
+    }
+
+    std::string              fileName;
+    std::list<SiTableIdAndKey> tableIdAndKeys;
 };
 
 class CompareSummaryFileName: public std::unary_function<FileSummary, bool>
