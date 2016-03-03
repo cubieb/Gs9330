@@ -344,7 +344,6 @@ public:
                            TableId &tableId, std::list<SiTableKey> &keys)
     {
         cout << "Reading " << xmlPath << endl;
-        cout << "Reading " << xmlPath << endl;
         if ((ACE_OS::access(xmlPath, F_OK)) != 0)
         {
             return  make_error_code(std::errc::no_such_file_or_directory);

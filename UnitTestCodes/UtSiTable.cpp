@@ -414,6 +414,7 @@ void SiTable::TestEitMakeCodes2()
     eitXml << "</Root>" << endl;
 
     eitXml.close();
+    remove("eit.xml");
 
     static uchar_t code1[4096] = 
     { 
@@ -1000,8 +1001,84 @@ void SiTable::TestEitMakeCodes2()
     size = siTable->MakeCodes(EitActualSchTableId, tsId, buffer, 1024, 1);
     CPPUNIT_ASSERT(size == siTable->GetCodesSize(EitActualSchTableId, tsId, 1));
     CPPUNIT_ASSERT(memcmp(buffer, code3, size) == 0);
+}
 
+void SiTable::TestEitRefreshCatch()
+{
+    /* write Eit table content into xml file. If needed, we can send this xml to wireshark. */
+    std::fstream eitXml("eit.xml", ios_base::out);
+    const string eitTxt = 
+        "<?xml version='1.0'  encoding='gb2312' ?>"
+        "<Root TableType='EIT' TableID='0x4E'>"
+        "   <Transportstream TSID='1' ONID='1' ServiceID='1' Version='1'>"
+        "       <Event EventID='1' StartTime='2016-01-01 01:00:00' Duration='003600' running_status='4' free_CA_mode='1'>"
+        "            <Descriptors>"
+        "                <Item01 Tag='0x4D' Data='4D0Achi05a01aa00'/>"
+        "            </Descriptors>"
+        "        </Event>"
+        "        <Event EventID='2' StartTime='2020-01-01 02:00:00' Duration='003600' running_status='4' free_CA_mode='1'>"
+        "            <Descriptors>"
+        "                <Item01 Tag='0x4D' Data='4D0Achi05a02aa00'/>"
+        "            </Descriptors>"
+        "        </Event>"
+        "        <Event EventID='3' StartTime='2020-01-01 03:00:00' Duration='003600' running_status='4' free_CA_mode='1'>"
+        "            <Descriptors>"
+        "                <Item01 Tag='0x4D' Data='4D0Achi05a03aa00'/>"
+        "            </Descriptors>"
+        "        </Event>"
+        "    </Transportstream>"
+        "</Root>";
+    eitXml << eitTxt;
+    eitXml.close();
     remove("eit.xml");
+
+    ServiceId serviceId = 1;
+    Version   version = 1;
+    TsId      tsId = 1;
+    OnId      onId = 1;
+    size_t    size;
+
+    static uchar_t buffer[1024];
+    /************* case 1 *************/
+    auto_ptr<SiTableInterface> eit1(SiTableInterface::CreateEitInstance(EitActualSchTableId, 
+                                                                       serviceId, version, 
+                                                                       tsId, onId));
+
+    EventId eventId = 1;
+    eit1->AddEvent(eventId, "2016-01-01 01:00:00", 3600, 4, 1);
+    eit1->AddEventDescriptor(eventId, string("4D0Achi05a01aa00"));
+    eventId = 2;
+    eit1->AddEvent(eventId, "2020-01-01 02:00:00", 3600, 4, 1);
+    eit1->AddEventDescriptor(eventId, string("4D0Achi05a02aa00"));
+    eventId = 3;
+    eit1->AddEvent(eventId, "2020-01-01 03:00:00", 3600, 4, 1);
+    eit1->AddEventDescriptor(eventId, string("4D0Achi05a03aa00"));
+
+    uchar_t code1[1024] = 
+    { 
+        0x50, 0xf0, 0x5a, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x50, 0x00, 0x01,
+        0xe0, 0x2b, 0x17, 0x00, 0x00, 0x01, 0x00, 0x00, 0x90, 0x0d, 0x4d, 0x0b, 0x63, 0x68, 0x69, 0x06,
+        0x13, 0x61, 0x30, 0x31, 0x61, 0x61, 0x00, 0x00, 0x02, 0xe5, 0xe0, 0x18, 0x00, 0x00, 0x01, 0x00,
+        0x00, 0x90, 0x0d, 0x4d, 0x0b, 0x63, 0x68, 0x69, 0x06, 0x13, 0x61, 0x30, 0x32, 0x61, 0x61, 0x00,
+        0x00, 0x03, 0xe5, 0xe0, 0x19, 0x00, 0x00, 0x01, 0x00, 0x00, 0x90, 0x0d, 0x4d, 0x0b, 0x63, 0x68,
+        0x69, 0x06, 0x13, 0x61, 0x30, 0x33, 0x61, 0x61, 0x00, 0xc9, 0x0c, 0x95, 0xe7
+    };
+    size = eit1->MakeCodes(EitActualSchTableId, tsId, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == eit1->GetCodesSize(EitActualSchTableId, tsId, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code1, size) == 0);
+
+    eit1->RefreshCatch();
+    uchar_t code2[1024] = 
+    { 
+        0x50, 0xf0, 0x41, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x50, 0x00, 0x02,
+        0xe5, 0xe0, 0x18, 0x00, 0x00, 0x01, 0x00, 0x00, 0x90, 0x0d, 0x4d, 0x0b, 0x63, 0x68, 0x69, 0x06,
+        0x13, 0x61, 0x30, 0x32, 0x61, 0x61, 0x00, 0x00, 0x03, 0xe5, 0xe0, 0x19, 0x00, 0x00, 0x01, 0x00,
+        0x00, 0x90, 0x0d, 0x4d, 0x0b, 0x63, 0x68, 0x69, 0x06, 0x13, 0x61, 0x30, 0x33, 0x61, 0x61, 0x00,
+        0xb7, 0x4a, 0x74, 0x93
+    };
+    size = eit1->MakeCodes(EitActualSchTableId, tsId, buffer, 1024, 0);
+    CPPUNIT_ASSERT(size == eit1->GetCodesSize(EitActualSchTableId, tsId, 0));
+    CPPUNIT_ASSERT(memcmp(buffer, code2, size) == 0);
 }
 
  void SiTable::TestNitMakeCodes()
@@ -1028,6 +1105,8 @@ void SiTable::TestEitMakeCodes2()
     }
     nitXml << string(4, ' ') << "</Network>" << endl;
     nitXml << "</Root>" << endl;
+    nitXml.close();
+    remove("nit.xml");
 
     TableId tableId = 0x40;
     NetId networkId = 1;
@@ -1217,8 +1296,6 @@ void SiTable::TestEitMakeCodes2()
     size = siTable->MakeCodes(tableId, tsId, buffer, 1024, 2);
     CPPUNIT_ASSERT(size == siTable->GetCodesSize(tableId, tsId, 2));
     CPPUNIT_ASSERT(memcmp(buffer, code3, size) == 0);
-
-    remove("nit.xml");
  }
 
 void SiTable::TestSdtConstruct()

@@ -3,7 +3,8 @@ import shutil
 import glob
 import time
 
-for file in glob.glob("10*.xml"):
+regex="1_[0-9][0-9][0-9]_??t*.xml"
+for file in glob.glob(regex):
 	os.remove(file)
 	
    

@@ -190,6 +190,7 @@ class SiTable : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(TestEitGetCodesSize);
     CPPUNIT_TEST(TestEitMakeCodes1);
     CPPUNIT_TEST(TestEitMakeCodes2);    
+    CPPUNIT_TEST(TestEitRefreshCatch);  
     /* Nit */
     CPPUNIT_TEST(TestNitMakeCodes);
     /* Sdt */
@@ -216,7 +217,8 @@ protected:
     /* Eit */
     void TestEitGetCodesSize();
     void TestEitMakeCodes1();
-    void TestEitMakeCodes2();
+    void TestEitMakeCodes2();    
+    void TestEitRefreshCatch();
     /* Nit */
     void TestNitMakeCodes();
     /* Sdt */
