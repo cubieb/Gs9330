@@ -175,8 +175,15 @@ bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
         return false;
     }
     
+    char *cfgDir = ACE_OS::getenv("EpgSenderData");    
+    if (cfgDir == nullptr)
+    {
+        errstrm << "Error when get environment variable of EpgSenderData" << endl;
+        return false;
+    }
+
     /* networks configuration */
-    string receiverCfgPath = string(dirCfg->GetCfgDir()) + string("\\receiver.xml");
+    string receiverCfgPath = string(cfgDir) + string("\\receiver.xml");
     networkCfgs = NetworkCfgsInterface::CreateInstance();
     NetworkCfgWrapperInterface<NetworkCfgsInterface, NetworkCfgInterface, ReceiverInterface> networkCfgWrapper;
     errCode = networkCfgWrapper.Select(*networkCfgs, receiverCfgPath.c_str());
@@ -187,7 +194,7 @@ bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
     }
 
     /* timer configuration */
-    string senderCfgPath = string(dirCfg->GetCfgDir()) + string("\\sender.xml");
+    string senderCfgPath = string(cfgDir) + string("\\sender.xml");
     timerCfg = TimerCfgInterface::CreateInstance();
     TimerCfgWrapperInterface<TimerCfgInterface> timerCfgWrapper;
     errCode = timerCfgWrapper.Select(*timerCfg, senderCfgPath.c_str());

@@ -22,19 +22,9 @@ DirCfg::~DirCfg()
 {
 }
 
-const char * DirCfg::GetCfgDir()
-{
-    return cfgDir.c_str();
-};
-
 const char * DirCfg::GetXmlDir()
 {
     return xmlDir.c_str();
-}
-
-void DirCfg::SetCfgDir(const char *cfgDir)
-{
-    this->cfgDir = cfgDir;
 }
 
 void DirCfg::SetXmlDir(const char *xmlDir)

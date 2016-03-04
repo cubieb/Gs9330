@@ -9,9 +9,7 @@ public:
     DirCfg();
     virtual ~DirCfg();
         
-    const char * GetCfgDir();
     const char * GetXmlDir();
-    void SetCfgDir(const char *cfgDir);
     void SetXmlDir(const char *xmlDir);
 
 private:

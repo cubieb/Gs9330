@@ -39,9 +39,6 @@ public:
         node = xmlFirstElementChild(node);  /* ChildXML node */
         assert(strcmp((const char *)node->name, "ChildXML") == 0);
 
-        shared_ptr<xmlChar> cfgDir = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"CfgDir");
-        dirCfg.SetCfgDir((char*)cfgDir.get());
-
         shared_ptr<xmlChar> xmlDir = GetXmlAttrValue<shared_ptr<xmlChar>>(node, (const xmlChar*)"ReceivDir");
         dirCfg.SetXmlDir((char*)xmlDir.get());
 
