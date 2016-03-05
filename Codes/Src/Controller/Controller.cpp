@@ -14,7 +14,6 @@
 
 /* ConfigurationWrapper */
 #include "Include/ConfigurationWrapper/TimerCfgWrapperInterface.h"
-#include "Include/ConfigurationWrapper/DirCfgWrapperInterface.h"
 #include "Include/ConfigurationWrapper/NetworkCfgWrapperInterface.h"
 #include "Include/ConfigurationWrapper/NetworkRelationWrapperInterface.h"
 
@@ -161,19 +160,12 @@ int Controller::handle_timeout(const ACE_Time_Value &currentTime,
 }
 
 #define TestReadXmlPerformance
-bool Controller::Start(ACE_Reactor *reactor, const char *cfgPath)
+bool Controller::Start(ACE_Reactor *reactor, const char *xmlPath)
 {
     error_code errCode;
     /********* Step 1: Init Configuration *********/
     /* dir configuration */
-    dirCfg = DirCfgInterface::CreateInstance();
-    DirCfgWrapperInterface<DirCfgInterface> dirCfgWrapper;
-    errCode = dirCfgWrapper.Select(*dirCfg, cfgPath);
-    if (errCode)
-    {
-        errstrm << "Error when reading " << cfgPath << ", error message: " << errCode.message() << endl;
-        return false;
-    }
+    dirCfg = DirCfgInterface::CreateInstance(xmlPath);
     
     char *cfgDir = ACE_OS::getenv("EpgSenderData");    
     if (cfgDir == nullptr)

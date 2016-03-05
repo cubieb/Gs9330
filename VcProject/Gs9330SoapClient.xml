@@ -1,6 +1,0 @@
-<?xml version='1.0'  encoding='gb2312' ?>
-<Root>
-    <ChildXML ReceivDir ="D:\Project.VC\Gs9330\InputFiles\XmlFiles" 
-              ServerIP ="192.168.3.153" RegionCode ="200">
-    </ChildXML>
-</Root>

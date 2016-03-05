@@ -13,9 +13,8 @@ public:
     virtual ~DirCfgInterface() {};
  
     virtual const char * GetXmlDir() = 0;
-    virtual void SetXmlDir(const char *xmlDir) = 0;
 
-    static DirCfgInterface * CreateInstance();
+    static DirCfgInterface * CreateInstance(const char *xmlPath);
 };
 
 #endif

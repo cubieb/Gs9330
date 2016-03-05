@@ -128,9 +128,6 @@
     <ClInclude Include="..\Codes\Include\Configuration\TimerCfgInterface.h">
       <Filter>头文件\Configuration</Filter>
     </ClInclude>
-    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\DirCfgWrapperInterface.h">
-      <Filter>头文件\ConfigurationWrapper</Filter>
-    </ClInclude>
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h">
       <Filter>头文件\ConfigurationWrapper</Filter>
     </ClInclude>

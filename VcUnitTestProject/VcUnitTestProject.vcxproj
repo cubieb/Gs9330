@@ -112,7 +112,6 @@
     <ClCompile Include="..\UnitTestCodes\UnitTestLibLinking.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Codes\Include\ConfigurationWrapper\DirCfgWrapperInterface.h" />
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkCfgWrapperInterface.h" />
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\NetworkRelationWrapperInterface.h" />
     <ClInclude Include="..\Codes\Include\ConfigurationWrapper\TimerCfgWrapperInterface.h" />

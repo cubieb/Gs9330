@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     ControllerInterface &controller = ControllerInterface::GetInstance();
     if (argc == 1)
     {
-        ret = controller.Start(ACE_Reactor::instance(), "Gs9330SoapClient.xml");
+        ret = controller.Start(ACE_Reactor::instance(), "ReceiveXml");
     }
     else
     {

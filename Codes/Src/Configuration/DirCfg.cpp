@@ -7,14 +7,15 @@
 /* Configuration */
 #include "DirCfg.h"
 
-DirCfgInterface * DirCfgInterface::CreateInstance()
+DirCfgInterface * DirCfgInterface::CreateInstance(const char *xmlPath)
 {
-    return new DirCfg;
+    return new DirCfg(xmlPath);
 }
 
 /**********************class DirCfg**********************/
 /* public function */
-DirCfg::DirCfg()
+DirCfg::DirCfg(const char *xmlPath)
+    : xmlDir(xmlPath)
 {
 }
 
@@ -25,9 +26,4 @@ DirCfg::~DirCfg()
 const char * DirCfg::GetXmlDir()
 {
     return xmlDir.c_str();
-}
-
-void DirCfg::SetXmlDir(const char *xmlDir)
-{
-    this->xmlDir = xmlDir;
 }

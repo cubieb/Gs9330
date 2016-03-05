@@ -6,14 +6,12 @@
 class DirCfg: public DirCfgInterface
 {
 public:
-    DirCfg();
+    DirCfg(const char *xmlPath);
     virtual ~DirCfg();
         
     const char * GetXmlDir();
-    void SetXmlDir(const char *xmlDir);
 
 private:
-    std::string cfgDir;
     std::string xmlDir;
 };
 
