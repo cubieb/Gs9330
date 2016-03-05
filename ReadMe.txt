@@ -25,6 +25,9 @@ ver.2.8:  对读取xml文件的效率做了优化, 优化后读取32个ts 一周的eit信息只需要3~4秒
           Ver.Debug.2.8 可用于将来做其他性能测试的基础版本。
 ver.2.9:  增加对中心频点的支持, receiver.xml每个网络的第一条receiver 就是中心频点.
           新增模板类 SiTableTemplate 做为sdt, bat, nit, eit的基类, 利用SiTableTemplate, 4张表可以在GetCodeSize(), GetSecNumber()上清除掉很多冗余的代码.
+ver.3.0:  通过环境变量读取发送配置的路径.
+          修改SiTableXmlWrapperInterface::Select()的申明, 新的函数定义通过return 返回xml中读取到的SiTable。
+          发布给"凌海"的稳定版本.
           
 4 实测数据
     983,116字节的xml编码后的Ts为178,788字节.
