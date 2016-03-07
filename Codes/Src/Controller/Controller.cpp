@@ -416,8 +416,6 @@ void Controller::SendUdp(NetworkCfgInterface *network,
     static size_t bufferSize = 1024 * 1024 * 16;
     static uchar_t *buffer = new uchar_t[bufferSize];
     
-    int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
     NetworkCfgInterface::iterator receiverIter;
     for (receiverIter =  network->Begin(); 
          receiverIter != network->End(); 
@@ -448,19 +446,34 @@ void Controller::SendUdp(NetworkCfgInterface *network,
            So we use Receiver's tsId as ccId index.
          */
         tsPacket->MakeCodes(tsId, tableId, tsId, buffer, size);
+        tsPacket->MapPid(buffer, size, EitPid, receiver->GetEitPid());
 
+        int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        
         int pktNumber = (size + UdpPayloadSize - 1) / UdpPayloadSize;
-        struct sockaddr_in socketAddr = receiver->GetSocketAddr();
+        struct sockaddr_in dstAddr = receiver->GetDstAddr();
+        uchar_t bt = dstAddr.sin_addr.S_un.S_un_b.s_b1;        
+        if (bt >= 224 && bt <= 239)
+        {
+            /* Multicast destination address, set socket option */
+            if(setsockopt(socketFd, IPPROTO_IP, IP_MULTICAST_IF, 
+                          (char *)&receiver->GetSrcAddr(), sizeof(struct sockaddr_in)) < 0)
+            {
+                errstrm << "Error when set socket option." << endl;
+                closesocket(socketFd);
+                return;
+            }
+        }
         for (int i = 0; i < pktNumber; ++i)
         {
             int udpSize = std::min((int)(size - UdpPayloadSize * i), (int)(UdpPayloadSize));
             sendto(socketFd, (char*)buffer + UdpPayloadSize * i, (int)udpSize, 0, 
-                   (SOCKADDR *)&socketAddr, 
+                   (SOCKADDR *)&dstAddr, 
                    sizeof(struct sockaddr_in));
         }
-    }    
 
-    closesocket(socketFd);
+        closesocket(socketFd);
+    }    
 }
 
 void Controller::ScheduleTimer(NetId netId, TableId tableId)

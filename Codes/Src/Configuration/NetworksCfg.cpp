@@ -8,9 +8,12 @@
 #include "NetworksCfg.h"
 using namespace std;
 
-ReceiverInterface * ReceiverInterface::CreateInstance(TsId tsId, const struct sockaddr_in &socketAddr)
+ReceiverInterface * ReceiverInterface::CreateInstance(TsId tsId, 
+                                                      const struct sockaddr_in &dstAddr, 
+                                                      const struct in_addr &srcAddr,
+                                                      Pid eitPid)
 {
-    return new Receiver(tsId, socketAddr);
+    return new Receiver(tsId, dstAddr, srcAddr, eitPid);
 }
 
 NetworkCfgInterface * NetworkCfgInterface::CreateInstance(NetId netId)
@@ -25,8 +28,8 @@ NetworkCfgsInterface * NetworkCfgsInterface::CreateInstance()
 
 /**********************class Receiver**********************/
 /* public function */
-Receiver::Receiver(TsId tsId, const struct sockaddr_in &socketAddr)
-    : tsId(tsId), socketAddr(socketAddr)
+Receiver::Receiver(TsId tsId, const struct sockaddr_in &dstAddr, const struct in_addr &srcAddr, Pid eitPid)
+    : tsId(tsId), dstAddr(dstAddr), srcAddr(srcAddr), eitPid(eitPid)
 {
 }
 
@@ -34,9 +37,19 @@ Receiver::~Receiver()
 {
 }
 
-struct sockaddr_in Receiver::GetSocketAddr() const
+Pid Receiver::GetEitPid() const
 {
-    return socketAddr;
+    return eitPid;
+}
+
+struct sockaddr_in Receiver::GetDstAddr() const
+{
+    return dstAddr;
+}
+
+struct in_addr Receiver::GetSrcAddr() const
+{
+    return srcAddr;
 }
 
 TsId Receiver::GetTsId() const
@@ -46,8 +59,8 @@ TsId Receiver::GetTsId() const
 
 void Receiver::Put(std::ostream& os) const
 {
-    os << "  ip = " << inet_ntoa(socketAddr.sin_addr) 
-       << ", port = " << ntohs(socketAddr.sin_port) 
+    os << "  ip = " << inet_ntoa(dstAddr.sin_addr) 
+       << ", port = " << ntohs(dstAddr.sin_port) 
        << ", tsId = " << tsId << endl;
 }
 
@@ -74,27 +87,9 @@ NetworkCfg::iterator NetworkCfg::Begin()
     return iterator(this, NodePtr(receivers.begin()));
 }
 
-void NetworkCfg::Delete(const struct sockaddr_in &socketAddr)
-{
-    list<ReceiverInterface *>::iterator iter;
-    iter = find_if(receivers.begin(), receivers.end(), CompareReceiverSocketAddr(socketAddr));
-    if (iter != receivers.end())
-    {
-        receivers.erase(iter);
-        delete *iter;
-    }
-}
-
 NetworkCfg::iterator NetworkCfg::End()
 {
     return iterator(this, NodePtr(receivers.end()));
-}
-
-NetworkCfg::iterator NetworkCfg::Find(const struct sockaddr_in &socketAddr)
-{
-    list<ReceiverInterface *>::iterator iter;
-    iter = find_if(receivers.begin(), receivers.end(), CompareReceiverSocketAddr(socketAddr));
-    return iterator(this, iter);
 }
 
 NetworkCfg::NodePtr NetworkCfg::GetMyHead()

@@ -190,6 +190,27 @@ size_t TransportPacket::MakeCodes(CcId ccId, TableId tableId, TsId tsId,
     return ptr - buffer;
 }
 
+void TransportPacket::MapPid(uchar_t *buffer, size_t bufferSize, Pid from, Pid to) const
+{
+    assert(bufferSize % TsPacketSize == 0);
+
+    Pid pid;
+    if (bufferSize != 0)
+    {
+        ReadBuffer(buffer + 1, pid);
+        pid = pid & MaxPid;
+        if (pid != from)
+            return;
+    }
+
+    for (uchar_t *ptr = buffer; ptr < buffer + bufferSize; ptr = ptr + TsPacketSize)
+    {
+        ReadBuffer(ptr + 1, pid);
+        pid = (pid & ~MaxPid) | to;        
+        WriteBuffer(ptr + 1, pid);
+    }
+}
+
 void TransportPacket::RefreshCatch()
 {
     list<SiTableInterface *>::iterator iter;

@@ -46,6 +46,7 @@ typedef uint32_t CatchId;
 #define EitPid                     0x0012
 #define NitPid                     0x0010
 #define SdtPid                     0x0011
+#define MaxPid                     0x1FFF
 
 #define BatTableId                 0x4A
 #define EitActualPfTableId         0x4E

@@ -26,6 +26,7 @@ public:
     virtual Pid    GetPid() const = 0;
     virtual size_t MakeCodes(CcId ccId, TableId tableId, TsId tsId, 
                              uchar_t *buffer, size_t bufferSize) = 0;
+    virtual void MapPid(uchar_t *buffer, size_t bufferSize, Pid from, Pid to) const = 0;
     virtual void RefreshCatch() = 0;
 
     static TransportPacketInterface * CreateInstance(NetId netId, Pid pid);

@@ -1,53 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
     <network netid="1">
-        <receiver ip="10.0.0.10" port="5001">
-            <tsid>1</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5002">
-            <tsid>2</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5003">
-            <tsid>3</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5004">
-            <tsid>4</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5005">
-            <tsid>5</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5006">
-            <tsid>6</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5007">
-            <tsid>7</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5008">
-            <tsid>8</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5009">
-            <tsid>9</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5010">
-            <tsid>10</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5011">
-            <tsid>11</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5012">
-            <tsid>12</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5013">
-            <tsid>13</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5014">
-            <tsid>14</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5015">
-            <tsid>15</tsid>
-        </receiver>	
-        <receiver ip="10.0.0.10" port="5016">
-            <tsid>16</tsid>
-        </receiver>	
+        <receiver ip="225.1.1.1" port="5001" tsid="1" srcip="10.0.0.2" eitpid="1"/>
+        <receiver ip="225.1.1.1" port="5002" tsid="2" srcip="10.0.0.2" eitpid="2"/>
     </network>    
 </root>

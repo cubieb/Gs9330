@@ -35,7 +35,7 @@ public:
     Pid    GetPid() const;
     size_t MakeCodes(CcId ccId, TableId tableId, TsId tsId, 
                      uchar_t *buffer, size_t bufferSize);
-
+    void MapPid(uchar_t *buffer, size_t bufferSize, Pid from, Pid to) const;
     void RefreshCatch();
 
 private:

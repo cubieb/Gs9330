@@ -14,13 +14,18 @@ public:
     ReceiverInterface() {};
     virtual ~ReceiverInterface() {}
 
-    virtual struct sockaddr_in GetSocketAddr() const = 0;
+    virtual Pid GetEitPid() const = 0;
+    virtual struct sockaddr_in GetDstAddr() const = 0;
+    virtual struct in_addr GetSrcAddr() const = 0;
     virtual TsId GetTsId() const = 0;
 
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 
-    static ReceiverInterface * CreateInstance(TsId tsId, const struct sockaddr_in &socketAddr);
+    static ReceiverInterface * CreateInstance(TsId tsId, 
+                                              const struct sockaddr_in &dstAddr, 
+                                              const struct in_addr &srcAddr,
+                                              Pid eitPid);
 };
 
 inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& value) 
@@ -28,29 +33,6 @@ inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& val
     value.Put(os); 
     return os; 
 }
-
-class CompareReceiverSocketAddr: public std::unary_function<ReceiverInterface, bool>
-{
-public:
-    CompareReceiverSocketAddr(const struct sockaddr_in &socketAddr)
-        : socketAddr(socketAddr)
-    {}
-
-    result_type operator()(const argument_type &receiver)
-    {
-        sockaddr_in addr = receiver.GetSocketAddr();
-        return (result_type)(addr.sin_addr.s_addr == socketAddr.sin_addr.s_addr
-                             && addr.sin_port == socketAddr.sin_port);
-    }    
-
-    result_type operator()(const argument_type *receiver)
-    {
-        return this->operator()(*receiver);
-    }
-
-private:
-    sockaddr_in socketAddr;
-};
 
 /**********************class NetworkInterface**********************/
 class NetworkCfgInterface: public ContainerBase
@@ -97,9 +79,9 @@ public:
     }
 
     virtual iterator Begin() = 0;
-    virtual void Delete(const struct sockaddr_in &socketAddr) = 0;
+    //virtual void Delete(const struct sockaddr_in &socketAddr) = 0;
     virtual iterator End() = 0;
-    virtual iterator Find(const struct sockaddr_in &socketAddr) = 0;
+    //virtual iterator Find(const struct sockaddr_in &socketAddr) = 0;
     
     // ContainerBase function, destroy proxy.
     void FreeProxy()
