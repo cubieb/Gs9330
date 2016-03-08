@@ -82,8 +82,8 @@ public:
                      pidNode != nullptr;
                      pidNode = xmlNextElementSibling(pidNode))
                 {
-                    Pid from = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"old");
-                    Pid to   = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"new");
+                    Pid from = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"oldpid");
+                    Pid to   = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"newpid");
                     receiver->Add(from, to);
                 }
 

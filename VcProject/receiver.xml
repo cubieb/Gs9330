@@ -2,11 +2,11 @@
 <root>    
     <network netid="1" srcip="10.0.0.2">
         <receiver ip="225.1.1.1" port="5001" tsid="1">
-            <pid old="17" new="17"/>
+            <pid oldpid="17" newpid="17"/>
         </receiver>
         <receiver ip="225.1.1.1" port="5002" tsid="2">
-            <pid old="17" new="20"/>
-            <pid old="18" new="21"/>
+            <pid oldpid="17" newpid="20"/>
+            <pid oldpid="18" newpid="21"/>
         </receiver>
     </network>
 </root>
