@@ -8,17 +8,14 @@
 #include "NetworksCfg.h"
 using namespace std;
 
-ReceiverInterface * ReceiverInterface::CreateInstance(TsId tsId, 
-                                                      const struct sockaddr_in &dstAddr, 
-                                                      const struct in_addr &srcAddr,
-                                                      Pid eitPid)
+ReceiverInterface * ReceiverInterface::CreateInstance(TsId tsId, const struct sockaddr_in &dstAddr)
 {
-    return new Receiver(tsId, dstAddr, srcAddr, eitPid);
+    return new Receiver(tsId, dstAddr);
 }
 
-NetworkCfgInterface * NetworkCfgInterface::CreateInstance(NetId netId)
+NetworkCfgInterface * NetworkCfgInterface::CreateInstance(NetId netId, const struct in_addr &srcAddr)
 {
-    return new NetworkCfg(netId);
+    return new NetworkCfg(netId, srcAddr);
 }
 
 NetworkCfgsInterface * NetworkCfgsInterface::CreateInstance()
@@ -28,18 +25,30 @@ NetworkCfgsInterface * NetworkCfgsInterface::CreateInstance()
 
 /**********************class Receiver**********************/
 /* public function */
-Receiver::Receiver(TsId tsId, const struct sockaddr_in &dstAddr, const struct in_addr &srcAddr, Pid eitPid)
-    : tsId(tsId), dstAddr(dstAddr), srcAddr(srcAddr), eitPid(eitPid)
+Receiver::Receiver(TsId tsId, const struct sockaddr_in &dstAddr)
+    : tsId(tsId), dstAddr(dstAddr)
 {
+    AllocProxy();
 }
 
 Receiver::~Receiver()
 {
+    FreeProxy();
 }
 
-Pid Receiver::GetEitPid() const
+void Receiver::Add(Pid from, Pid to)
 {
-    return eitPid;
+    pidMaps.push_back(make_pair(from, to));
+}
+
+Receiver::iterator Receiver::Begin()
+{
+    return iterator(this, NodePtr(pidMaps.begin()));
+}
+
+Receiver::iterator Receiver::End()
+{
+    return iterator(this, NodePtr(pidMaps.end()));
 }
 
 struct sockaddr_in Receiver::GetDstAddr() const
@@ -47,9 +56,9 @@ struct sockaddr_in Receiver::GetDstAddr() const
     return dstAddr;
 }
 
-struct in_addr Receiver::GetSrcAddr() const
+Receiver::NodePtr Receiver::GetMyHead()
 {
-    return srcAddr;
+    return NodePtr(pidMaps.end());
 }
 
 TsId Receiver::GetTsId() const
@@ -59,15 +68,15 @@ TsId Receiver::GetTsId() const
 
 void Receiver::Put(std::ostream& os) const
 {
-    os << "  ip = " << inet_ntoa(dstAddr.sin_addr) 
-       << ", port = " << ntohs(dstAddr.sin_port) 
-       << ", tsId = " << tsId << endl;
+    os << ", tsId = " << tsId
+       << "  dst ip = " << inet_ntoa(dstAddr.sin_addr) 
+       << ", port = " << ntohs(dstAddr.sin_port) << endl;
 }
 
 /**********************class NetworkCfg**********************/
 /* public function */
-NetworkCfg::NetworkCfg(NetId netId)
-    : netId(netId), parentNetId(0)
+NetworkCfg::NetworkCfg(NetId netId, const struct in_addr &srcAddr)
+    : netId(netId), parentNetId(0), srcAddr(srcAddr)
 {
     AllocProxy();
 }
@@ -110,6 +119,11 @@ NetId NetworkCfg::GetParentNetId() const
 NetId NetworkCfg::SetParentNetId(NetId netId)
 {
     return parentNetId = netId;
+}
+
+struct in_addr NetworkCfg::GetSrcAddr() const
+{
+    return srcAddr;
 }
 
 void NetworkCfg::Put(std::ostream& os) const

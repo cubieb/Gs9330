@@ -7,27 +7,28 @@
 class Receiver: public ReceiverInterface
 {
 public:
-    Receiver(TsId tsId, const struct sockaddr_in &dstAddr, const struct in_addr &srcAddr, Pid eitPid);
+    Receiver(TsId tsId, const struct sockaddr_in &dstAddr);
     ~Receiver();
     
-    Pid GetEitPid() const;
+    void Add(Pid from, Pid to);
+    iterator Begin();
+    virtual iterator End();
     struct sockaddr_in GetDstAddr() const;
-    struct in_addr GetSrcAddr() const;
+    NodePtr GetMyHead();
     TsId GetTsId() const;   
     void Put(std::ostream& os) const;
 
 private:
     TsId tsId;
     struct sockaddr_in dstAddr;
-    struct in_addr     srcAddr;
-    Pid  eitPid;
+    std::list<PidMap>  pidMaps;
 };
 
 /**********************class NetworkCfg**********************/
 class NetworkCfg: public NetworkCfgInterface
 {
 public:
-    NetworkCfg(NetId netId);
+    NetworkCfg(NetId netId, const struct in_addr &srcAddr);
     ~NetworkCfg();
 
     void Add(ReceiverInterface *receiver);
@@ -38,12 +39,14 @@ public:
     NetId GetNetId() const;    
     NetId GetParentNetId() const;
     NetId SetParentNetId(NetId netId);
+    struct in_addr GetSrcAddr() const;
 
     void Put(std::ostream& os) const;
 
 private:
     NetId netId;
     NetId parentNetId;
+    struct in_addr srcAddr;
     std::list<ReceiverInterface *> receivers;
 };
 

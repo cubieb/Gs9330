@@ -58,30 +58,35 @@ public:
             return  make_error_code(std::errc::io_error);
         }
 
-        uint_t recieverId = 0;
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
             node = nodes->nodeTab[i];
             NetId netId = GetXmlAttrValue<NetId>(node, (const xmlChar*)"netid");
+            SharedXmlChar srcIp = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"srcip");
+            struct in_addr srcAddr;
+            srcAddr.s_addr = inet_addr((char *)srcIp.get());
 
-            Network *network = Network::CreateInstance(netId);
+            Network *network = Network::CreateInstance(netId, srcAddr);
             for (node = xmlFirstElementChild(node); node != nullptr; node = xmlNextElementSibling(node))
             {
+                TsId tsId = GetXmlAttrValue<TsId>(node, (const xmlChar*)"tsid");
+
                 SharedXmlChar dstIp = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"ip");
                 struct sockaddr_in dstAddr;
                 dstAddr.sin_family = AF_INET;
                 dstAddr.sin_addr.s_addr = inet_addr((char *)dstIp.get());
                 dstAddr.sin_port = htons(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"port"));
-                              
-                TsId tsId =GetXmlAttrValue<TsId>(node, (const xmlChar*)"tsid");  
-
-                SharedXmlChar srcIp = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"srcip");
-                struct in_addr srcAddr;
-                srcAddr.s_addr = inet_addr((char *)srcIp.get());
-
-                Pid eitPid = GetXmlAttrValue<Pid>(node, (const xmlChar*)"eitpid");  
                 
-                Receiver *receiver = Receiver::CreateInstance(tsId, dstAddr, srcAddr, eitPid);
+                Receiver *receiver = Receiver::CreateInstance(tsId, dstAddr);                
+                for (xmlNodePtr pidNode = xmlFirstElementChild(node);
+                     pidNode != nullptr;
+                     pidNode = xmlNextElementSibling(pidNode))
+                {
+                    Pid from = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"old");
+                    Pid to   = GetXmlAttrValue<Pid>(pidNode, (const xmlChar*)"new");
+                    receiver->Add(from, to);
+                }
+
                 network->Add(receiver);
             }
 

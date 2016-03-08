@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
-    <network netid="1">
-        <receiver ip="225.1.1.1" port="5001" tsid="1" srcip="10.0.0.2" eitpid="1"/>
-        <receiver ip="225.1.1.1" port="5002" tsid="2" srcip="10.0.0.2" eitpid="2"/>
-    </network>    
+    <network netid="1" srcip="10.0.0.2">
+        <receiver ip="225.1.1.1" port="5001" tsid="1">
+            <pid old="17" new="17"/>
+        </receiver>
+        <receiver ip="225.1.1.1" port="5002" tsid="2">
+            <pid old="17" new="20"/>
+            <pid old="18" new="21"/>
+        </receiver>
+    </network>
 </root>

@@ -446,7 +446,11 @@ void Controller::SendUdp(NetworkCfgInterface *network,
            So we use Receiver's tsId as ccId index.
          */
         tsPacket->MakeCodes(tsId, tableId, tsId, buffer, size);
-        tsPacket->MapPid(buffer, size, EitPid, receiver->GetEitPid());
+        ReceiverInterface::iterator pidMapIter;
+        for (pidMapIter = receiver->Begin(); pidMapIter != receiver->End(); ++pidMapIter)
+        {
+            tsPacket->MapPid(buffer, size, pidMapIter->first, pidMapIter->second);
+        }
 
         int socketFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         
@@ -457,7 +461,7 @@ void Controller::SendUdp(NetworkCfgInterface *network,
         {
             /* Multicast destination address, set socket option */
             if(setsockopt(socketFd, IPPROTO_IP, IP_MULTICAST_IF, 
-                          (char *)&receiver->GetSrcAddr(), sizeof(struct sockaddr_in)) < 0)
+                          (char *)&network->GetSrcAddr(), sizeof(struct sockaddr_in)) < 0)
             {
                 errstrm << "Error when set socket option." << endl;
                 closesocket(socketFd);
