@@ -7,6 +7,7 @@ typedef uint16_t EventId;
 typedef uint16_t NetId;
 typedef uint16_t OnId;
 typedef uint16_t Pid;
+typedef uint32_t ReceiverId;
 typedef uchar_t  SectionNumber;
 typedef uint16_t ServiceId;
 typedef uint32_t SiTableKey;

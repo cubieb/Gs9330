@@ -7,7 +7,7 @@
 class Receiver: public ReceiverInterface
 {
 public:
-    Receiver(TsId tsId, const struct sockaddr_in &dstAddr);
+    Receiver(ReceiverId receiverId, TsId tsId, const struct sockaddr_in &dstAddr);
     ~Receiver();
     
     void Add(Pid from, Pid to);
@@ -15,10 +15,12 @@ public:
     virtual iterator End();
     struct sockaddr_in GetDstAddr() const;
     NodePtr GetMyHead();
+    ReceiverId GetReceiverId() const;
     TsId GetTsId() const;   
     void Put(std::ostream& os) const;
 
 private:
+    ReceiverId receiverId;
     TsId tsId;
     struct sockaddr_in dstAddr;
     std::list<PidMap>  pidMaps;

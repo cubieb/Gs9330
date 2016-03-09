@@ -20,6 +20,7 @@
 #include "UtTransportPacket.h"
 #include "UtConverter.h"
 #include "UtSiTableXmlWrapperInterface.h"
+#include "UtNetworksCfg.h"
 
 using namespace std;
 using namespace UnitTest;

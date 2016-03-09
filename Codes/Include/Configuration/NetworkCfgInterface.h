@@ -74,6 +74,7 @@ public:
         return ptr;
     }
 
+    virtual ReceiverId GetReceiverId() const = 0;
     virtual TsId GetTsId() const = 0;
 
     // ContainerBase function.
@@ -85,7 +86,8 @@ public:
     /* the following function is provided just for debug */
     virtual void Put(std::ostream& os) const = 0;
 
-    static ReceiverInterface * CreateInstance(TsId tsId, const struct sockaddr_in &dstAddr);
+    static ReceiverInterface * CreateInstance(ReceiverId receiverId, TsId tsId, 
+                                              const struct sockaddr_in &dstAddr);
 };
 
 inline std::ostream& operator << (std::ostream& os, const ReceiverInterface& value) 

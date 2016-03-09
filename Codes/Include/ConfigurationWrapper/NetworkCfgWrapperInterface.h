@@ -58,6 +58,7 @@ public:
             return  make_error_code(std::errc::io_error);
         }
 
+        ReceiverId receiverId = 0;
         for (int i = 0; i < nodes->nodeNr; ++i)
         {
             node = nodes->nodeTab[i];
@@ -77,7 +78,7 @@ public:
                 dstAddr.sin_addr.s_addr = inet_addr((char *)dstIp.get());
                 dstAddr.sin_port = htons(GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"port"));
                 
-                Receiver *receiver = Receiver::CreateInstance(tsId, dstAddr);                
+                Receiver *receiver = Receiver::CreateInstance(receiverId++, tsId, dstAddr);                
                 for (xmlNodePtr pidNode = xmlFirstElementChild(node);
                      pidNode != nullptr;
                      pidNode = xmlNextElementSibling(pidNode))

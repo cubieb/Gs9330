@@ -432,6 +432,7 @@ void Controller::SendUdp(NetworkCfgInterface *network,
             }
         }
 
+        ReceiverId receiverId = receiver->GetReceiverId();
         TsId tsId = receiver->GetTsId();
         size_t size = tsPacket->GetCodesSize(tableId, tsId); 
         
@@ -442,10 +443,10 @@ void Controller::SendUdp(NetworkCfgInterface *network,
             buffer = new uchar_t[bufferSize];
             assert(bufferSize <= 1024*1024*512);
         }
-        /* Ts is is unique for every receiver, 
-           So we use Receiver's tsId as ccId index.
+        /* ReceiverId is is unique for every receiver, 
+           So we use ReceiverId as ccId index.
          */
-        tsPacket->MakeCodes(tsId, tableId, tsId, buffer, size);
+        tsPacket->MakeCodes((CcId)receiverId, tableId, tsId, buffer, size);
         ReceiverInterface::iterator pidMapIter;
         for (pidMapIter = receiver->Begin(); pidMapIter != receiver->End(); ++pidMapIter)
         {

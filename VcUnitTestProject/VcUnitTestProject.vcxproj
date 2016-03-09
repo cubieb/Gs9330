@@ -106,6 +106,7 @@
     <ClCompile Include="..\UnitTestCodes\DescriptorHelper.cpp" />
     <ClCompile Include="..\UnitTestCodes\UtConverter.cpp" />
     <ClCompile Include="..\UnitTestCodes\Main.cpp" />
+    <ClCompile Include="..\UnitTestCodes\UtNetworksCfg.cpp" />
     <ClCompile Include="..\UnitTestCodes\UtSiTableXmlWrapperInterface.cpp" />
     <ClCompile Include="..\UnitTestCodes\UtTransportPacket.cpp" />
     <ClCompile Include="..\UnitTestCodes\UtSiTable.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="..\Codes\Src\TsPacketSiTable\TransportStream.h" />
     <ClInclude Include="..\UnitTestCodes\DescriptorHelper.h" />
     <ClInclude Include="..\UnitTestCodes\UtConverter.h" />
+    <ClInclude Include="..\UnitTestCodes\UtNetworksCfg.h" />
     <ClInclude Include="..\UnitTestCodes\UtSiTableXmlWrapperInterface.h" />
     <ClInclude Include="..\UnitTestCodes\UtTransportPacket.h" />
     <ClInclude Include="..\UnitTestCodes\UtSiTable.h" />

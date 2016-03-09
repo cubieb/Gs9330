@@ -133,6 +133,9 @@
     <ClCompile Include="..\Codes\Src\Configuration\TimerCfg.cpp">
       <Filter>CodeUnderTest\源文件\Configuration</Filter>
     </ClCompile>
+    <ClCompile Include="..\UnitTestCodes\UtNetworksCfg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\UnitTestCodes\UtSiTable.h">
@@ -251,6 +254,9 @@
     </ClInclude>
     <ClInclude Include="..\Codes\Src\Configuration\TimerCfg.h">
       <Filter>CodeUnderTest\源文件\Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UnitTestCodes\UtNetworksCfg.h">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
