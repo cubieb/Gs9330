@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>    
     <network netid="1" srcip="10.0.0.2">
-        <receiver ip="225.1.1.1" port="5001" tsid="1">
-            <pid oldpid="17" newpid="17"/>
+        <receiver ip="10.0.0.10" port="5001" tsid="1">
+            <pid oldpid="18" newpid="118"/>
         </receiver>
         <receiver ip="225.1.1.1" port="5002" tsid="2">
-            <pid oldpid="17" newpid="20"/>
-            <pid oldpid="18" newpid="21"/>
+            <pid oldpid="18" newpid="118"/>
         </receiver>
+        <receiver ip="10.0.0.10" port="5003" tsid="3"/>
+        <receiver ip="10.0.0.10" port="5004" tsid="4"/>
+        <receiver ip="10.0.0.10" port="5005" tsid="5"/>
+        <receiver ip="10.0.0.10" port="5006" tsid="6"/>
+        <receiver ip="10.0.0.10" port="5007" tsid="7"/>
+        <receiver ip="10.0.0.10" port="5008" tsid="8"/>
+        <receiver ip="10.0.0.10" port="5009" tsid="9"/>
+        <receiver ip="10.0.0.10" port="5010" tsid="10"/>
     </network>
 </root>

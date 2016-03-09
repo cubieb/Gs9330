@@ -20,10 +20,19 @@
 using namespace std;
 
 int main(int argc, char **argv)
-{    
+{   
+    /* to keep there is only one instance is running */
+    HANDLE mutex;
+    mutex = CreateMutex(NULL, TRUE, TEXT("EpgSender")); 
+    if ((mutex != nullptr) && (GetLastError() == ERROR_ALREADY_EXISTS)) 
+    {
+        /* One another instance is running! */
+        return 0;
+    }
+
     HWND hwnd=GetConsoleWindow();
     SendMessage(hwnd,WM_SETICON,ICON_SMALL,( LPARAM )LoadIcon(GetModuleHandle(NULL),MAKEINTRESOURCE(IDI_ICON1)));
-
+    
     cout << "interal version: " << ExeVersion << endl;
     bool ret;
     ControllerInterface &controller = ControllerInterface::GetInstance();
@@ -42,6 +51,12 @@ int main(int argc, char **argv)
     }
 
     ACE_Reactor::instance()->run_reactor_event_loop();
+
+    if (mutex != nullptr)
+    {
+        ReleaseMutex(mutex);
+        CloseHandle(mutex);
+    }
 
     return 0;
 }

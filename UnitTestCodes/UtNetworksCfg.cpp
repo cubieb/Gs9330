@@ -22,7 +22,7 @@ void NetworksCfg::TestReceiver()
     std::fstream xml("receiver.xml", ios_base::out);
     xml << "<?xml version='1.0' encoding='UTF-8'?>"
         "<root>"    
-        "    <network netid='1' srcip='10.0.0.2'>"
+        "    <network netid='1' srcip='10.0.0.1'>"
         "        <receiver ip='225.1.1.1' port='5001' tsid='1'>"
         "            <pid oldpid='16' newpid='116'/>"
         "            <pid oldpid='17' newpid='117'/>"
@@ -30,7 +30,13 @@ void NetworksCfg::TestReceiver()
         "        <receiver ip='225.1.1.2' port='5002' tsid='2'>"
         "            <pid oldpid='18' newpid='118'/>"
         "        </receiver>"
-        "    </network>"
+        "        <receiver ip='225.1.1.3' port='5003' tsid='3'>"
+        "        </receiver>"
+        "    </network>"  
+        "    <network netid='1' srcip='10.0.0.2'>"
+        "        <receiver ip='225.1.1.4' port='5004' tsid='4'>"
+        "        </receiver>"
+        "    </network>"  
         "</root>";
     xml.close();
 
@@ -60,12 +66,20 @@ void NetworksCfg::TestReceiver()
     NetworkCfg networks[] =
     {
         {
-            "10.0.0.2", 
+            "10.0.0.1", 
             {
                 {0, 1, "225.1.1.1", 5001, {{16, 116}, {17, 117}}, 2},
-                {1, 2, "225.1.1.2", 5002, {{18, 118}}, 1}
+                {1, 2, "225.1.1.2", 5002, {{18, 118}}, 1},
+                {2, 3, "225.1.1.3", 5003, {}, 0}
             },
-            2
+            3
+        },
+        {
+            "10.0.0.2", 
+            {
+                {3, 4, "225.1.1.4", 5004, {}, 0}
+            },
+            1
         }
     };
 
