@@ -69,6 +69,8 @@ Controller::Controller()
     tableIdToPid.insert(make_pair(EitOtherPfTableId, EitPid));
     tableIdToPid.insert(make_pair(EitActualSchTableId, EitPid));
     tableIdToPid.insert(make_pair(EitOtherSchTableId, EitPid));
+
+    dirHandle = ACE_INVALID_HANDLE;
 }
 
 Controller::~Controller()
@@ -113,7 +115,7 @@ int Controller::handle_signal(int signum, siginfo_t *, ucontext_t *)
     {
         return 0;
     }
-
+    
     string ok = string(dirCfg->GetXmlDir()) + string("\\ok");
 	while((ACE_OS::access(ok.c_str(), F_OK)) != 0)
     {
@@ -263,6 +265,8 @@ void Controller::AnalyzeFileName(const char *path, NetId &netId, Pid &pid, strin
 
 void Controller::AddMonitoredDir(const char *directory)
 {
+    /* we can monitor one dir only. */
+    assert(dirHandle == ACE_INVALID_HANDLE);
     int flags = FILE_NOTIFY_CHANGE_FILE_NAME;
 
     dirHandle = ACE_TEXT_FindFirstChangeNotification(directory,  

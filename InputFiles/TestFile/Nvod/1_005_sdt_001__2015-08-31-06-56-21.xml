@@ -1,0 +1,23 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="SDT" TableID="0x42">
+	<Transportstream TSID="1" ONID="1" Version="4">
+		<Service ServiceID="1" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+			<Descriptors Sum="1">
+				<Item01 Tag="0x48" Data="480A010007CCTV010"/>
+				<Item02 Tag="0x4C" Data="4C020009"/>
+			</Descriptors>
+		</Service>
+		<Service ServiceID="2" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+			<Descriptors Sum="1">
+				<Item01 Tag="0x48" Data="480A010007CCTV012"/>
+				<Item02 Tag="0x4C" Data="4C020009"/>
+			</Descriptors>
+		</Service>
+		<Service ServiceID="9" EIT_schedule_flag="0" EIT_present_following_flag="0" running_status="4" free_CA_mode="0">
+			<Descriptors>
+				<Item01 Tag="0x48" Data="480A010007Nvod001"/>
+				<Item02 Tag="0x4B" Data="4B0C000100010001000100010002"/>
+			</Descriptors>
+		</Service>
+	</Transportstream>
+</Root>

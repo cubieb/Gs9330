@@ -1,0 +1,22 @@
+<?xml version='1.0'  encoding='gb2312' ?>
+<Root TableType="EIT" TableID="0x4E">
+	<Transportstream TSID="1" ONID="1" ServiceID="1" Version="4">
+		<Event EventID="1" StartTime="2017-08-31 01:00:00" Duration="003600" running_status="4" free_CA_mode="1">
+			<Descriptors>
+				<Item01 Tag="0x4F" Data="4F0400090065"/>
+			</Descriptors>
+		</Event>
+		<Event EventID="2" StartTime="2017-08-31 02:00:00" Duration="003600" running_status="4" free_CA_mode="1">
+			<Descriptors>
+				<Item01 Tag="0x4F" Data="4F0400090065"/>
+			</Descriptors>
+		</Event>
+	</Transportstream>
+	<Transportstream TSID="1" ONID="1" ServiceID="9" Version="4">
+		<Event EventID="101" StartTime="2017-08-31 01:00:00" Duration="003600" running_status="4" free_CA_mode="1">
+			<Descriptors>
+				<Item01 Tag="0x4D" Data="4D07chi02aa00"/>
+			</Descriptors>
+		</Event>
+	</Transportstream>
+</Root>

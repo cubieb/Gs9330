@@ -73,7 +73,7 @@ Descriptor* NetworkNameDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x40);
+    assert(tag == NetworkNameDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;        
@@ -104,7 +104,7 @@ Descriptor * ServiceListDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x41);
+    assert(tag == ServiceListDescriptor::Tag);
     assert(descriptorLenght % 3 == 0);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
@@ -144,7 +144,7 @@ Descriptor * StuffingDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x42);
+    assert(tag == StuffingDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -173,7 +173,7 @@ Descriptor * SatelliteDeliverySystemDescriptorCreator::CreateInstance(std::strin
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x43);
+    assert(tag == SatelliteDeliverySystemDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -215,7 +215,7 @@ Descriptor * CableDeliverySystemDescriptorCreator::CreateInstance(std::string &s
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x44);
+    assert(tag == CableDeliverySystemDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -257,7 +257,7 @@ Descriptor * BouquetNameDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x47);
+    assert(tag == BouquetNameDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;        
@@ -288,7 +288,7 @@ Descriptor * ServiceDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x48);
+    assert(tag == ServiceDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -333,7 +333,7 @@ Descriptor * LinkageDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x4A);
+    assert(tag == LinkageDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -447,6 +447,80 @@ Descriptor * LinkageDescriptorCreator::CreateInstance(uchar_t *data)
     return new LinkageDescriptor(data); 
 }
 
+/**********************class NvodReferenceDescriptor**********************/
+NvodReferenceDescriptor::NvodReferenceDescriptor(uchar_t *data)
+    : Descriptor(data)
+{
+}
+ 
+Descriptor* NvodReferenceDescriptorCreator::CreateInstance(std::string &strData)
+{
+    uchar_t *data = (uchar_t *)strData.c_str();
+    uchar_t tag, descriptorLenght;
+    data = data + ConvertHexStrToInt(data, tag);
+    data = data + ConvertHexStrToInt(data, descriptorLenght);
+    assert(tag == NvodReferenceDescriptor::Tag);
+    assert(descriptorLenght % 6 == 0);
+    assert(descriptorLenght * 2 == (strData.size() - 4));
+
+    uchar_t buffer[UCHAR_MAX];
+    uchar_t *ptr = buffer;
+    ptr = ptr + WriteBuffer(ptr, tag);
+    ptr = ptr + WriteBuffer(ptr, descriptorLenght);
+
+    for (size_t i = 0; i < descriptorLenght; i = i + 6)
+    {
+        uint16_t tsId, onId, srvId;
+
+        data = data + ConvertHexStrToInt(data, tsId);
+        data = data + ConvertHexStrToInt(data, onId);
+        data = data + ConvertHexStrToInt(data, srvId);
+
+        ptr = ptr + WriteBuffer(ptr, tsId);
+        ptr = ptr + WriteBuffer(ptr, onId);
+        ptr = ptr + WriteBuffer(ptr, srvId);
+    }
+
+    return new ServiceListDescriptor(buffer);
+}
+
+Descriptor* NvodReferenceDescriptorCreator::CreateInstance(uchar_t *data)
+{
+    return new NvodReferenceDescriptor(data); 
+}
+
+/**********************class TimeShiftedServiceDescriptor**********************/
+TimeShiftedServiceDescriptor::TimeShiftedServiceDescriptor(uchar_t *data)
+    : Descriptor(data)
+{}
+
+Descriptor* TimeShiftedServiceDescriptorCreator::CreateInstance(std::string &strData)
+{
+    uchar_t *data = (uchar_t *)strData.c_str();
+    uchar_t tag, descriptorLenght;
+    data = data + ConvertHexStrToInt(data, tag);
+    data = data + ConvertHexStrToInt(data, descriptorLenght);
+    assert(tag == TimeShiftedServiceDescriptor::Tag);
+    assert(descriptorLenght == 2);
+    assert(strData.size() == 8);
+
+    uchar_t buffer[UCHAR_MAX];
+    uchar_t *ptr = buffer;
+    ptr = ptr + WriteBuffer(ptr, tag);
+    ptr = ptr + WriteBuffer(ptr, descriptorLenght);
+
+    uint16_t srvId;
+    data = data + ConvertHexStrToInt(data, srvId);
+    ptr = ptr + WriteBuffer(ptr, srvId);
+
+    return new TimeShiftedServiceDescriptor(buffer);
+}
+
+Descriptor* TimeShiftedServiceDescriptorCreator::CreateInstance(uchar_t *data)
+{
+    return new TimeShiftedServiceDescriptor(data); 
+}
+
 /**********************class ShortEventDescriptor**********************/
 ShortEventDescriptor::ShortEventDescriptor(uchar_t *data)
     : Descriptor(data)
@@ -458,7 +532,7 @@ Descriptor* ShortEventDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x4D);
+    assert(tag == ShortEventDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -505,7 +579,7 @@ Descriptor * ExtendedEventDescriptorCreator::CreateInstance(std::string &strData
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x4E);
+    assert(tag == ExtendedEventDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -577,7 +651,7 @@ Descriptor * TimeShiftedEventDescriptorCreator::CreateInstance(std::string &strD
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x4F);
+    assert(tag == TimeShiftedEventDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -612,7 +686,7 @@ ComponentDescriptor::ComponentDescriptor(uchar_t *data)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x50);
+    assert(tag == ComponentDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -656,7 +730,7 @@ Descriptor * CaIdentifierDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x53);
+    assert(tag == CaIdentifierDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -691,7 +765,7 @@ Descriptor * ContentDescriptorCreator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x54);
+    assert(tag == ContentDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -729,7 +803,7 @@ Descriptor * ParentalRatingDescriptorCreator::CreateInstance(std::string &strDat
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x55);
+    assert(tag == ParentalRatingDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -767,7 +841,7 @@ Descriptor * TerrestrialDeliverySystemDescriptorCreator::CreateInstance(std::str
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x5A);
+    assert(tag == TerrestrialDeliverySystemDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -814,7 +888,7 @@ Descriptor * MultilingualNetworkNameDescriptorCreator::CreateInstance(std::strin
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x5B);
+    assert(tag == MultilingualNetworkNameDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -861,7 +935,7 @@ Descriptor * MultilingualComponentDescriptorCreator::CreateInstance(std::string 
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x5E);
+    assert(tag == MultilingualComponentDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -912,7 +986,7 @@ Descriptor * PrivateDataSpecifierDescriptorCreator::CreateInstance(std::string &
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x5F);
+    assert(tag == PrivateDataSpecifierDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -944,7 +1018,7 @@ Descriptor * FrequencyListDescriptorCreator::CreateInstance(std::string &strData
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x62);
+    assert(tag == FrequencyListDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -983,7 +1057,7 @@ Descriptor * DataBroadcastDescriptorCreator::CreateInstance(std::string &strData
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x64);
+    assert(tag == DataBroadcastDescriptor::Tag);
 
     uchar_t buffer[UCHAR_MAX];
     uchar_t *ptr = buffer;
@@ -1033,7 +1107,7 @@ Descriptor * ExtensionDescriptorCreator::CreateInstance(std::string &strData)
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
     data = data + ConvertHexStrToInt(data, descriptorTagExtension);
-    assert(tag == 0x7F);
+    assert(tag == ExtensionDescriptor::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -1128,7 +1202,7 @@ Descriptor * UserdefinedDscriptor83Creator::CreateInstance(std::string &strData)
     uchar_t tag, descriptorLenght;
     data = data + ConvertHexStrToInt(data, tag);
     data = data + ConvertHexStrToInt(data, descriptorLenght);
-    assert(tag == 0x83);
+    assert(tag == UserdefinedDscriptor83::Tag);
     assert(descriptorLenght * 2 == (strData.size() - 4));
 
     uchar_t buffer[UCHAR_MAX];
@@ -1281,6 +1355,8 @@ DescriptorCreatorRegistration(CableDeliverySystemDescriptor::Tag, CableDeliveryS
 DescriptorCreatorRegistration(BouquetNameDescriptor::Tag, BouquetNameDescriptorCreator);
 DescriptorCreatorRegistration(ServiceDescriptor::Tag, ServiceDescriptorCreator);
 DescriptorCreatorRegistration(LinkageDescriptor::Tag, LinkageDescriptorCreator);
+DescriptorCreatorRegistration(NvodReferenceDescriptor::Tag, NvodReferenceDescriptorCreator);
+DescriptorCreatorRegistration(TimeShiftedServiceDescriptor::Tag, TimeShiftedServiceDescriptorCreator);
 DescriptorCreatorRegistration(ShortEventDescriptor::Tag, ShortEventDescriptorCreator);
 DescriptorCreatorRegistration(ExtendedEventDescriptor::Tag, ExtendedEventDescriptorCreator);
 DescriptorCreatorRegistration(TimeShiftedEventDescriptor::Tag, TimeShiftedEventDescriptorCreator);
