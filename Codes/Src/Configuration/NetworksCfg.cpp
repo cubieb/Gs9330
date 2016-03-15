@@ -203,7 +203,7 @@ bool NetworkCfgs::IsChildNetwork(NetId ancestor, NetId offspring) const
          iter != networks.end();
          iter = find_if(networks.begin(), networks.end(), CompareNetworkCfgId((*iter)->GetParentNetId())))
     {
-        if ((*iter)->GetNetId() == ancestor)
+        if ((*iter)->GetParentNetId() == ancestor)
         {
             return true;
         }
