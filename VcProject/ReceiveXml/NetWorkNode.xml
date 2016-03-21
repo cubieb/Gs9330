@@ -1,5 +1,6 @@
 <?xml version='1.0'  encoding='gb2312' ?>
 <Root>
-	<NetNode NetID="1" NetName="沈阳市网" FatherID=""/>
+	<NetNode NetID="1" NetName="成都市网络" FatherID=""/>
+	<NetNode NetID="3" NetName="金牛区" FatherID="1"/>
 </Root>
 
