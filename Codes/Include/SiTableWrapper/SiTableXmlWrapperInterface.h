@@ -213,11 +213,12 @@ private:
     {
         uint16_t eventId = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"EventID");
         SharedXmlChar startTime = GetXmlAttrValue<SharedXmlChar>(node, (const xmlChar*)"StartTime");
-        uint32_t duration = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Duration");
+        uint32_t bcd = GetXmlAttrValue<uint32_t>(node, (const xmlChar*)"Duration");
+        time_t   duration = (bcd / 10000 * 3600) + ((bcd % 10000) / 100 * 60) + (bcd % 100); 
         uint16_t  runningStatus = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"running_status");
         uint16_t  freeCaMode = GetXmlAttrValue<uint16_t>(node, (const xmlChar*)"free_CA_mode");
 
-        siTable.AddEvent(eventId, (char*)startTime.get(), (time_t)duration, runningStatus, freeCaMode);
+        siTable.AddEvent(eventId, (char*)startTime.get(), duration, runningStatus, freeCaMode);
     
         for (xmlNodePtr cur = xmlFirstElementChild(xmlFirstElementChild(node)); 
              cur != nullptr; 
