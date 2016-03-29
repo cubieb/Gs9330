@@ -258,5 +258,11 @@
     <ClInclude Include="..\UnitTestCodes\UtNetworksCfg.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VcUnitTestProject.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
