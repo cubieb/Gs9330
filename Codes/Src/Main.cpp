@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     }
 
     HWND hwnd=GetConsoleWindow();
-    SendMessage(hwnd,WM_SETICON,ICON_SMALL,( LPARAM )LoadIcon(GetModuleHandle(NULL),MAKEINTRESOURCE(IDI_ICON1)));
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1)));
     
     cout << "interal version: " << ExeVersion << endl;
     char *dir = (argc == 1 ? "ReceiveXml" : argv[1]);
@@ -47,6 +47,7 @@ int main(int argc, char **argv)
     if (!controller.Start(ACE_Reactor::instance(), dir))
     {
         errstrm << "controller.Start() failed. " << endl;
+        system("pause");
         return 1;
     }
 

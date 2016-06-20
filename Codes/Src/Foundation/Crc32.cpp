@@ -95,7 +95,7 @@ Crc32::~Crc32()
 /*
 	Returns the calculated CRC23 for the given string.
 */
-uint32_t Crc32::CalculateCrc(const uchar_t*buffer, size_t bufferSize)
+uint32_t Crc32::CalculateCrc(const uchar_t *buffer, size_t bufferSize)
 {
     uint32_t crc,i;
 

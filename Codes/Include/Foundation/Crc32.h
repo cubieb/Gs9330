@@ -1,6 +1,7 @@
 #ifndef _Crc32_h_
 #define _Crc32_h_
 
+/**********************class Crc32**********************/
 class Crc32
 {
 public:

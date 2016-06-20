@@ -1,1 +1,1 @@
-#define ExeVersion  
+#define ExeVersion "694" 

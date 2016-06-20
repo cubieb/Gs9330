@@ -14,7 +14,7 @@ CatchId CatchIdHelper::GetCatchId(TableId tableId, TsId tsId)
 
 CatchId CatchIdHelper::GetCatchId(TableId tableId, TsId tsId, SectionNumber secIndex)
 {
-    return ((tableId & MaxTableId)<< (TsIdBits + SectionNumberBits)) 
+    return ((tableId & MaxTableId) << (TsIdBits + SectionNumberBits)) 
          | ((tsId  & MaxTsId) << SectionNumberBits)
          | (secIndex & MaxSectionNumber);
 }

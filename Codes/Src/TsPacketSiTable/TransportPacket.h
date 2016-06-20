@@ -15,6 +15,17 @@ struct transport_packet
     uchar_t  transport_scrambling_control:2;    // 2 bslbf
     uchar_t  adaptation_field_control:2;        // 2 bslbf
     uchar_t  continuity_counter:4;              // 4 bslbf   -
+    //if(adaptation_field_control == '10' || adaptation_field_control == '11')
+    //{
+    //    adaptation_field()
+    //}
+    //if(adaptation_field_control == '01' || adaptation_field_control == '11') 
+    //{
+    //    for (i = 0; i < N; i++)
+    //    {
+    //        data_byte 8 bslbf  //could be 2.4.3.6 PES packet
+    //    }
+    //}
 };
 #pragma pack(pop)
 #define MaxTsPacketPayloadSize (TsPacketSize - sizeof(transport_packet))
